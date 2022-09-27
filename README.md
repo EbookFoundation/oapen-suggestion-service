@@ -1,4 +1,5 @@
-# Configuration
+# OAPEN Suggestion Service
+## Configuration
 Create a `database.ini` file in `oapen-engine/src` with the following:
 ```
 [postgresql]
