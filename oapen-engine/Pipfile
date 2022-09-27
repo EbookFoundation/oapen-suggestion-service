@@ -5,10 +5,12 @@ name = "pypi"
 
 [packages]
 nltk = "*"
-psycopg2-binary = "*"
 requests = "*"
+psycopg2 = "*"
+pandas = "*"
+sklearn = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.7"
+python_version = "3.10"
