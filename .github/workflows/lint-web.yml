@@ -1,0 +1,13 @@
+name: Web lint checker
+on: push
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+    - run: cd web && npm install
+    - run: cd web && npm run lint
