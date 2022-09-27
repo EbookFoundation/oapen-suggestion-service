@@ -7,6 +7,8 @@ name = "pypi"
 nltk = "*"
 requests = "*"
 psycopg2 = "*"
+pandas = "*"
+sklearn = "*"
 
 [dev-packages]
 
