@@ -11,4 +11,4 @@ jobs:
         node-version: '14.x'
     - run: cd web
     - run: npm install
-    - run: npm run link
+    - run: npm run lint
