@@ -20,9 +20,9 @@ jobs:
         run: |
           pip install pipenv
           pipenv install
-        - run: pipenv run isort
-        - run: pipenv run black --check .
-        - run: pipenv run flake8
-        - run: pipenv run pytest
+          pipenv run isort
+          pipenv run black --check .
+          pipenv run flake8
+          pipenv run pytest
         
       
