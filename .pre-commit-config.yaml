@@ -1,5 +1,5 @@
 repos:
-  - repo: local
+  - repo: local/oapen-engine
     hooks:
       - id: isort
         name: isort
