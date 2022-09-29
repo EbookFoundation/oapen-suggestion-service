@@ -21,12 +21,11 @@ jobs:
           pip install pipenv
           pipenv install
 
-      - name: Lint
+      - name: Lint + Test
         run: |
+          pipenv install --dev
+          pipenv run isort
           pipenv run black --check .
           pipenv run flake8
-
-      - name: Test
-        run: |
           pipenv run pytest
       
