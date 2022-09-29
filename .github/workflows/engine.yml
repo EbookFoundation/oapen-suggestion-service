@@ -23,10 +23,11 @@ jobs:
           pipenv shell
 
       - name: Lint
-         run: |
+        run: |
           pipenv run black --check .
           pipenv run flake8
 
       - name: Test
-        - run: pipenv run pytest
+        run: |
+          pipenv run pytest
       
