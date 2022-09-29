@@ -20,9 +20,9 @@ jobs:
         run: |
           pip install pipenv
           pipenv install --deploy --dev
-          pipenv run isort src/
-          pipenv run black --check src/ --exclude="lib/*"
-          pipenv run flake8
+          pipenv run isort --profile black src
+          pipenv run black --check . --exclude="lib/*"
+          pipenv run flake8 --ignore="lib/*"
           pipenv run pytest
         
       
