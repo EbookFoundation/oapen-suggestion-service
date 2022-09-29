@@ -7,18 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Setup Python
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          
-      - name: Install pipenv
-        working-directory: ./oapen-engine
-        run: |
-          curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
         
       - name: Install dependencies with pipenv
         working-directory: ./oapen-engine
         run: |
+          pip install pipenv
           pipenv install
 
       - name: Lint + Test
