@@ -9,11 +9,12 @@ requests = "*"
 psycopg2 = "*"
 pandas = "*"
 sklearn = "*"
+
+[dev-packages]
 pytest = "*"
 flake8 = "*"
 black = "*"
-
-[dev-packages]
+isort = "*"
 
 [requires]
 python_version = "3.10"
