@@ -12,14 +12,15 @@ jobs:
           python-version: '3.10'
           cache: 'pipenv'
       - name: Install pipenv
-        run: cd oapen-engine
-        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: |
+          cd oapen-engine
+          curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
         
       - name: Install dependencies with pipenv
         run: |
           pip install pipenv
           pipenv install --deploy --dev
-      - run: pipenv run isort --recursive --diff
-      - run: pipenv run black --check .
-      - run: pipenv run pytest
+          pipenv run isort --recursive --diff
+          pipenv run black --check .
+          pipenv run pytest
       
