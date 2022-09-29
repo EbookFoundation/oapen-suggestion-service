@@ -13,7 +13,8 @@ jobs:
           
       - name: Install pipenv
         working-directory: ./oapen-engine
-      - run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: |
+          curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
         
       - name: Install dependencies with pipenv
       - run: pipenv install --deploy --dev
