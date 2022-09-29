@@ -17,6 +17,7 @@ jobs:
           curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
         
       - name: Install dependencies with pipenv
+        working-directory: ./oapen-engine
         run: |
           pipenv install --deploy --dev
 
