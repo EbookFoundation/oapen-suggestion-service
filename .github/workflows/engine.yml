@@ -17,10 +17,12 @@ jobs:
           curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
         
       - name: Install dependencies with pipenv
-      - run: pipenv install --deploy --dev
+        run: |
+          pipenv install --deploy --dev
 
       - name: Lint + Test
-      - run: pipenv install --dev
+        run: |
+          pipenv install --dev
       - run: pipenv run isort
       - run: pipenv run black --check .
       - run: pipenv run flake8
