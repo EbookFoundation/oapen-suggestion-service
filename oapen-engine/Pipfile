@@ -9,6 +9,10 @@ requests = "*"
 psycopg2 = "*"
 pandas = "*"
 sklearn = "*"
+pytest = "*"
+flake8 = "*"
+isort = "*"
+black = "*"
 
 [dev-packages]
 
