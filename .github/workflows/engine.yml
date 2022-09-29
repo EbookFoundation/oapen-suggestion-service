@@ -20,7 +20,7 @@ jobs:
         run: |
           pip install pipenv
           pipenv install --deploy --dev
-          pipenv run isort . --gitignore
+          pipenv run isort . --gitignore --skip lib/*
           pipenv run black --check .
           pipenv run flake8
           pipenv run pytest
