@@ -1,5 +1,6 @@
-from .core import *
 from .codec import *
+from .core import *
+
 
 def ToASCII(label):
     return encode(label)
