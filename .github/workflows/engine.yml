@@ -20,7 +20,6 @@ jobs:
         run: |
           pip install pipenv
           pipenv install
-          pipenv shell
 
       - name: Lint
         run: |
