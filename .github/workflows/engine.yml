@@ -12,8 +12,8 @@ jobs:
           python-version: '3.10'
           cache: 'pipenv'
       - name: Install pipenv
-      - run: cd oapen-engine
-      - run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+        run: cd oapen-engine
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
         
       - name: Install dependencies with pipenv
         run: |
