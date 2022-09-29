@@ -19,12 +19,11 @@ jobs:
       - name: Install dependencies with pipenv
         working-directory: ./oapen-engine
         run: |
-          pipenv install --deploy --dev
+          pipenv install
 
       - name: Lint + Test
         run: |
-          pipenv install --dev
-      - run: pipenv run isort
+        pipenv run isort
       - run: pipenv run black --check .
       - run: pipenv run flake8
       - run: pipenv run pytest
