@@ -160,5 +160,4 @@ cython_debug/
 #.idea/
 
 database.ini
-Pipfile.lock
-lib/
+lib/*
