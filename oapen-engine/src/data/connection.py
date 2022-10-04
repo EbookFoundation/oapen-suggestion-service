@@ -29,7 +29,5 @@ def get_connection():
     return conn
 
 
-def close_connection(conn):
-    if conn is not None:
-        conn.close()
-        print("Database connection closed.")
+if __name__ == "__main__":
+    connect()
