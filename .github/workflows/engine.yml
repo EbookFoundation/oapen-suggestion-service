@@ -22,7 +22,7 @@ jobs:
           pipenv install --deploy --dev
           pipenv run isort --profile black src/
           pipenv run black --check src/ --exclude="lib/*"
-          pipenv run flake8 src/ --ignore="lib/*"
+          pipenv run flake8 src/ --ignore="lib/* W" 
           pipenv run pytest
         
       
