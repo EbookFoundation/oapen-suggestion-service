@@ -1,27 +1,43 @@
 import requests
 import json
+from xml.etree import ElementTree
 
-COMMUNITY_URL = "https://library.oapen.org/rest/communities/"
-COLLECTION_URL = "https://library.oapen.org/rest/collections/"
-BITSTREAM_URL = "https://library.oapen.org/rest/search"
+SERVER_PATH = "https://library.oapen.org/rest"
+GET_COMMUNITY = "/communities/"
+GET_COLLECTION = "/collections/"
+GET_BITSTREAM = "/search"
+GET_COLLECTION_ITEMS = "/collections/{id}/items"
+GET_COMMUNITY_COLLECTIONS = "/communities/{id}/collections"
 
-def send_get_request(url, params = None):
-    req = requests.get(url = url, params=params)
-    res = req.json()
-    return json.load(res)
+# This is the onl
+BOOKS_COMMUNITY_ID = "3579505d-9d1b-4745-bcaf-a37329d25c69"
+
+def send_get_request(endpoint, params = None):
+    req = requests.get(url = SERVER_PATH + endpoint, params=params)
+    return req.json()
 
 def get_all_communities():
-    send_get_request(url=COMMUNITY_URL)
+    return send_get_request(endpoint=GET_COMMUNITY)
 
 def get_community(community):
-    send_get_request(url=COMMUNITY_URL + community)
+    return send_get_request(endpoint=GET_COMMUNITY + community)
 
 def get_collection(collection):
-    send_get_request(url=COLLECTION_URL + collection)
+    return send_get_request(endpoint=GET_COLLECTION + collection)
 
 def get_bitstream(handle):
     params = {
         "query": "handle:%22" + str(handle) + "%22",
         "expand":"bitstreams"
     }
-    send_get_request(url=BITSTREAM_URL, params=params)
+    return send_get_request(endpoint=GET_BITSTREAM, params=params)
+
+
+def get_collections_from_community(community):
+    data = send_get_request(endpoint=GET_COMMUNITY_COLLECTIONS.format(id=community))
+    return [x['uuid'] for x in data]
+
+def get_items_from_collection(collection):
+    data = send_get_request(endpoint=GET_COLLECTION_ITEMS.format(id=collection))
+    return [x['uuid'] for x in data]
+    
