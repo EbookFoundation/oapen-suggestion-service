@@ -7,6 +7,7 @@ export type OAPENApiRelativePath = string;
 export type URL = string;
 
 export interface Expandable {
+  // OAPEN returns a list of "expandables" -- things you can further query for additionally (like metadata). Once the expandable is added to the object, it's removed from this list.
   expand?: OAPENExpandable[];
 }
 
