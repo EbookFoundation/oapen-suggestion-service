@@ -10,7 +10,6 @@ interface ManyProps {
 export default function ItemMany({ many }: ManyProps) {
   return (
     <>
-      <p>Hello</p>
       <h1>Listing</h1>
       <ul>
         {many.map((item) => (

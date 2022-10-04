@@ -34,9 +34,7 @@ export const getItemsRaw = async (): Promise<OAPENItemQueried[]> => {
   return transformed;
 };
 
-export const getItemSingleRaw = async (
-  uuid: string
-): Promise<OAPENItemQueried> => {
+const getItemSingleRaw = async (uuid: string): Promise<OAPENItemQueried> => {
   const rawText = await get(["items", uuid].map(encodeURIComponent).join("/"));
 
   const transformed = transformRawItemQueried(rawText);
@@ -53,12 +51,13 @@ export const getItemSingleMetadata = async (
   return rawText as RawMetadataItem[];
 };
 
-export const combineItemMetadata = (
+const combineItemMetadata = (
   item: OAPENItemQueried,
   metadata: RawMetadataItem[]
 ): OAPENItemWithMetadata => {
   return { ...item, metadata } as OAPENItemWithMetadata;
 };
+
 export const getItemWithMetadata = async (
   uuid: string
 ): Promise<OAPENItemWithMetadata> => {

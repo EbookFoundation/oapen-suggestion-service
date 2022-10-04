@@ -1,19 +1,20 @@
 import type { GetStaticProps, GetStaticPaths } from "next";
 import { OAPENItems } from "../../lib/oapen";
 import type { OAPENItemWithMetadata } from "../../lib/oapen/OAPENTypes";
+import { RenderItem } from "../../components/render/RenderItem";
 
 interface SingleItemProps {
   item: OAPENItemWithMetadata;
 }
 
 export default function ItemSingle({ item }: SingleItemProps) {
-  const name = item.metadata.find(({ key }) => key == "grantor.name")?.value;
+  const name =
+    item.name || item.metadata.find(({ key }) => key == "grantor.name")?.value;
+  const type = item.metadata.find(({ key }) => key == "dc.type")?.value;
+  console.log({ item });
   return (
     <>
-      <h1>{name}</h1>
-      <code>
-        <pre>{JSON.stringify({ item }, null, 4)}</pre>
-      </code>
+      <RenderItem item={item} />
     </>
   );
 }
