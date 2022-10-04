@@ -1,5 +1,8 @@
+from model.ngrams import run_ngrams
+
+
 def main():
-    print("Hello world")
+    run_ngrams()
     return
 
 

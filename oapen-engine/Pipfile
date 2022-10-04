@@ -9,6 +9,7 @@ requests = "*"
 psycopg2 = "*"
 pandas = "*"
 sklearn = "*"
+lxml = "*"
 
 [dev-packages]
 pytest = "*"
