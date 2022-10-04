@@ -1,15 +1,9 @@
-import data.oapen as oapen
+import data.oapen as OapenAPI
+import model.oapen_types as OapenTypes
+from model.ngrams import run_ngrams
 
 def main():
-
-    books_community = oapen.get_community(oapen.BOOKS_COMMUNITY_ID)
-    print(books_community)
-    books_collections = oapen.get_collections_from_community(oapen.BOOKS_COMMUNITY_ID)
-    print(books_collections)
-    books_items = oapen.get_items_from_collection("ea93f8f0-430f-4a03-b7e2-5b06053585b0")
-
-    print(books_items)
-    
+    run_ngrams()
     return
 
 
