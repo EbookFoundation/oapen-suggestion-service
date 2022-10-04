@@ -1,6 +1,3 @@
-import json
-from xml.etree import ElementTree
-
 import requests
 
 SERVER_PATH = "https://library.oapen.org"
