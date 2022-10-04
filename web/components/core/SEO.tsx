@@ -1,4 +1,4 @@
-import { APP_NAME_TEXT, APP_DESCRIPTION } from "../constants";
+import { APP_NAME_TEXT, APP_DESCRIPTION } from "../../constants";
 import Head from "next/head";
 
 interface SEOComponents {
