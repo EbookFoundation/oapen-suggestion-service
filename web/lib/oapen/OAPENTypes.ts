@@ -29,7 +29,7 @@ export interface RawMetadataItem {
 }
 
 type HasMetadata = {
-  metadata: OAPENMetadata;
+  metadata: RawMetadataItem[];
 };
 
 export type OAPENItemQueried = OAPENItemRaw & Expandable;
