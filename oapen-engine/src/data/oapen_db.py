@@ -28,13 +28,10 @@ def add_suggestion(connection, suggestion: OapenSuggestion) -> None:
 def add_many_suggestions(connection, suggestions) -> None:
     cursor = connection.cursor()
     args_str = ','.join(cursor.mogrify("(%s,%s,%s::suggestion[])", x).decode("utf-8") for x in suggestions)
-    # try:
+    
     query = f"""
         INSERT INTO oapen_suggestions.suggestions VALUES {args_str}
     """
 
     cursor.execute(query)
-    # except:
-    #     print("add_many_suggestions: could not insert values")
-    # finally:
     cursor.close()

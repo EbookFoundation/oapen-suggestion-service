@@ -8,8 +8,7 @@ from data.oapen_db import add_many_suggestions
 
 
 
-def mock_suggestion_rows(connection, n = 10):
-    cursor = connection.cursor()
+def mock_suggestion_rows(n = 10):
     items = OapenAPI.get_items_from_collection("5f664493-8fee-465a-9c22-7ea8e0595775")
 
     rows = []
