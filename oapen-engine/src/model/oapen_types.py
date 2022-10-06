@@ -19,6 +19,7 @@ class OapenItem:
                 return text if limit is None else text[:limit]
         return ""
 
+OapenSuggestion = (str, int)
 
 def transform_item_data(data) -> OapenItem:
     uuid = data["uuid"]
