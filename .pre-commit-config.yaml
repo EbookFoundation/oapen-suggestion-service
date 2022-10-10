@@ -3,7 +3,8 @@ repos:
     rev: 5.10.1
     hooks:
       - id: isort
-        args: [--profile, black, --filter-files, oapen-engine/src]
+        entry: "cd oapen-engine/src"
+        args: [--profile, black, --filter-files]
         name: isort (python)
   -   repo: https://github.com/psf/black
       rev: stable
