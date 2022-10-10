@@ -1,7 +1,10 @@
 from sqlite3 import connect
 from venv import create
+
 import psycopg2
+
 from data.connection import get_connection
+
 
 def create_schema(connection) -> None:
     cursor = connection.cursor()
@@ -14,9 +17,11 @@ def create_schema(connection) -> None:
                 name		text,
                 suggestions	suggestion[]
             );
-        """)
+        """
+    )
 
     cursor.close()
+
 
 def drop_schema(connection) -> None:
     cursor = connection.cursor()
@@ -25,10 +30,11 @@ def drop_schema(connection) -> None:
         DROP SCHEMA IF EXISTS oapen_suggestions CASCADE;
         DROP TABLE IF EXISTS suggestions CASCADE;
         DROP TYPE IF EXISTS suggestion CASCADE;
-        """)
+        """
+    )
 
     cursor.close()
-    
+
 
 connection = get_connection()
 

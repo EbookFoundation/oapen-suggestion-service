@@ -3,12 +3,12 @@ from typing import List
 
 import nltk
 import pandas as pd
+from nltk import word_tokenize
+from nltk.corpus import stopwords
 
 import data.oapen as OapenAPI
 import lib.stopwords as oapen_stopwords
 
-from nltk import word_tokenize
-from nltk.corpus import stopwords
 from .oapen_types import OapenItem, transform_item_data
 
 nltk.download("stopwords")
