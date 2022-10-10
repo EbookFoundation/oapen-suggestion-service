@@ -3,16 +3,16 @@ repos:
     rev: 5.10.1
     hooks:
       - id: isort
-        args: ["--profile", "black", "--filter-files", "oapen-engine/src"]
+        args: [--profile, black, --filter-files, oapen-engine/src]
         name: isort (python)
   -   repo: https://github.com/psf/black
       rev: stable
       hooks:
       - id: black
         language_version: python3.10
-        args: ["oapen-engine/src"]
+        args: [oapen-engine/src]
   -   repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v1.2.3
       hooks:
       - id: flake8
-        args: ["oapen-engine/src"]
+        args: [oapen-engine/src]
