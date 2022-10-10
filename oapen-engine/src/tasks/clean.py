@@ -1,8 +1,3 @@
-from sqlite3 import connect
-from venv import create
-
-import psycopg2
-
 from data.connection import get_connection
 
 

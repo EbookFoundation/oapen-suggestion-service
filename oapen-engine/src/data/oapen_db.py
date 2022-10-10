@@ -1,7 +1,4 @@
-from curses import curs_set
-from typing import List
-
-import psycopg2
+from logging import Logger
 
 from model.oapen_types import OapenSuggestion
 
@@ -27,8 +24,8 @@ def add_suggestion(connection, suggestion: OapenSuggestion) -> None:
 
     try:
         cursor.execute(query, suggestion)
-    except:
-        print("add_suggestion: could not insert value (%s, %s, %s)" % suggestion)
+    except Exception as ex:
+        Logger.exception(ex)
     finally:
         cursor.close()
 
@@ -47,9 +44,7 @@ def add_many_suggestions(connection, suggestions) -> None:
 
     try:
         cursor.execute(query)
-    except:
-        print(
-            "add_many_suggestions: could not insert %d values" % str(len(suggestions))
-        )
+    except Exception as ex:
+        Logger.exception(ex)
     finally:
         cursor.close()

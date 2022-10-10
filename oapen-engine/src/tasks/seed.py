@@ -1,12 +1,7 @@
-from sqlite3 import connect
-from venv import create
-
-import psycopg2
-
 import data.oapen as OapenAPI
 from data.connection import get_connection
 from data.oapen_db import add_many_suggestions
-from model.oapen_types import OapenItem, OapenSuggestion, transform_item_data
+from model.oapen_types import transform_item_data
 
 
 def mock_suggestion_rows(n=10):
