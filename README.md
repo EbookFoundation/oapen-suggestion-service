@@ -6,7 +6,7 @@ The OAPEN Suggestion Engine will suggest ebooks based on other books with simila
 
 This project is a monorepo, with multiple pieces that can be added or removed as neccessary for deployment.
 
-### [Mining Engine (Core)](tree/main/oapen-engine)
+### [Mining Engine (Core)](/oapen-engine)
 
 This engine is written in Python, and generates the recommendation data for users. 
 Our suggestion service is centered around the trigram semantic inferencing algorithm. This script should be run as a job on a cron schedule to periodically ingest new texts added to the OAPEN catalog through their API. It will populate the Database (see Database section) with pre-processed lists of suggestions for each entry in the catalog.
@@ -34,7 +34,7 @@ You can find the code for the mining engine in `oapen-engine/`.
     * Maintained by [a large consortium of corporations and open-source developers](https://scikit-learn.org/stable/).
 
 
-### [API Engine (Core)](tree/main/api)
+### [API Engine (Core)](/api)
 
 You can find the code for the API engine in `api/`.
 
@@ -50,7 +50,7 @@ You can find the code for the API engine in `api/`.
     * Maintained [on npm](https://www.npmjs.com/package/pg)
 
 
-### [Web Demo (Optional)](tree/main/web)
+### [Web Demo (Optional)](/web)
 
 You can find the code for the web demo in `web/`.
 
