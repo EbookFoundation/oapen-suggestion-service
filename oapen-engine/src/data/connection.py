@@ -1,39 +1,35 @@
 #!/usr/bin/python
 import psycopg2
-from config import config
+from data.config import config
 
 
-def connect():
-    """Connect to the PostgreSQL database server"""
+def get_connection():
     conn = None
     try:
-        # read connection parameters
         params = config()
 
-        # connect to the PostgreSQL server
         print("Connecting to the PostgreSQL database...")
         conn = psycopg2.connect(**params)
+        conn.autocommit = True
 
-        # create a cursor
         cur = conn.cursor()
 
-        # execute a statement
         print("PostgreSQL database version:")
         cur.execute("SELECT version()")
 
-        # display the PostgreSQL database server version
         db_version = cur.fetchone()
         print(db_version)
 
-        # close the communication with the PostgreSQL
         cur.close()
+
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
-        if conn is not None:
-            conn.close()
-            print("Database connection closed.")
+        return conn
+    return conn
 
 
-if __name__ == "__main__":
-    connect()
+def close_connection(conn):
+    if conn is not None:
+        conn.close()
+        print("Database connection closed.")
