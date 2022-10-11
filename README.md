@@ -36,6 +36,8 @@ You can find the code for the mining engine in `oapen-engine/`.
 
 ### [API Engine (Core)](/api)
 
+This API server returns a list of recommended books from the database.
+
 You can find the code for the API engine in `api/`.
 
 **Base dependencies**:
@@ -51,6 +53,8 @@ You can find the code for the API engine in `api/`.
 
 
 ### [Web Demo (Optional)](/web)
+
+This is a web-app demo that can be used to query the API engine and see suggested books. This does not have to be maintained if the API is used on another site, but is useful for development and a tech demo.
 
 You can find the code for the web demo in `web/`.
 
