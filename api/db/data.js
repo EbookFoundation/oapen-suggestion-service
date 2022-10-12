@@ -1,4 +1,4 @@
-const validate = require("../validate");
+const validate = require("../validate.js");
 const { ParameterizedQuery: PQ } = require("pg-promise");
 
 const db = require("./connection.js");
@@ -11,8 +11,7 @@ async function querySuggestions(id) {
 
   // Run query
   return db.one(query).catch((error) => {
-    console.log("ERROR:", error.message);
-    return { error: error.message };
+    return { error: { name: error.name, message: error.message } };
   });
 }
 
