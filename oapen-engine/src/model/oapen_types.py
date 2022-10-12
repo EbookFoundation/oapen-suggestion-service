@@ -20,6 +20,9 @@ class OapenItem:
         return ""
 
 
+OapenSuggestion = (str, int)
+
+
 def transform_item_data(data) -> OapenItem:
     uuid = data["uuid"]
     name = data["name"]

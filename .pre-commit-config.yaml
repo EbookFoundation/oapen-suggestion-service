@@ -1,31 +1,18 @@
 repos:
-  - repo: local
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
     hooks:
       - id: isort
-        name: isort
-        stages: [commit]
-        language: system
-        entry: cd oapen-engine && pipenv run isort src/
-        types: [python]
-
+        args: [--profile, black, --filter-files, oapen-engine/src]
+        name: isort (python)
+  -   repo: https://github.com/psf/black
+      rev: stable
+      hooks:
       - id: black
-        name: black
-        stages: [commit]
-        language: system
-        entry: cd oapen-engine && pipenv run black src/
-        types: [python]
-
+        language_version: python3.10
+        args: [oapen-engine/src]
+  -   repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v1.2.3
+      hooks:
       - id: flake8
-        name: flake8
-        stages: [commit]
-        language: system
-        entry: cd oapen-engine && pipenv run flake8 src/
-        types: [python]
-        exclude: setup.py
-
-      - id: pytest
-        name: pytest
-        stages: [commit]
-        language: system
-        entry: cd oapen-engine && pipenv run pytest
-        types: [python]
+        args: [oapen-engine/src]
