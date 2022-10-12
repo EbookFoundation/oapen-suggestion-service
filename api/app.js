@@ -1,5 +1,7 @@
+require("dotenv").config({ path: "./db/database.env" });
 const express = require("express");
 const app = express();
+
 const apiRoutes = require("./routes.js");
 
 app.use(express.json());

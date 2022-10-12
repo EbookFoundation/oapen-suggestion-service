@@ -4,12 +4,14 @@
   "description": "An API which allows you to search for books with similar content from the oapen.org library.",
   "main": "app.js",
   "scripts": {
+    "clean": "node ./db/clean.js",
     "seed": "node ./db/seed.js",
     "start": "node app.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.0.3",
     "express": "^4.18.1",
     "pg-promise": "^10.12.0"
   }

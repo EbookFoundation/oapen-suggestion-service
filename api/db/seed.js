@@ -1,5 +1,7 @@
-//TODO: seed the db
+require("dotenv").config({ path: "./db/database.env" });
+const db = require("./connection.js");
 
+//seed can be run from "make setup-env" from oapen-engine/
 //"7b5fdf5b-9ffa-4073-84fe-c21cce0025b5"	"Energy Poverty, Practice, and Policy"	"{""(7b5fdf5b-9ffa-4073-84fe-c21cce0025b5,0)""}"
 //"a91a6b7d-874a-4144-b44d-0da647a82acc"	"The Future European Energy System"	"{""(a91a6b7d-874a-4144-b44d-0da647a82acc,1)""}"
 //"858df59f-0014-4355-8435-dca9c187ce0c"	"Literatura latinoamericana mundial"	"{""(858df59f-0014-4355-8435-dca9c187ce0c,2)""}"

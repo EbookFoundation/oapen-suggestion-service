@@ -6,11 +6,11 @@ A basic Node.js + Express api using pg-promise to interface with PostgreSQL and 
 
 ## Database Configuration
 
-To use a local connection, create a `database.js` file in `api/src/db` with the following:
+To use a local connection, create a `database.js` file in `api/db` with the following:
 
 ```
 const config = {
-    host: 'localhost',
+    host: 'host',
     port: 5432,
     database: 'my-database-name',
     user: 'user-name',
@@ -32,12 +32,23 @@ const config = {
 module.exports = config;
 ```
 
-You can also set up local environment variables with that information to connect to the database.
+You can also create a file called `database.env` in `api/db` with the contents
+
+```
+DATABASE_URL="postgres://username:password@host:port/database"
+```
+
+e.g.
+
+```
+DATABASE_URL="postgres://postgres:password@localhost:5432/postgres"
+```
 
 ## Running with npm
 
 ```
 npm ci
+npm run clean
 npm run seed
 npm start
 ```
