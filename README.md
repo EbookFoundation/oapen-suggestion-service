@@ -48,8 +48,9 @@ You can find the code for the API engine in `api/`.
 * `express` - Basic HTTP server
     * Maintained by the [OpenJS foundation](https://expressjs.com/)
     * Largest Node HTTP server
-* `pg` -- basic PostgreSQL driver
-    * Maintained [on npm](https://www.npmjs.com/package/pg)
+- `pg-promise` -- basic PostgreSQL driver
+  - Maintained [on Github](https://github.com/vitaly-t/pg-promise)
+- `dotenv` -- loads environment variables from .env
 
 
 ### [Web Demo (Optional)](/web)
