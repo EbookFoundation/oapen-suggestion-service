@@ -51,6 +51,7 @@ You can find the code for the API engine in `api/`.
 - `pg-promise` -- basic PostgreSQL driver
   - Maintained [on Github](https://github.com/vitaly-t/pg-promise)
 - `dotenv` -- loads environment variables from .env
+  - Maintained [on Github](https://github.com/motdotla/dotenv)
 
 
 ### [Web Demo (Optional)](/web)
