@@ -1,14 +1,14 @@
 import string
 from typing import List
 
-import data.oapen as OapenAPI
-import lib.stopwords as oapen_stopwords
-import nltk
-import pandas as pd
-from nltk import word_tokenize
-from nltk.corpus import stopwords
+import data.oapen as OapenAPI # pylint: disable=import-error
+import model.stopwords as oapen_stopwords # pylint: disable=import-error
+import nltk # pylint: disable=import-error
+import pandas as pd # pylint: disable=import-error
+from nltk import word_tokenize # pylint: disable=import-error
+from nltk.corpus import stopwords # pylint: disable=import-error
 
-from .oapen_types import OapenItem, transform_item_data
+from .oapen_types import OapenItem, transform_item_data # pylint: disable=relative-beyond-top-level
 
 nltk.download("stopwords")
 
@@ -56,9 +56,47 @@ def make_df(data: List[OapenItem]):
         df.loc[len(df.index)] = [item.uuid, item.name, text]
     return df
 
+def get_text_by_uuid(df, uuid):
+    return df.loc[df.uuid == uuid].text[0] 
+
+def generate_ngram(text, n):
+    ngrams = {}
+    #store appearance count of each trigram
+    for index in range(0, len(text) + 1 - n):
+        ngram = ' '.join(text[index:index+n])
+        ngrams.setdefault(ngram, 0) #sets curr ngram to 0 if non-existant
+        ngrams[ngram] += 1
+    return dict(sorted(ngrams.items(), key=lambda item: item[1])) #return sorted by count
+
+def generate_ngram_by_uuid(df, uuid, n):
+    text = get_text_by_uuid(df, uuid)
+    return generate_ngram(text, n)
+
+def get_n_most_occuring(dic, n=100):
+    sorted_dict = dict(sorted(dic.items(), key=lambda item: item[1])) #sorts in case of additionas post generate_ngram
+    return list(sorted_dict)[:n]
+
+#Currently, this uses the n most occuring ngrams to compare
+#This could also count the instances in the highest
+def get_similarity_score(ngram1, ngram2, n=100):
+    n_most_occ_1 = get_n_most_occuring(ngram1, n)
+    n_most_occ_2 = get_n_most_occuring(ngram2, n)
+    repeated = 0
+    for n_gram in n_most_occ_1:
+        if n_gram in n_most_occ_2:
+            repeated += 1
+    return repeated/n
 
 def run_ngrams():
     data = get_data()
+    # Uncomment to print raw text of first book
+    # for item in data:
+    #     print(item.get_text_bitstream())
+    #     break
     df = make_df(data)
     print(df.shape)
-    print(df[:10])
+    print(df)
+    sample_list = get_text_by_uuid(df, df.iloc[0].uuid)
+    print(sample_list[:10])
+    sample_ngram_list = generate_ngram_by_uuid(df, df.iloc[0].uuid, 3)
+    print(get_n_most_occuring(sample_ngram_list, 2))
