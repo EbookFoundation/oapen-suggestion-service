@@ -66,14 +66,14 @@ def generate_ngram(text, n):
         ngram = ' '.join(text[index:index+n])
         ngrams.setdefault(ngram, 0) #sets curr ngram to 0 if non-existant
         ngrams[ngram] += 1
-    return dict(sorted(ngrams.items(), key=lambda item: item[1])) #return sorted by count
+    return dict(sorted(ngrams.items(), key=lambda item: item[1], reverse=True)) #return sorted by count
 
 def generate_ngram_by_uuid(df, uuid, n):
     text = get_text_by_uuid(df, uuid)
     return generate_ngram(text, n)
 
 def get_n_most_occuring(dic, n=100):
-    sorted_dict = dict(sorted(dic.items(), key=lambda item: item[1])) #sorts in case of additionas post generate_ngram
+    sorted_dict = dict(sorted(dic.items(), key=lambda item: item[1], reverse=True)) #sorts in case of additionas post generate_ngram
     return list(sorted_dict)[:n]
 
 # Currently, this uses the n most occuring ngrams to compare
@@ -98,7 +98,8 @@ def get_similarity_score_by_dict_count(ngrams1, ngrams2):
         repeated += min(ngrams1_value, ngrams2.get(key, 0)) #adds min value, or 0 by default if key not found
     return repeated/total
 
-def run_ngrams():
+#to demo some functions
+def test_functions():
     data = get_data()
     # Uncomment to print raw text of first book
     # for item in data:
@@ -111,3 +112,48 @@ def run_ngrams():
     print(sample_list[:10])
     sample_ngram_list = generate_ngram_by_uuid(df, df.iloc[0].uuid, 3)
     print(get_n_most_occuring(sample_ngram_list, 2))
+
+#run demo with the above titles
+#NOTE: ERRORS, do not run
+def run_demo():
+    demo_books = {
+        #should be similar
+        "Domestic Policymaking and Regional Cooperation" : "01d59c45-78b8-4710-9805-584c72866c32",
+        "Local Leadership and the Path from Government to Governance in Small Cities" : "00fc2a5a-6540-4176-ac76-c35ddba4cceb",
+
+        #should be similar but different from first group
+        "Repurposing Music in the Digital Age" : "02445c92-5c12-47e3-bde7-5764ef6c0434",
+        #"An Experimental Approach to Music Performance" : "00fa7fba-0343-4db9-b18b-7c9d430a1131"
+    }
+
+    items = []
+    ngram_dict = {}
+
+    print("---------------------------------")
+    
+    for name, uuid in demo_books.items():
+        book_item = OapenAPI.get_item(uuid)
+        print(book_item)
+
+        item = transform_item_data(book_item)
+        items.append(item)
+
+        text = process_text(item.get_text_bitstream())
+        print(f"  {name}: text array\n{text[:30]}...\n")
+
+        ngram_dict[uuid] = generate_ngram(text, 3)
+        print(f"  {name}: ngram dictionary\n {list(ngram_dict[uuid].items())[:30]}...")
+
+        print("---------------------------------")
+
+    for name, uuid in demo_books.items():
+        print(f"Showing similarity scores for all books relative to {name}:\n")
+        for name2, uuid2 in demo_books.items():
+            if uuid == uuid2: #dont check self
+                continue
+            print(f"  Similarity score by simple count for title {name2}: {100 * get_similarity_score(ngram_dict[uuid], ngram_dict[uuid2], n=10000)}%")
+            print(f"  Similarity score by dict count for title {name2}: {100 * get_similarity_score_by_dict_count(ngram_dict[uuid], ngram_dict[uuid2])}%")
+            print()
+
+def run_ngrams():
+    run_demo()
