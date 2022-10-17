@@ -96,6 +96,8 @@ def get_similarity_score_by_dict_count(ngrams1, ngrams2):
     total = sum(ngrams1.values()) #gets counts from book 1
     for key, ngrams1_value in ngrams1.items():
         repeated += min(ngrams1_value, ngrams2.get(key, 0)) #adds min value, or 0 by default if key not found
+        # if(min(ngrams1_value, ngrams2.get(key, 0)) != 0):
+        #     print(key)
     return repeated/total
 
 #to demo some functions
