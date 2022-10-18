@@ -8,7 +8,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", apiRoutes);
 
 app.use("*", (req, res) => {
-  res.status(404).json({ error: "Resource not found" });
+  return res.status(404).json({ error: "Resource not found" });
 });
 
 const port = process.env.PORT || 3001;

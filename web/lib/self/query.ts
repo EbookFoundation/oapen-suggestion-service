@@ -1,4 +1,4 @@
-const ENDPOINT = process.env?.API_SERVER || "http://localhost:3001";
+const ENDPOINT = process.env?.API_SERVER || "http://localhost:3001/web";
 import axios from "axios";
 
 export async function get(url = "") {
