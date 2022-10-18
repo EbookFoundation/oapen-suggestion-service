@@ -1,18 +1,14 @@
 repos:
-  - repo: https://github.com/pycqa/isort
-    rev: 5.10.1
+-   repo: https://github.com/pre-commit/mirrors-isort
+    rev: v4.3.21
     hooks:
-      - id: isort
-        args: [--profile, black, --filter-files, oapen-engine/src]
-        name: isort (python)
-  -   repo: https://github.com/psf/black
-      rev: stable
-      hooks:
-      - id: black
-        language_version: python3.10
-        args: [oapen-engine/src]
-  -   repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v1.2.3
-      hooks:
-      - id: flake8
-        args: [oapen-engine/src]
+    - id: isort
+-   repo: https://github.com/ambv/black
+    rev: stable
+    hooks:
+    - id: black
+      language_version: python3.10
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    - id: flake8
