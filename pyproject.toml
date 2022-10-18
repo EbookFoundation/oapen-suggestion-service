@@ -13,9 +13,10 @@ exclude = '''
   | build
   | dist
   | lib
-  | oapen-engine/lib
+  | ./oapen-engine/lib
   | __pycache__
   | bin
-  | oapen-engine/bin
+  | ./oapen-engine/bin
+  | 
 )/
 '''
