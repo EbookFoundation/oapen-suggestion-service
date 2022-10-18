@@ -1,34 +1,36 @@
+from typing import List
+
 import data.oapen as OapenAPI
 
 
 class OapenItem:
-    def __init__(self, uuid, name, handle, expand, link, metadata):
+    def __init__(self, uuid, name, handle, expand, link, metadata, bitstreams):
         self.uuid = uuid
         self.name = name
         self.handle = handle
         self.expand = expand
         self.link = link
         self.metadata = metadata
-        self.bitstreams = OapenAPI.get_bitstreams(self.uuid)
+        self.bitstreams = bitstreams
 
-    def get_text_bitstream(self, limit=None):
-        for bitstream in self.bitstreams:
-            if bitstream["mimeType"] == "text/plain":
-                retrieveLink = bitstream["retrieveLink"]
-                text = str(OapenAPI.get(retrieveLink).decode("utf-8"))
-                return text if limit is None else text[:limit]
-        return ""
+    def get_text(self):
+        return OapenAPI.get_bitstream_text(self.bitstreams)
 
 
 OapenSuggestion = (str, int)
 
 
-def transform_item_data(data) -> OapenItem:
-    uuid = data["uuid"]
-    name = data["name"]
-    handle = data["handle"]
-    expand = data["expand"]
-    link = data["link"]
-    metadata = data["metadata"]
+def transform_item_data(item) -> OapenItem:
+    uuid = item["uuid"]
+    name = item["name"]
+    handle = item["handle"]
+    expand = item["expand"]
+    link = item["link"]
+    metadata = item["metadata"]
+    bitstreams = item["bitstreams"]
 
-    return OapenItem(uuid, name, handle, expand, link, metadata)
+    return OapenItem(uuid, name, handle, expand, link, metadata, bitstreams)
+
+
+def transform_multiple_items_data(data: List[object]) -> List[OapenItem]:
+    return [transform_item_data(x) for x in data]
