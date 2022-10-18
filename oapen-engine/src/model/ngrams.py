@@ -29,7 +29,9 @@ def process_text(text):
     l_text = text.lower()
     p_text = "".join([c for c in l_text if c not in string.punctuation])
     words = word_tokenize(p_text)
-    filtered_words = list(filter(lambda x: x not in STOPWORDS and x.isalpha(), words))  # added isalpha to check that it contains only letters
+    filtered_words = list(
+        filter(lambda x: x not in STOPWORDS and x.isalpha(), words)
+    )  # added isalpha to check that it contains only letters
 
     return filtered_words
 
@@ -68,10 +70,12 @@ def generate_ngram(text, n):
     ngrams = {}
     # store appearance count of each trigram
     for index in range(0, len(text) + 1 - n):
-        ngram = ' '.join(text[index:index + n])
+        ngram = " ".join(text[index : index + n])
         ngrams.setdefault(ngram, 0)  # sets curr ngram to 0 if non-existant
         ngrams[ngram] += 1
-    return dict(sorted(ngrams.items(), key=lambda item: item[1], reverse=True))  # return sorted by count
+    return dict(
+        sorted(ngrams.items(), key=lambda item: item[1], reverse=True)
+    )  # return sorted by count
 
 
 def generate_ngram_by_uuid(df, uuid, n):
@@ -79,8 +83,10 @@ def generate_ngram_by_uuid(df, uuid, n):
     return generate_ngram(text, n)
 
 
-def get_n_most_occuring(dic, n=100):
-    sorted_dict = dict(sorted(dic.items(), key=lambda item: item[1], reverse=True))  # sorts in case of additionas post generate_ngram
+def get_n_most_occuring(dic: dict, n=100):
+    sorted_dict = dict(
+        sorted(dic.items(), key=lambda item: item[1], reverse=True)
+    )  # sorts in case of additionas post generate_ngram
     return list(sorted_dict)[:n]
 
 
@@ -104,7 +110,9 @@ def get_similarity_score_by_dict_count(ngrams1, ngrams2):
     repeated = 0
     total = sum(ngrams1.values())  # gets counts from book 1
     for key, ngrams1_value in ngrams1.items():
-        repeated += min(ngrams1_value, ngrams2.get(key, 0))  # adds min value, or 0 by default if key not found
+        repeated += min(
+            ngrams1_value, ngrams2.get(key, 0)
+        )  # adds min value, or 0 by default if key not found
         # if(min(ngrams1_value, ngrams2.get(key, 0)) != 0):
         #     print(key)
     return repeated / total
@@ -130,11 +138,10 @@ def test_functions():
 def run_demo():
     demo_books = {
         # should be similar
-        "Domestic Policymaking and Regional Cooperation" : "01d59c45-78b8-4710-9805-584c72866c32",
-        "Local Leadership and the Path from Government to Governance in Small Cities" : "00fc2a5a-6540-4176-ac76-c35ddba4cceb",
-
+        "Domestic Policymaking and Regional Cooperation": "01d59c45-78b8-4710-9805-584c72866c32",
+        "Local Leadership and the Path from Government to Governance in Small Cities": "00fc2a5a-6540-4176-ac76-c35ddba4cceb",
         # should be similar but different from first group
-        "Repurposing Music in the Digital Age" : "02445c92-5c12-47e3-bde7-5764ef6c0434",
+        "Repurposing Music in the Digital Age": "02445c92-5c12-47e3-bde7-5764ef6c0434",
         # "An Experimental Approach to Music Performance" : "00fa7fba-0343-4db9-b18b-7c9d430a1131"
     }
 
@@ -163,8 +170,12 @@ def run_demo():
         for name2, uuid2 in demo_books.items():
             if uuid == uuid2:  # dont check self
                 continue
-            print(f"  Similarity score by simple count for title {name2}: {100 * get_similarity_score(ngram_dict[uuid], ngram_dict[uuid2], n=10000)}%")
-            print(f"  Similarity score by dict count for title {name2}: {100 * get_similarity_score_by_dict_count(ngram_dict[uuid], ngram_dict[uuid2])}%")
+            print(
+                f"  Similarity score by simple count for title {name2}: {100 * get_similarity_score(ngram_dict[uuid], ngram_dict[uuid2], n=10000)}%"
+            )
+            print(
+                f"  Similarity score by dict count for title {name2}: {100 * get_similarity_score_by_dict_count(ngram_dict[uuid], ngram_dict[uuid2])}%"
+            )
             print()
 
 
