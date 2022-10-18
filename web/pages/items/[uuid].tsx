@@ -1,11 +1,7 @@
 import type { GetStaticProps, GetStaticPaths } from "next";
-import { OAPENItems } from "../../lib/oapen";
-import type { OAPENItemWithMetadata } from "../../lib/oapen/OAPENTypes";
-import { RenderItem } from "../../components/render/RenderItem";
 
-interface SingleItemProps {
-  item: OAPENItemWithMetadata;
-}
+import { RenderItem } from "../../components/render/RenderItem";
+import { fetchSingleItemProps, SingleItemProps } from "../../lib/item/single";
 
 export default function ItemSingle({ item }: SingleItemProps) {
   const name =
@@ -30,14 +26,31 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<SingleItemProps> = async (
   context
 ) => {
-  const item = await OAPENItems.getItemWithMetadata(context?.params?.uuid + "");
-  const data: SingleItemProps = {
-    item,
-  };
+  const uuid = context?.params?.uuid;
+  if (!uuid)
+    return {
+      props: {},
+      notFound: true,
+    };
 
-  return {
-    props: {
-      ...data,
-    },
-  };
+  try {
+    // TODO may be better to statically render OAPEN data,
+    // and ping for suggestions dynamically (lazy load)
+    let data = await fetchSingleItemProps(String(uuid));
+
+    if (!data?.item?.handle)
+      return {
+        props: {},
+        notFound: true,
+      };
+
+    return {
+      props: {
+        ...data,
+      },
+    };
+  } catch (e) {
+    console.error(e);
+    return { props: {}, error: e };
+  }
 };
