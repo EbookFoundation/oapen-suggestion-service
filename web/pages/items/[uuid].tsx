@@ -38,6 +38,12 @@ export const getStaticProps: GetStaticProps<SingleItemProps> = async (
     // and ping for suggestions dynamically (lazy load)
     let data = await fetchSingleItemProps(String(uuid));
 
+    if (!data?.item?.handle)
+      return {
+        props: {},
+        notFound: true,
+      };
+
     return {
       props: {
         ...data,
