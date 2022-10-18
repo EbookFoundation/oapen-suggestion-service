@@ -8,7 +8,7 @@ def create_schema(connection) -> None:
         CREATE TYPE suggestion AS (id uuid, rank int);
         CREATE SCHEMA oapen_suggestions
             CREATE TABLE IF NOT EXISTS suggestions (
-                item_id		uuid	PRIMARY KEY,
+                handle		text	PRIMARY KEY,
                 name		text,
                 suggestions	suggestion[]
             );
