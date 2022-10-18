@@ -10,10 +10,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", apiRoutes);
 
 app.use("*", (req, res) => {
-  res.status(404).json({ error: "Resource not found" });
+  return res.status(404).json({ error: "Resource not found" });
 });
 
-app.listen(3001, () => {
-  console.log("Suggestion Service API is up!");
-  console.log("Endpoint: /GET http://localhost:3001/api/{item_uuid}");
+const port = process.env.PORT || 3001;
+
+app.listen(port, () => {
+  console.log("Suggestion Service API is up on port " + port);
+  console.log("Endpoint: /GET http://localhost:" + port + "/api/{item_uuid}");
 });

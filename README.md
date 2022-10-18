@@ -2,6 +2,10 @@
 
 The OAPEN Suggestion Engine will suggest ebooks based on other books with similar content.
 
+## Running server
+
+You can run all the servers together with `./all-dev.sh` -- after installing dependencies with `./setup.sh`
+
 ## Monorepo components
 
 This project is a monorepo, with multiple pieces that can be added or removed as neccessary for deployment.

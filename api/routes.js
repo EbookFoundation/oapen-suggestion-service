@@ -25,7 +25,7 @@ router.get("/:handle", async (req, res) => {
 
     res.status(200).json(responseData);
   } catch (e) {
-    res.status(500).json({ error: "Internal server error." });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
