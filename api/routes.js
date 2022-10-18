@@ -8,14 +8,11 @@ const data = require("./db/data.js");
 router.get("/:handle", async (req, res) => {
   try {
     var handle = req.params.handle;
-
-    //Validate the parameter
     await validate.checkHandle(handle);
 
-    //Get the data
     let responseData = await data.getSuggestions(handle);
 
-    if (responseData.error && responseData.error.name === "QueryResultError") {
+    if (responseData.error && responseData.error.name === pgp.errors.QueryResultError.name) {
       res.status(404).json({ error: responseData.error.message });
       return;
     } else if (responseData.error) {
