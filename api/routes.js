@@ -10,7 +10,7 @@ router.get("/:handle", async (req, res) => {
     var handle = req.params.handle;
     await validate.checkHandle(handle);
 
-    let responseData = await data.getSuggestions(handle);
+    let responseData = await data.querySuggestions(handle);
 
     if (responseData.error && responseData.error.name === pgp.errors.QueryResultError.name) {
       res.status(404).json({ error: responseData.error.message });
