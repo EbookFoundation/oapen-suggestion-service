@@ -70,7 +70,7 @@ def generate_ngram(text, n):
     ngrams = {}
     # store appearance count of each trigram
     for index in range(0, len(text) + 1 - n):
-        ngram = " ".join(text[index : index + n])
+        ngram = " ".join(text[index: index + n])
         ngrams.setdefault(ngram, 0)  # sets curr ngram to 0 if non-existant
         ngrams[ngram] += 1
     return dict(
@@ -138,11 +138,11 @@ def test_functions():
 def run_demo():
     demo_books = {
         # should be similar
-        "Domestic Policymaking and Regional Cooperation": "01d59c45-78b8-4710-9805-584c72866c32",
-        "Local Leadership and the Path from Government to Governance in Small Cities": "00fc2a5a-6540-4176-ac76-c35ddba4cceb",
+        "Domestic...": "01d59c45-78b8-4710-9805-584c72866c32",
+        "Local Leadership ...": "00fc2a5a-6540-4176-ac76-c35ddba4cceb",
         # should be similar but different from first group
-        "Repurposing Music in the Digital Age": "02445c92-5c12-47e3-bde7-5764ef6c0434",
-        # "An Experimental Approach to Music Performance" : "00fa7fba-0343-4db9-b18b-7c9d430a1131"
+        "Repurposing Music...": "02445c92-5c12-47e3-bde7-5764ef6c0434",
+        # "An Experimental..." : "00fa7fba-0343-4db9-b18b-7c9d430a1131"
     }
 
     items = []
@@ -170,11 +170,15 @@ def run_demo():
         for name2, uuid2 in demo_books.items():
             if uuid == uuid2:  # dont check self
                 continue
+
+            simple_similarity_score = 100 * get_similarity_score(ngram_dict[uuid], ngram_dict[uuid2], n=10000)
             print(
-                f"  Similarity score by simple count for title {name2}: {100 * get_similarity_score(ngram_dict[uuid], ngram_dict[uuid2], n=10000)}%"
+                f"  Similarity score by simple count for title {name2}: {simple_similarity_score}%"
             )
+
+            dict_similarity_score = 100 * get_similarity_score_by_dict_count(ngram_dict[uuid], ngram_dict[uuid2])
             print(
-                f"  Similarity score by dict count for title {name2}: {100 * get_similarity_score_by_dict_count(ngram_dict[uuid], ngram_dict[uuid2])}%"
+                f"  Similarity score by dict count for title {name2}: {dict_similarity_score}%"
             )
             print()
 
