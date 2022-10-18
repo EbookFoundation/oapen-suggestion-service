@@ -8,14 +8,14 @@ from model.oapen_types import (
     transform_multiple_items_data,
 )
 
-SERVER_PATH = "https://library.oapen.org/rest"
-GET_COMMUNITY = "/communities/{id}"
-GET_COLLECTION = "/collections/{id}"
-GET_ITEM_BITSTREAMS = "/items/{id}/bitstreams"
-GET_COLLECTION_ITEMS = "/collections/{id}/items"
-GET_COMMUNITY_COLLECTIONS = "/communities/{id}/collections"
-GET_ITEM = "/search?query=handle:%22{handle}%22&expand=bitstreams"
-GET_COLLECTION_BY_LABEL = "/search?query=oapen.collection:%22{label}%22"
+SERVER_PATH = "https://library.oapen.org"
+GET_COMMUNITY = "/rest/communities/{id}"
+GET_COLLECTION = "/rest/collections/{id}"
+GET_ITEM_BITSTREAMS = "/rest/items/{id}/bitstreams"
+GET_COLLECTION_ITEMS = "/rest/collections/{id}/items"
+GET_COMMUNITY_COLLECTIONS = "/rest/communities/{id}/collections"
+GET_ITEM = "/rest/search?query=handle:%22{handle}%22&expand=bitstreams"
+GET_COLLECTION_BY_LABEL = "/rest/search?query=oapen.collection:%22{label}%22"
 
 # This is the only community we care about right now
 BOOKS_COMMUNITY_ID = "3579505d-9d1b-4745-bcaf-a37329d25c69"
