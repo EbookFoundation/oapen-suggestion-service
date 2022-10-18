@@ -34,6 +34,8 @@ export const getStaticProps: GetStaticProps<SingleItemProps> = async (
     };
 
   try {
+    // TODO may be better to statically render OAPEN data,
+    // and ping for suggestions dynamically (lazy load)
     let data = await fetchSingleItemProps(String(uuid));
 
     return {
