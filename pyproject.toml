@@ -15,5 +15,6 @@ exclude = '''
   | lib
   | oapen-engine/lib
   | __pycache__
+  | oapen-engine/bin
 )/
 '''
