@@ -1,13 +1,7 @@
 import type { GetStaticProps, GetStaticPaths } from "next";
-import { OAPENItems } from "../../lib/oapen";
-import { SelfItems } from "../../lib/self";
-import type { OAPENItemWithMetadata } from "../../lib/oapen/OAPENTypes";
-import { RenderItem } from "../../components/render/RenderItem";
 
-interface SingleItemProps {
-  item: OAPENItemWithMetadata;
-  selfSuggestions: any; // TODO change
-}
+import { RenderItem } from "../../components/render/RenderItem";
+import { fetchSingleItemProps, SingleItemProps } from "../../lib/item/single";
 
 export default function ItemSingle({ item }: SingleItemProps) {
   const name =
@@ -32,23 +26,23 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<SingleItemProps> = async (
   context
 ) => {
-  // TODO write async
-  const item = await OAPENItems.getItemWithMetadata(context?.params?.uuid + "");
-  let selfSuggestions = {};
+  const uuid = context?.params?.uuid;
+  if (!uuid)
+    return {
+      props: {},
+      notFound: true,
+    };
+
   try {
-    selfSuggestions = await SelfItems.getItemByHandle(item?.handle || "");
+    let data = await fetchSingleItemProps(String(uuid));
+
+    return {
+      props: {
+        ...data,
+      },
+    };
   } catch (e) {
-    console.error("Could not fetch SelfSuggestions", e);
+    console.error(e);
+    return { props: {}, error: e };
   }
-
-  const data: SingleItemProps = {
-    item,
-    selfSuggestions,
-  };
-
-  return {
-    props: {
-      ...data,
-    },
-  };
 };
