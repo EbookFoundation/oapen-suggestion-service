@@ -1,7 +1,8 @@
 import { get } from "./query";
+import { SelfSuggestions } from "./SelfTypes"
 
-export const getItemByHandle = async (handle: string): Promise<any> => {
+export const getItemByHandle = async (handle: string): Promise<SelfSuggestions> => {
   const rawText = await get("/" + encodeURIComponent(handle));
 
-  return rawText;
+  return rawText as SelfSuggestions;
 };
