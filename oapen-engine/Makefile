@@ -16,3 +16,6 @@ clean_db:
 	
 run:
 	cd src && pipenv run python main.py
+
+run-tests:
+	cd src && pipenv run pytest
