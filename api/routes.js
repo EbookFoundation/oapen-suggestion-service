@@ -7,9 +7,12 @@ router.get("/:handle", async (req, res) => {
     await validate.checkHandle(req.params.handle);
     //TODO: Call a data function to grab suggestions from DB
     let responseData = { error: "Not implemented" };
-    res.status(200).json(responseData);
+    res.status(500).json(responseData);
+    return;
   } catch (e) {
-    res.status(200).json({});
+    console.error(e);
+    res.status(500).json({ error: "Something happened" });
+    return;
   }
 });
 
