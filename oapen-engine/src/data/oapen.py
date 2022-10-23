@@ -66,7 +66,7 @@ def get_collection_items_by_id(id, limit=None) -> List[OapenItem]:
 
 
 def get_collection_items_by_label(label, limit=None) -> List[OapenItem]:
-    label = label = "+".join(label.split(" "))
+    label = "+".join(label.split(" "))
     res = get(
         endpoint=GET_COLLECTION_BY_LABEL.format(label=label), params={"limit": limit}
     )
