@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 import data.oapen as OapenAPI
 
 
@@ -20,7 +22,8 @@ class OapenItem:
         return ""
 
 
-OapenSuggestion = (str, int)
+OapenSuggestion = ("OapenSuggestion", ["handle", "rank"])
+OapenNgram = ("OapenNgram", ["handle", "ngrams"])
 
 
 def transform_item_data(data) -> OapenItem:

@@ -10,7 +10,7 @@ def mock_suggestion_rows(n=10):
     rows = []
     for i in range(min(10, len(items))):
         item = transform_item_data(OapenAPI.get_item(items[i]))
-        rows.append((items[i], item.name, [(items[i], i)]))
+        rows.append((item.handle, item.name, [(item.handle, 1)]))
 
     return rows
 
