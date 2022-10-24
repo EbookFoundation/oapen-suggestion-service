@@ -8,10 +8,7 @@ import pandas as pd  # pylint: disable=import-error
 from nltk import word_tokenize  # pylint: disable=import-error
 from nltk.corpus import stopwords  # pylint: disable=import-error
 
-from .oapen_types import (  # pylint: disable=relative-beyond-top-level
-    OapenItem,
-    transform_item_data,
-)
+from .oapen_types import OapenItem  # pylint: disable=relative-beyond-top-level
 
 nltk.download("stopwords")
 
@@ -36,41 +33,24 @@ def process_text(text):
     return filtered_words
 
 
-def get_data(collection_limit=1, item_limit=10) -> List[OapenItem]:
-    books_collections = OapenAPI.get_collections_from_community(
-        OapenAPI.BOOKS_COMMUNITY_ID
-    )
-    books_items = []
-
-    for i in range(min(collection_limit, len(books_collections))):
-        books_items += OapenAPI.get_items_from_collection(books_collections[i])
-
-    items = []
-
-    for i in range(0, min(item_limit, len(books_items))):
-        book_item = OapenAPI.get_item(books_items[i])
-        item = transform_item_data(book_item)
-        items.append(item)
-    return items
-
-
 def make_df(data: List[OapenItem]):
-    df = pd.DataFrame(columns=["uuid", "name", "text"])
+    df = pd.DataFrame(columns=["handle", "name", "text"])
+
     for item in data:
-        text = process_text(item.get_text_bitstream())
-        df.loc[len(df.index)] = [item.uuid, item.name, text]
+        text = process_text(item.get_text())
+        df.loc[len(df.index)] = [item.handle, item.name, text]
     return df
 
 
-def get_text_by_uuid(df, uuid):
-    return df.loc[df.uuid == uuid].text[0]
+def get_text_by_handle(df, handle):
+    return df.loc[df.handle == handle].text[0]
 
 
 def generate_ngram(text, n):
     ngrams = {}
     # store appearance count of each trigram
     for index in range(0, len(text) + 1 - n):
-        ngram = " ".join(text[index: index + n])
+        ngram = " ".join(text[index : index + n])
         ngrams.setdefault(ngram, 0)  # sets curr ngram to 0 if non-existant
         ngrams[ngram] += 1
     return dict(
@@ -78,8 +58,8 @@ def generate_ngram(text, n):
     )  # return sorted by count
 
 
-def generate_ngram_by_uuid(df, uuid, n):
-    text = get_text_by_uuid(df, uuid)
+def generate_ngram_by_handle(df, handle, n):
+    text = get_text_by_handle(df, handle)
     return generate_ngram(text, n)
 
 
@@ -120,7 +100,9 @@ def get_similarity_score_by_dict_count(ngrams1, ngrams2):
 
 # to demo some functions
 def test_functions():
-    data = get_data()
+    data = OapenAPI.get_collection_items_by_label(
+        "Austrian Science Fund (FWF)", limit=100
+    )
     # Uncomment to print raw text of first book
     # for item in data:
     #     print(item.get_text_bitstream())
@@ -128,9 +110,9 @@ def test_functions():
     df = make_df(data)
     print(df.shape)
     print(df)
-    sample_list = get_text_by_uuid(df, df.iloc[0].uuid)
+    sample_list = get_text_by_handle(df, df.iloc[0].handle)
     print(sample_list[:10])
-    sample_ngram_list = generate_ngram_by_uuid(df, df.iloc[0].uuid, 3)
+    sample_ngram_list = generate_ngram_by_handle(df, df.iloc[0].handle, 3)
     print(get_n_most_occuring(sample_ngram_list, 2))
 
 
@@ -138,11 +120,11 @@ def test_functions():
 def run_demo():
     demo_books = {
         # should be similar
-        "Domestic...": "01d59c45-78b8-4710-9805-584c72866c32",
-        "Local Leadership ...": "00fc2a5a-6540-4176-ac76-c35ddba4cceb",
+        "Quality Management and Accounting in Service Industries": "20.500.12657/54327",
+        "Management Accountants’ Business Orientation and Involvement in Incentive Compensation": "20.500.12657/26999",
         # should be similar but different from first group
-        "Repurposing Music...": "02445c92-5c12-47e3-bde7-5764ef6c0434",
-        # "An Experimental..." : "00fa7fba-0343-4db9-b18b-7c9d430a1131"
+        "Immersion Into Noise": "20.500.12657/33907",
+        "Ambisonics": "20.500.12657/23095",
     }
 
     items = []
@@ -150,33 +132,37 @@ def run_demo():
 
     print("---------------------------------")
 
-    for name, uuid in demo_books.items():
-        book_item = OapenAPI.get_item(uuid)
-        print(book_item)
+    for name, handle in demo_books.items():
+        item = OapenAPI.get_item(handle)
 
-        item = transform_item_data(book_item)
         items.append(item)
 
-        text = process_text(item.get_text_bitstream())
+        text = process_text(item.get_text())
         print(f"  {name}: text array\n{text[:30]}...\n")
 
-        ngram_dict[uuid] = generate_ngram(text, 3)
-        print(f"  {name}: ngram dictionary\n {list(ngram_dict[uuid].items())[:30]}...")
+        ngram_dict[handle] = generate_ngram(text, 3)
+        print(
+            f"  {name}: ngram dictionary\n {list(ngram_dict[handle].items())[:30]}..."
+        )
 
         print("---------------------------------")
 
-    for name, uuid in demo_books.items():
+    for name, handle in demo_books.items():
         print(f"Showing similarity scores for all books relative to {name}:\n")
-        for name2, uuid2 in demo_books.items():
-            if uuid == uuid2:  # dont check self
-                continue
+        for name2, handle2 in demo_books.items():
+            # if handle == handle2:  # dont check self
+            #     continue
 
-            simple_similarity_score = 100 * get_similarity_score(ngram_dict[uuid], ngram_dict[uuid2], n=10000)
+            simple_similarity_score = 100 * get_similarity_score(
+                ngram_dict[handle], ngram_dict[handle2], n=10000
+            )
             print(
                 f"  Similarity score by simple count for title {name2}: {simple_similarity_score}%"
             )
 
-            dict_similarity_score = 100 * get_similarity_score_by_dict_count(ngram_dict[uuid], ngram_dict[uuid2])
+            dict_similarity_score = 100 * get_similarity_score_by_dict_count(
+                ngram_dict[handle], ngram_dict[handle2]
+            )
             print(
                 f"  Similarity score by dict count for title {name2}: {dict_similarity_score}%"
             )
