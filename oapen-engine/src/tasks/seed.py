@@ -13,7 +13,7 @@ def mock_suggestion_rows(n=10):
 
     rows = []
     for i in range(min(10, len(items))):
-        rows.append((items[i].handle, items[i].name, [(items[i], i)]))
+        rows.append((items[i].handle, items[i].name, [(items[i].handle, i)]))
 
     return rows
 

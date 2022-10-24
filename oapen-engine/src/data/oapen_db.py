@@ -6,7 +6,11 @@ from model.oapen_types import OapenSuggestion
 def table_exists(connection, table):
     cursor = connection.cursor
     cursor.execute(
-        "select exists(select * from oapen_suggestions.tables where table_name=%s)",
+        """
+        SELECT EXISTS (
+            SELECT * FROM oapen_suggestions.tables WHERE table_name=%s
+        )
+        """,
         (table),
     )
 
