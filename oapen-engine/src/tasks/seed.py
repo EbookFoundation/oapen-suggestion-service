@@ -1,7 +1,7 @@
 from typing import List
 
 import data.oapen as OapenAPI
-from data.connection import get_connection
+from data.connection import close_connection, connection
 from data.oapen_db import add_many_suggestions
 from model.oapen_types import OapenItem
 
@@ -12,15 +12,13 @@ def mock_suggestion_rows(n=10):
     )
 
     rows = []
-    for i in range(min(10, len(items))):
+    for i in range(min(30, len(items))):
         rows.append((items[i].handle, items[i].name, [(items[i].handle, i)]))
 
     return rows
 
 
-connection = get_connection()
+rows = mock_suggestion_rows(30)
+add_many_suggestions(rows)
 
-rows = mock_suggestion_rows(connection)
-add_many_suggestions(connection, rows)
-
-connection.close()
+close_connection(connection)

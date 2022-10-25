@@ -20,6 +20,12 @@ def get_connection():
         db_version = cur.fetchone()
         print(db_version)
 
+        # psycopg2.extensions.register_type(
+        #     psycopg2.extensions.new_array_type(
+
+        #     )
+        # )
+
         cur.close()
 
     except (Exception, psycopg2.DatabaseError) as error:
@@ -33,3 +39,6 @@ def close_connection(conn):
     if conn is not None:
         conn.close()
         print("Database connection closed.")
+
+
+connection = get_connection()
