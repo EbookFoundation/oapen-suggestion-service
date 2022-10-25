@@ -1,6 +1,6 @@
 from typing import List
 
-import data.oapen as OapenAPI
+import src.data.oapen as OapenAPI
 from model.oapen_types import OapenItem
 
 
