@@ -17,5 +17,6 @@ const port = process.env.PORT || 3001;
 
 app.listen(port, () => {
   console.log("Suggestion Service API is up on port " + port);
-  console.log("Endpoint: /GET http://localhost:" + port + "/api/{item_uuid}");
+  console.log("Endpoint: /GET http://localhost:" + port + "/api/{handle}");
+  console.log("Endpoint: /GET http://localhost:" + port + "/api/{handle}/ngrams")
 });
