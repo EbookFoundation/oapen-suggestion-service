@@ -32,13 +32,11 @@ def add_single_suggestion(suggestion) -> None:
             VALUES (%s, %s, %s::oapen_suggestions.suggestion[])
             ON CONFLICT (handle)
             DO
-                UPDATE SET suggestions = (%s::oapen_suggestions.suggestion[])
+                UPDATE SET suggestions = excluded.suggestions
             """
 
     try:
-        cursor.execute(
-            query, (suggestion[0], suggestion[1], suggestion[2], suggestion[2])
-        )
+        cursor.execute(query, (suggestion[0], suggestion[1], suggestion[2]))
     except (Exception, psycopg2.Error) as error:
         print(error)
     finally:
@@ -72,16 +70,16 @@ def add_many_suggestions(suggestions) -> None:
 def add_single_ngrams(ngram) -> None:
     cursor = connection.cursor()
 
-    query = f"""
+    query = """
             INSERT INTO oapen_suggestions.ngrams (handle, ngrams)
-            VALUES ({ngram[0]}, {ngram[1]}::oapen_suggestions.ngram[])
+            VALUES (%s, %s::oapen_suggestions.ngram[])
             ON CONFLICT (handle)
             DO
-                UPDATE SET ngrams = {ngram[1]}
+                UPDATE SET ngrams = excluded.ngrams
             """
 
     try:
-        cursor.execute(query)
+        cursor.execute(query, ngram[0], ngram[1])
     except (Exception, psycopg2.Error) as error:
         print(error)
     finally:

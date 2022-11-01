@@ -95,6 +95,7 @@ def run_caching_test():
 
 
 def run_ngrams():
+    # run_demo()
     run_caching_test()
 
 
