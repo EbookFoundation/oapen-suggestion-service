@@ -13,6 +13,17 @@ async function querySuggestions(id) {
   });
 }
 
+async function queryNgrams(id) {
+  await validate.checkHandle(id);
+
+  const query = new PQ({ text: "SELECT * FROM oapen_suggestions.ngrams WHERE handle = $1", values: [id] });
+
+  return db.one(query).catch((error) => {
+    return { error: { name: error.name, message: error.message } };
+  });
+}
+
 module.exports = {
   querySuggestions,
+  queryNgrams,
 };
