@@ -4,7 +4,7 @@ const validate = require("./validate");
 
 const data = require("./db/data.js");
 
-//GET endpoint
+//GET endpoint for suggestions
 router.get("/:handle", async (req, res) => {
   try {
     var handle = req.params.handle;
@@ -13,14 +13,32 @@ router.get("/:handle", async (req, res) => {
     let responseData = await data.querySuggestions(handle);
 
     if (responseData.error && responseData.error.name === pgp.errors.QueryResultError.name) {
-      res.status(404).json({ error: responseData.error.message });
-      return;
+      return res.status(404).json({ error: responseData.error.message });
     } else if (responseData.error) {
-      res.status(500).json(responseData);
-      return;
+      return res.status(500).json(responseData);
     }
 
-    res.status(200).json(responseData);
+    return res.status(200).json(responseData);
+  } catch (e) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//GET endpoint for ngrams
+router.get('/:handle/ngrams', async (req, res) => {
+  try {
+    var handle = req.params.handle;
+    await validate.checkHandle(handle);
+
+    let responseData = await data.queryNgrams(handle);
+
+    if (responseData.error && responseData.error.name === pgp.errors.QueryResultError.name) {
+      return res.status(404).json({ error: responseData.error.message });
+    } else if (responseData.error) {
+      return res.status(500).json(responseData);
+    }
+
+    return res.status(200).json(responseData);
   } catch (e) {
     res.status(500).json({ error: "Internal server error" });
   }
