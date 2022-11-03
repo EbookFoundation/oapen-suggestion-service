@@ -1,5 +1,4 @@
-from collections import namedtuple
-from typing import List
+from typing import Dict, List, Tuple
 
 import data.oapen as OapenAPI
 
@@ -18,8 +17,10 @@ class OapenItem:
         return OapenAPI.get_bitstream_text(self.bitstreams)
 
 
-OapenSuggestion = ("OapenSuggestion", ["handle", "rank"])
-OapenNgram = ("OapenNgram", ["handle", "ngrams"])
+OapenSuggestion = Tuple[str, float]
+OapenNgram = Tuple[str, List[Tuple[str, int]]]
+
+NgramDict = Dict[str, int]
 
 
 def transform_item_data(item) -> OapenItem:

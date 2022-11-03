@@ -20,6 +20,8 @@ def get_connection():
         db_version = cur.fetchone()
         print(db_version)
 
+        # TODO: Register adapters for suggestion and ngram types
+
         cur.close()
 
     except (Exception, psycopg2.DatabaseError) as error:
@@ -33,3 +35,6 @@ def close_connection(conn):
     if conn is not None:
         conn.close()
         print("Database connection closed.")
+
+
+connection = get_connection()
