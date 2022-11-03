@@ -20,11 +20,7 @@ def get_connection():
         db_version = cur.fetchone()
         print(db_version)
 
-        # psycopg2.extensions.register_type(
-        #     psycopg2.extensions.new_array_type(
-
-        #     )
-        # )
+        # TODO: Register adapters for suggestion and ngram types
 
         cur.close()
 

@@ -3,8 +3,16 @@ import data.oapen_db as OapenDB
 import model.ngrams as Model
 from data.connection import close_connection, connection
 
+demo_books = {
+    # should be similar
+    "Quality Management and Accounting in Service Industries": "20.500.12657/54327",
+    "Management Accountants’ Business Orientation and Involvement in Incentive Compensation": "20.500.12657/26999",
+    # should be similar but different from first group
+    "Immersion Into Noise": "20.500.12657/33907",
+    "Ambisonics": "20.500.12657/23095",
+}
 
-# to demo some functions
+
 def test_functions():
     data = OapenAPI.get_collection_items_by_label(
         "Austrian Science Fund (FWF)", limit=100
@@ -22,17 +30,7 @@ def test_functions():
     print(Model.get_n_most_occuring(sample_ngram_list, 2))
 
 
-# run demo with the above titles
 def run_demo():
-    demo_books = {
-        # should be similar
-        "Quality Management and Accounting in Service Industries": "20.500.12657/54327",
-        "Management Accountants’ Business Orientation and Involvement in Incentive Compensation": "20.500.12657/26999",
-        # should be similar but different from first group
-        "Immersion Into Noise": "20.500.12657/33907",
-        "Ambisonics": "20.500.12657/23095",
-    }
-
     items = []
     ngram_dict = {}
 
@@ -76,14 +74,6 @@ def run_demo():
 
 
 def run_caching_test():
-    demo_books = {
-        # should be similar
-        "Quality Management and Accounting in Service Industries": "20.500.12657/54327",
-        "Management Accountants’ Business Orientation and Involvement in Incentive Compensation": "20.500.12657/26999",
-        # should be similar but different from first group
-        "Immersion Into Noise": "20.500.12657/33907",
-        "Ambisonics": "20.500.12657/23095",
-    }
 
     items = []
 
