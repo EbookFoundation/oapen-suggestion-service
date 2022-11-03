@@ -5,9 +5,26 @@ from data.connection import connection
 from model.oapen_types import OapenNgram
 
 
+def mogrify_ngrams(ngrams) -> str:
+    cursor = connection.cursor()
+    args = ",".join(
+        cursor.mogrify("(%s,%s::oapen_suggestions.ngram[])", x).decode("utf-8")
+        for x in ngrams
+    )
+    return args
+
+
+def mogrify_suggestions(suggestions):
+    cursor = connection.cursor()
+    args = ",".join(
+        cursor.mogrify("(%s,%s,%s::oapen_suggestions.suggestion[])", x).decode("utf-8")
+        for x in suggestions
+    )
+    return args
+
+
 def table_exists(table):
     cursor = connection.cursor
-
     query = """
             SELECT EXISTS (
                 SELECT * FROM oapen_suggestions.tables WHERE table_name=%s
@@ -26,7 +43,6 @@ def table_exists(table):
 
 def add_single_suggestion(suggestion) -> None:
     cursor = connection.cursor()
-
     query = """
             INSERT INTO oapen_suggestions.suggestions (handle, name, suggestions)
             VALUES (%s, %s, %s::oapen_suggestions.suggestion[])
@@ -45,12 +61,7 @@ def add_single_suggestion(suggestion) -> None:
 
 def add_many_suggestions(suggestions) -> None:
     cursor = connection.cursor()
-
-    args = ",".join(
-        cursor.mogrify("(%s,%s,%s::oapen_suggestions.suggestion[])", x).decode("utf-8")
-        for x in suggestions
-    )
-
+    args = mogrify_suggestions(suggestions)
     query = f"""
             INSERT INTO oapen_suggestions.suggestions (handle, name, suggestions)
             VALUES {args}
@@ -69,7 +80,6 @@ def add_many_suggestions(suggestions) -> None:
 
 def add_single_ngrams(ngram) -> None:
     cursor = connection.cursor()
-
     query = """
             INSERT INTO oapen_suggestions.ngrams (handle, ngrams)
             VALUES (%s, %s::oapen_suggestions.ngram[])
@@ -88,12 +98,7 @@ def add_single_ngrams(ngram) -> None:
 
 def add_many_ngrams(ngrams) -> None:
     cursor = connection.cursor()
-
-    args = ",".join(
-        cursor.mogrify("(%s,%s::oapen_suggestions.ngram[])", x).decode("utf-8")
-        for x in ngrams
-    )
-
+    args = mogrify_ngrams(ngrams)
     query = f"""
             INSERT INTO oapen_suggestions.ngrams (handle, ngrams)
             VALUES {args}
@@ -112,7 +117,6 @@ def add_many_ngrams(ngrams) -> None:
 
 def get_all_ngrams() -> List[OapenNgram]:
     cursor = connection.cursor()
-
     query = """
             SELECT * FROM oapen_suggestions.ngrams
             """
