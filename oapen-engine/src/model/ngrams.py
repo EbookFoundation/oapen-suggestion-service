@@ -40,7 +40,7 @@ def make_df(data: List[OapenItem]):
     df = pd.DataFrame(columns=["handle", "name", "text"])
 
     for item in data:
-        text = process_text(item.get_text())
+        text = process_text(item.text)
         df.loc[len(df.index)] = [item.handle, item.name, text]
     return df
 
@@ -111,7 +111,7 @@ def cache_ngrams(handle: str, ngrams: NgramDict):
 def cache_ngrams_from_items(items: List[OapenItem], n=3):
     rows = []
     for item in items:
-        text = process_text(item.get_text())
+        text = process_text(item.text)
         ngrams = generate_ngram(text, n)
         rows.append((item.handle, list(sort_ngrams_by_count(ngrams))))
 

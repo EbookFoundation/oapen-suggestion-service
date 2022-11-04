@@ -48,7 +48,7 @@ def get_item(handle) -> OapenItem:
     res = get(endpoint=GET_ITEM.format(handle=handle))
 
     if res is not None and len(res) > 0:
-        return transform_item_data(res[0])
+        return transform_item_data(res[0], get_bitstream_text(res[0]["bitstreams"]))
     return res
 
 
@@ -76,7 +76,7 @@ def get_collection_items_by_label(label, limit=None) -> List[OapenItem]:
     return res
 
 
-def get_bitstream_text(bitstreams, limit=None):
+def get_bitstream_text(bitstreams, limit=None) -> str:
     for bitstream in bitstreams:
         if bitstream["mimeType"] == "text/plain":
             retrieveLink = bitstream["retrieveLink"]

@@ -127,10 +127,9 @@ def get_all_ngrams() -> List[OapenNgram]:
         cursor.execute(query)
         records = cursor.fetchall()
 
-        for i in range(1):
-            # print(records[i])
-            print(type(records[i][0]))
-            print(type(records[i][1]))
+        for i in range(len(records[0])):
+            print(type(records[0][i]))
+            print(records[0][i])
 
         return ngrams
 

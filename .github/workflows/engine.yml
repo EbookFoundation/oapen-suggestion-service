@@ -1,6 +1,6 @@
 name: OAPEN Engine
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
@@ -23,5 +23,6 @@ jobs:
           pipenv run isort --profile black src/
           pipenv run black --check src/ --exclude="lib/*"
           pipenv run flake8 src/ --ignore="lib/*, W, E203, E266, E501, W503, F403, F401"
+          pipenv run pytest
         
       

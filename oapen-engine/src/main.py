@@ -41,7 +41,7 @@ def run_demo():
 
         items.append(item)
 
-        text = Model.process_text(item.get_text())
+        text = Model.process_text(item.text)
         print(f"  {name}: text array\n{text[:30]}...\n")
 
         ngram_dict[handle] = Model.generate_ngram(text, 3)
