@@ -18,6 +18,8 @@ class OapenItem:
 OapenSuggestion = NewType("OapenSuggestion", Tuple[str, float])
 OapenNgram = NewType("OapenNgram", Tuple[str, List[Tuple[str, int]]])
 
+SuggestionRow = NewType("SuggestionRow", Tuple[str, str, List[OapenSuggestion]])
+
 NgramDict = Dict[str, int]
 
 

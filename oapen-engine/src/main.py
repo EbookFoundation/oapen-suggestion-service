@@ -30,7 +30,7 @@ def test_functions():
     print(Model.get_n_most_occuring(sample_ngram_list, 2))
 
 
-def run_demo():
+def run_demo(show_results=True):
     items = []
     ngram_dict = {}
 
@@ -51,30 +51,31 @@ def run_demo():
 
         print("---------------------------------")
 
-    for name, handle in demo_books.items():
-        print(f"Showing similarity scores for all books relative to {name}:\n")
-        for name2, handle2 in demo_books.items():
-            # if handle == handle2:  # dont check self
-            #     continue
+    if show_results:
+        for name, handle in demo_books.items():
+            print(f"Showing similarity scores for all books relative to {name}:\n")
+            for name2, handle2 in demo_books.items():
+                # if handle == handle2:  # dont check self
+                #     continue
 
-            simple_similarity_score = 100 * Model.get_similarity_score(
-                ngram_dict[handle], ngram_dict[handle2], n=10000
-            )
-            print(
-                f"  Similarity score by simple count for title {name2}: {simple_similarity_score}%"
-            )
+                simple_similarity_score = 100 * Model.get_similarity_score(
+                    ngram_dict[handle], ngram_dict[handle2], n=10000
+                )
+                print(
+                    f"  Similarity score by simple count for title {name2}: {simple_similarity_score}%"
+                )
 
-            dict_similarity_score = 100 * Model.get_similarity_score_by_dict_count(
-                ngram_dict[handle], ngram_dict[handle2]
-            )
-            print(
-                f"  Similarity score by dict count for title {name2}: {dict_similarity_score}%"
-            )
-            print()
+                dict_similarity_score = 100 * Model.get_similarity_score_by_dict_count(
+                    ngram_dict[handle], ngram_dict[handle2]
+                )
+                print(
+                    f"  Similarity score by dict count for title {name2}: {dict_similarity_score}%"
+                )
+                print()
 
 
-def run_caching_test():
-
+def cache_demo():
+    print("Caching ngrams...")
     items = []
 
     for name, handle in demo_books.items():
@@ -82,17 +83,32 @@ def run_caching_test():
         items.append(item)
 
     Model.cache_ngrams_from_items(items)
+    print("Done caching ngrams.")
+
+
+def query_db_demo():
+    suggestions = OapenDB.get_all_suggestions()
+    ngrams = OapenDB.get_all_ngrams()
+
+    print("Querying suggestions...")
+    for i in range(min(5, len(suggestions))):
+        print(suggestions[i])
+
+    print("Querying ngrams...")
+    for i in range(min(5, len(ngrams))):
+        print(ngrams[i][0], ngrams[i][1][0:4])
 
 
 def run_ngrams():
-    # run_demo()
-    run_caching_test()
+    run_demo()
+    cache_demo()
 
 
 def main():
-    run_ngrams()
+    run_demo(show_results=False)
+    cache_demo()
+    query_db_demo()
 
-    OapenDB.get_all_ngrams()
     close_connection(connection)
     return
 

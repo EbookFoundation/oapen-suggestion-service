@@ -1,8 +1,8 @@
-from typing import List
+from typing import List, Tuple
 
 import psycopg2
 from data.connection import connection
-from model.oapen_types import OapenNgram
+from model.oapen_types import OapenNgram, OapenSuggestion
 
 
 def mogrify_ngrams(ngrams) -> str:
@@ -116,22 +116,48 @@ def add_many_ngrams(ngrams) -> None:
 
 
 def get_all_ngrams() -> List[OapenNgram]:
+
     cursor = connection.cursor()
     query = """
-            SELECT * FROM oapen_suggestions.ngrams
+            SELECT handle, CAST (ngrams AS oapen_suggestions.ngram[]) FROM oapen_suggestions.ngrams
             """
 
     try:
 
         ngrams: List[OapenNgram] = []
+
         cursor.execute(query)
         records = cursor.fetchall()
 
-        for i in range(len(records[0])):
-            print(type(records[0][i]))
-            print(records[0][i])
+        for record in records:
+            ngrams.append((record[0], record[1]))
 
         return ngrams
+
+    except (Exception, psycopg2.Error) as error:
+        print(error)
+    finally:
+        cursor.close()
+
+
+def get_all_suggestions() -> List[Tuple[str, str, List[OapenSuggestion]]]:
+
+    cursor = connection.cursor()
+    query = """
+            SELECT handle, name, CAST (suggestions AS oapen_suggestions.suggestion[]) FROM oapen_suggestions.suggestions
+            """
+
+    try:
+
+        suggestions: List[OapenSuggestion] = []
+
+        cursor.execute(query)
+        records = cursor.fetchall()
+
+        for record in records:
+            suggestions.append((record[0], record[1], record[2]))
+
+        return suggestions
 
     except (Exception, psycopg2.Error) as error:
         print(error)

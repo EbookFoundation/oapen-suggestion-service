@@ -13,6 +13,10 @@ seed_db:
 
 clean_db:
 	cd src && pipenv run python tasks/clean.py
+
+clean_and_seed:
+	$(MAKE) clean_db 
+	$(MAKE) seed_db
 	
 run:
 	cd src && pipenv run python main.py
