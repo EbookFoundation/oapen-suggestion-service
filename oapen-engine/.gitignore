@@ -163,5 +163,7 @@ database.ini
 lib/python3.7/
 lib/python3.10/
 bin/
+bin
+bin/*
 .pytest_cache
 lib/
