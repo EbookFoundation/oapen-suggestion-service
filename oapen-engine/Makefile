@@ -1,10 +1,13 @@
+PYTHONEX := "python"
+PIPEX := "pip"
+
 setup-env:
 ifeq ($(OS),Windows_NT)
 	py -m pip install --upgrade pip
 else
-	python -m pip install --upgrade pip
+	$(PYTHONEX) -m pip install --upgrade pip
 endif
-	pip install pipenv
+	$(PIPEX) install pipenv
 	pipenv install
 	pipenv shell
 
