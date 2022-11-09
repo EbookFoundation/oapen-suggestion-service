@@ -16,6 +16,7 @@ GET_COLLECTION_ITEMS = "/rest/collections/{id}/items"
 GET_COMMUNITY_COLLECTIONS = "/rest/communities/{id}/collections"
 GET_ITEM = "/rest/search?query=handle:%22{handle}%22&expand=bitstreams"
 GET_COLLECTION_BY_LABEL = "/rest/search?query=oapen.collection:%22{label}%22"
+GET_WEEKLY_ITEMS = "/rest/search?query=dc.date.accessioned_dt:[NOW-7DAY/DAY+TO+NOW]"
 
 # This is the only community we care about right now
 BOOKS_COMMUNITY_ID = "3579505d-9d1b-4745-bcaf-a37329d25c69"
@@ -83,3 +84,12 @@ def get_bitstream_text(bitstreams, limit=None) -> str:
             text = str(get(retrieveLink).decode("utf-8"))
             return text if limit is None else text[:limit]
     return ""
+
+
+# Gets all items added in the last week
+def get_weekly_items(limit=None) -> List[OapenItem]:
+    res = get(endpoint=GET_WEEKLY_ITEMS, params={"limit": limit})
+
+    if res is not None and len(res) > 0:
+        return transform_multiple_items_data(res)
+    return res
