@@ -4,8 +4,6 @@
   "description": "An API which allows you to search for books with similar content from the oapen.org library.",
   "main": "app.js",
   "scripts": {
-    "clean": "node ./db/clean.js",
-    "seed": "node ./db/seed.js",
     "dev": "nodemon ./app.js",
     "start": "node app.js"
   },
