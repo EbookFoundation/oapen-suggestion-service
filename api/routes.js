@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const validate = require("./validate");
+const pgp = require("pg-promise");
 
+const validate = require("./validate");
 const data = require("./db/data.js");
 
 //GET endpoint for suggestions
-router.get("/:handle", async (req, res) => {
+router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)", async (req, res) => {
   try {
     var handle = req.params.handle;
     await validate.checkHandle(handle);
@@ -25,7 +26,7 @@ router.get("/:handle", async (req, res) => {
 });
 
 //GET endpoint for ngrams
-router.get('/:handle/ngrams', async (req, res) => {
+router.get('/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)/ngrams', async (req, res) => {
   try {
     var handle = req.params.handle;
     await validate.checkHandle(handle);
@@ -40,7 +41,7 @@ router.get('/:handle/ngrams', async (req, res) => {
 
     return res.status(200).json(responseData);
   } catch (e) {
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 

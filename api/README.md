@@ -31,16 +31,10 @@ npm start
 
 ## Endpoints
 
-> **Warning**
->
-> _All_ handles _must_ be url-safe for all endpoints
->
-> So `20.400.12657/47581` would be escaped to `20.400.12657%2F47581`
-
 - `Endpoint: /GET http://localhost:3001/api/{handle}`
 
-  - e.g. http://localhost:3001/api/20.400.12657%2F47581
+  - e.g. http://localhost:3001/api/20.400.12657/47581
 
 - `Endpoint: /GET http://localhost:3001/api/{handle}/ngrams`
 
-  - e.g. http://localhost:3001/api/20.400.12657%2F47581/ngrams
+  - e.g. http://localhost:3001/api/20.400.12657/47581/ngrams
