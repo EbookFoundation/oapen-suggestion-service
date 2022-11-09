@@ -23,3 +23,6 @@ run:
 
 run-tests:
 	cd src && pipenv run pytest
+
+refresh-items:
+	cd src && pipenv run python tasks/refresh_items.py

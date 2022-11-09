@@ -1,4 +1,5 @@
-from typing import Dict, List, NewType, Tuple
+from datetime import datetime
+from typing import Dict, List, Tuple, Union
 
 
 class OapenItem:
@@ -15,10 +16,15 @@ class OapenItem:
         self.text = text
 
 
-OapenSuggestion = NewType("OapenSuggestion", Tuple[str, float])
-OapenNgram = NewType("OapenNgram", Tuple[str, List[Tuple[str, int]]])
+Suggestion = Tuple[str, float]
+SuggestionRowWithoutDate = Tuple[str, str, List[Suggestion]]
+SuggestionRowWithDate = Tuple[str, str, List[Suggestion], datetime, datetime]
+SuggestionRow = Union[SuggestionRowWithDate, SuggestionRowWithoutDate]
 
-SuggestionRow = NewType("SuggestionRow", Tuple[str, str, List[OapenSuggestion]])
+Ngram = Tuple[str, int]
+NgramRowWithoutDate = Tuple[str, List[Ngram]]
+NgramRowWithDate = Tuple[str, List[Ngram], datetime, datetime]
+NgramRow = Union[NgramRowWithDate, NgramRowWithoutDate]
 
 NgramDict = Dict[str, int]
 
@@ -34,7 +40,3 @@ def transform_item_data(item, text) -> OapenItem:
         item["bitstreams"],
         text,
     )
-
-
-def transform_multiple_items_data(items) -> List[OapenItem]:
-    return [transform_item_data(item, item["bitstreams"]) for item in items]

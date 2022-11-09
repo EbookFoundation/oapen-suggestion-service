@@ -2,11 +2,7 @@ import logging
 from typing import List
 
 import requests
-from model.oapen_types import (
-    OapenItem,
-    transform_item_data,
-    transform_multiple_items_data,
-)
+from model.oapen_types import OapenItem, transform_item_data
 
 SERVER_PATH = "https://library.oapen.org"
 GET_COMMUNITY = "/rest/communities/{id}"
@@ -16,10 +12,19 @@ GET_COLLECTION_ITEMS = "/rest/collections/{id}/items"
 GET_COMMUNITY_COLLECTIONS = "/rest/communities/{id}/collections"
 GET_ITEM = "/rest/search?query=handle:%22{handle}%22&expand=bitstreams"
 GET_COLLECTION_BY_LABEL = "/rest/search?query=oapen.collection:%22{label}%22"
-GET_WEEKLY_ITEMS = "/rest/search?query=dc.date.accessioned_dt:[NOW-7DAY/DAY+TO+NOW]"
+GET_WEEKLY_ITEMS = (
+    "/rest/search?query=dc.date.accessioned_dt:[NOW-7DAY/DAY+TO+NOW]&expand=bitstreams"
+)
 
 # This is the only community we care about right now
 BOOKS_COMMUNITY_ID = "3579505d-9d1b-4745-bcaf-a37329d25c69"
+
+
+def transform_multiple_items_data(items) -> List[OapenItem]:
+    return [
+        transform_item_data(item, get_bitstream_text(item["bitstreams"]))
+        for item in items
+    ]
 
 
 def get(endpoint, params=None):

@@ -3,7 +3,7 @@ from typing import List
 import data.oapen as OapenAPI
 from data.connection import close_connection, connection
 from data.oapen_db import add_many_suggestions
-from model.oapen_types import OapenItem
+from model.oapen_types import OapenItem, SuggestionRow
 
 
 def mock_suggestion_rows(n=10):
@@ -11,11 +11,9 @@ def mock_suggestion_rows(n=10):
         "Knowledge Unlatched (KU)"
     )
 
-    rows = []
+    rows: List[SuggestionRow] = []
     for i in range(min(n, len(items))):
-        rows.append(
-            (items[i].handle, items[i].name, [(items[i].handle, j) for j in range(3)])
-        )
+        rows.append((items[i].handle, items[i].name, []))
 
     return rows
 

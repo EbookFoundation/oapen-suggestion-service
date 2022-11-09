@@ -9,9 +9,9 @@ from nltk import word_tokenize  # pylint: disable=import-error
 from nltk.corpus import stopwords  # pylint: disable=import-error
 
 from .oapen_types import (  # pylint: disable=relative-beyond-top-level
+    Ngram,
     NgramDict,
     OapenItem,
-    OapenNgram,
 )
 
 nltk.download("stopwords")
@@ -104,7 +104,7 @@ def get_similarity_score_by_dict_count(ngrams1: NgramDict, ngrams2: NgramDict) -
     return repeated / total
 
 
-def get_ngrams_for_items(items: List[OapenItem], n=3) -> List[OapenNgram]:
+def get_ngrams_for_items(items: List[OapenItem], n=3) -> List[Ngram]:
     rows = []
     for item in items:
         text = process_text(item.text)

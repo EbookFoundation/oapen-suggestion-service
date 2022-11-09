@@ -1,11 +1,11 @@
-from typing import List, Tuple
+from typing import List
 
 import psycopg2
 from data.connection import connection
-from model.oapen_types import OapenNgram, OapenSuggestion
+from model.oapen_types import NgramRow, SuggestionRow
 
 
-def mogrify_ngrams(ngrams) -> str:
+def mogrify_ngrams(ngrams: List[NgramRow]) -> str:
     cursor = connection.cursor()
     args = ",".join(
         cursor.mogrify("(%s,%s::oapen_suggestions.ngram[])", x).decode("utf-8")
@@ -14,7 +14,7 @@ def mogrify_ngrams(ngrams) -> str:
     return args
 
 
-def mogrify_suggestions(suggestions):
+def mogrify_suggestions(suggestions: List[SuggestionRow]) -> str:
     cursor = connection.cursor()
     args = ",".join(
         cursor.mogrify("(%s,%s,%s::oapen_suggestions.suggestion[])", x).decode("utf-8")
@@ -41,7 +41,7 @@ def table_exists(table):
         cursor.close()
 
 
-def add_single_suggestion(suggestion) -> None:
+def add_single_suggestion(suggestion: SuggestionRow) -> None:
     cursor = connection.cursor()
     query = """
             INSERT INTO oapen_suggestions.suggestions (handle, name, suggestions)
@@ -59,7 +59,7 @@ def add_single_suggestion(suggestion) -> None:
         cursor.close()
 
 
-def add_many_suggestions(suggestions) -> None:
+def add_many_suggestions(suggestions: List[SuggestionRow]) -> None:
     cursor = connection.cursor()
     args = mogrify_suggestions(suggestions)
     query = f"""
@@ -78,7 +78,7 @@ def add_many_suggestions(suggestions) -> None:
         cursor.close()
 
 
-def add_single_ngrams(ngram) -> None:
+def add_single_ngrams(ngram: NgramRow) -> None:
     cursor = connection.cursor()
     query = """
             INSERT INTO oapen_suggestions.ngrams (handle, ngrams)
@@ -96,7 +96,7 @@ def add_single_ngrams(ngram) -> None:
         cursor.close()
 
 
-def add_many_ngrams(ngrams) -> None:
+def add_many_ngrams(ngrams: List[NgramRow]) -> None:
     cursor = connection.cursor()
     args = mogrify_ngrams(ngrams)
     query = f"""
@@ -115,24 +115,20 @@ def add_many_ngrams(ngrams) -> None:
         cursor.close()
 
 
-def get_all_ngrams() -> List[OapenNgram]:
+def get_all_ngrams() -> List[NgramRow]:
 
     cursor = connection.cursor()
     query = """
-            SELECT handle, CAST (ngrams AS oapen_suggestions.ngram[]) FROM oapen_suggestions.ngrams
+            SELECT handle, CAST (ngrams AS oapen_suggestions.ngram[]), created_at, updated_at 
+            FROM oapen_suggestions.ngrams
             """
 
     try:
 
-        ngrams: List[OapenNgram] = []
-
         cursor.execute(query)
         records = cursor.fetchall()
 
-        for record in records:
-            ngrams.append((record[0], record[1]))
-
-        return ngrams
+        return records
 
     except (Exception, psycopg2.Error) as error:
         print(error)
@@ -140,24 +136,20 @@ def get_all_ngrams() -> List[OapenNgram]:
         cursor.close()
 
 
-def get_all_suggestions() -> List[Tuple[str, str, List[OapenSuggestion]]]:
+def get_all_suggestions() -> List[SuggestionRow]:
 
     cursor = connection.cursor()
     query = """
-            SELECT handle, name, CAST (suggestions AS oapen_suggestions.suggestion[]) FROM oapen_suggestions.suggestions
+            SELECT handle, name, CAST (suggestions AS oapen_suggestions.suggestion[]), created_at, updated_at 
+            FROM oapen_suggestions.suggestions
             """
 
     try:
 
-        suggestions: List[OapenSuggestion] = []
-
         cursor.execute(query)
         records = cursor.fetchall()
 
-        for record in records:
-            suggestions.append((record[0], record[1], record[2]))
-
-        return suggestions
+        return records
 
     except (Exception, psycopg2.Error) as error:
         print(error)
