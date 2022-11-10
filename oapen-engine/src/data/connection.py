@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import psycopg2
 from data.config import config
+from psycopg2.extras import register_composite
 
 
 def get_connection():
@@ -20,15 +21,12 @@ def get_connection():
         db_version = cur.fetchone()
         print(db_version)
 
-        # TODO: Register adapters for suggestion and ngram types
-
         cur.close()
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         return conn
-    return conn
 
 
 def close_connection(conn):
@@ -38,3 +36,7 @@ def close_connection(conn):
 
 
 connection = get_connection()
+
+
+register_composite("oapen_suggestions.suggestion", connection, globally=True)
+register_composite("oapen_suggestions.ngram", connection, globally=True)
