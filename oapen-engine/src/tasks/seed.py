@@ -12,8 +12,10 @@ def mock_suggestion_rows(n=10):
     )
 
     rows = []
-    for i in range(min(30, len(items))):
-        rows.append((items[i].handle, items[i].name, [(items[i].handle, i)]))
+    for i in range(min(n, len(items))):
+        rows.append(
+            (items[i].handle, items[i].name, [(items[i].handle, j) for j in range(3)])
+        )
 
     return rows
 

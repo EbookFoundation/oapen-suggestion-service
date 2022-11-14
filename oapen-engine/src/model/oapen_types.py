@@ -1,10 +1,10 @@
-from typing import Dict, List, Tuple
-
-import data.oapen as OapenAPI
+from typing import Dict, List, NewType, Tuple
 
 
 class OapenItem:
-    def __init__(self, uuid, name, handle, expand, link, metadata, bitstreams):
+    def __init__(
+        self, uuid, name, handle, expand, link, metadata, bitstreams, text: str
+    ):
         self.uuid = uuid
         self.name = name
         self.handle = handle
@@ -12,28 +12,29 @@ class OapenItem:
         self.link = link
         self.metadata = metadata
         self.bitstreams = bitstreams
-
-    def get_text(self):
-        return OapenAPI.get_bitstream_text(self.bitstreams)
+        self.text = text
 
 
-OapenSuggestion = Tuple[str, float]
-OapenNgram = Tuple[str, List[Tuple[str, int]]]
+OapenSuggestion = NewType("OapenSuggestion", Tuple[str, float])
+OapenNgram = NewType("OapenNgram", Tuple[str, List[Tuple[str, int]]])
+
+SuggestionRow = NewType("SuggestionRow", Tuple[str, str, List[OapenSuggestion]])
 
 NgramDict = Dict[str, int]
 
 
-def transform_item_data(item) -> OapenItem:
-    uuid = item["uuid"]
-    name = item["name"]
-    handle = item["handle"]
-    expand = item["expand"]
-    link = item["link"]
-    metadata = item["metadata"]
-    bitstreams = item["bitstreams"]
+def transform_item_data(item, text) -> OapenItem:
+    return OapenItem(
+        item["uuid"],
+        item["name"],
+        item["handle"],
+        item["expand"],
+        item["link"],
+        item["metadata"],
+        item["bitstreams"],
+        text,
+    )
 
-    return OapenItem(uuid, name, handle, expand, link, metadata, bitstreams)
 
-
-def transform_multiple_items_data(data: List[object]) -> List[OapenItem]:
-    return [transform_item_data(x) for x in data]
+def transform_multiple_items_data(items) -> List[OapenItem]:
+    return [transform_item_data(item, item["bitstreams"]) for item in items]
