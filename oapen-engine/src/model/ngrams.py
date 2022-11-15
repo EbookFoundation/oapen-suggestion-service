@@ -78,14 +78,16 @@ def get_n_most_occuring(dic: NgramDict, n=100):
 
 # Currently, this uses the n most occuring ngrams to compare
 # This could also count the instances in the highest
-def get_similarity_score(ngram1: NgramDict, ngram2: NgramDict, n=100) -> float:
+def get_similarity_score(
+    ngram1: NgramDict, ngram2: NgramDict, n=100, as_percent=True
+) -> float:
     n_most_occ_1 = get_n_most_occuring(ngram1, n)
     n_most_occ_2 = get_n_most_occuring(ngram2, n)
     repeated = 0
     for n_gram in n_most_occ_1:
         if n_gram in n_most_occ_2:
             repeated += 1
-    return repeated / n
+    return repeated / n if as_percent else repeated
 
 
 # this treats ngrams1 as primary ngrams, since we want a

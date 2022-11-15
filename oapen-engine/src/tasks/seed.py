@@ -1,24 +1,35 @@
+import time
 from typing import List
 
 import data.oapen as OapenAPI
-from data.connection import close_connection, connection
-from data.oapen_db import add_many_suggestions
-from model.oapen_types import OapenItem, SuggestionRow
+import model.ngrams as OapenEngine
+from model.oapen_types import OapenItem
+
+COLLECTION_NAME = "Knowledge Unlatched (KU)"
+LIMIT = 100
+print("Getting items for OapenDB...")
+time_start = time.perf_counter()
+items: List[OapenItem] = OapenAPI.get_collection_items_by_label(
+    "Knowledge Unlatched (KU)", limit=LIMIT
+)
 
 
-def mock_suggestion_rows(n=10):
-    items: List[OapenItem] = OapenAPI.get_collection_items_by_label(
-        "Knowledge Unlatched (KU)"
-    )
+print(
+    "Found "
+    + str(len(items))
+    + " items in "
+    + str(time.perf_counter() - time_start)
+    + "s."
+)
 
-    rows: List[SuggestionRow] = []
-    for i in range(min(n, len(items))):
-        rows.append((items[i].handle, items[i].name, []))
+time_start = time.perf_counter()
+print("Storing ngrams in DB...")
+OapenEngine.cache_ngrams_from_items(items)
 
-    return rows
-
-
-rows = mock_suggestion_rows(30)
-add_many_suggestions(rows)
-
-close_connection(connection)
+print(
+    "Updated "
+    + str(len(items))
+    + " items in "
+    + str(time.perf_counter() - time_start)
+    + "s."
+)

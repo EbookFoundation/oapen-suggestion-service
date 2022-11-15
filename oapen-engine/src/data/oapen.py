@@ -11,7 +11,9 @@ GET_ITEM_BITSTREAMS = "/rest/items/{id}/bitstreams"
 GET_COLLECTION_ITEMS = "/rest/collections/{id}/items"
 GET_COMMUNITY_COLLECTIONS = "/rest/communities/{id}/collections"
 GET_ITEM = "/rest/search?query=handle:%22{handle}%22&expand=bitstreams"
-GET_COLLECTION_BY_LABEL = "/rest/search?query=oapen.collection:%22{label}%22"
+GET_COLLECTION_BY_LABEL = (
+    "/rest/search?query=oapen.collection:%22{label}%22&expand=bitstreams"
+)
 GET_WEEKLY_ITEMS = (
     "/rest/search?query=dc.date.accessioned_dt:[NOW-7DAY/DAY+TO+NOW]&expand=bitstreams"
 )
@@ -83,11 +85,12 @@ def get_collection_items_by_label(label, limit=None) -> List[OapenItem]:
 
 
 def get_bitstream_text(bitstreams, limit=None) -> str:
-    for bitstream in bitstreams:
-        if bitstream["mimeType"] == "text/plain":
-            retrieveLink = bitstream["retrieveLink"]
-            text = str(get(retrieveLink).decode("utf-8"))
-            return text if limit is None else text[:limit]
+    if bitstreams is not None:
+        for bitstream in bitstreams:
+            if bitstream["mimeType"] == "text/plain":
+                retrieveLink = bitstream["retrieveLink"]
+                text = str(get(retrieveLink).decode("utf-8"))
+                return text if limit is None else text[:limit]
     return ""
 
 
