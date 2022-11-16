@@ -1,8 +1,8 @@
+import os
 import string
 from typing import List
 
 import data.oapen_db as OapenDB
-import model.stopwords as oapen_stopwords  # pylint: disable=import-error
 import nltk  # pylint: disable=import-error
 import pandas as pd  # pylint: disable=import-error
 from nltk import word_tokenize  # pylint: disable=import-error
@@ -14,15 +14,28 @@ from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     OapenNgram,
 )
 
+stopword_paths = ["model/stopwords_broken.txt",
+                  "model/stopwords_dutch.txt",
+                  "model/stopwords_filter.txt",
+                  "model/stopwords_publisher.txt"]
+
+for p in stopword_paths:
+    with open(p, "r") as f:
+        oapen_stopwords = [line.rstrip() for line in f]
+
+with open("model/stopwords.txt", "r") as f:
+    oapen_stopwords = [line.rstrip() for line in f]
+
+with open("model/stopwords.txt", "r") as f:
+    oapen_stopwords = [line.rstrip() for line in f]
+
 nltk.download("stopwords")
 
 STOPWORDS = (
     stopwords.words("english")
     + stopwords.words("german")
     + stopwords.words("dutch")
-    + oapen_stopwords.stopwords_dutch_extra
-    + oapen_stopwords.stopwords_filter
-    + oapen_stopwords.stopwords_publisher
+    + oapen_stopwords
 )
 
 
@@ -58,7 +71,7 @@ def generate_ngram(text, n=3) -> NgramDict:
     ngrams = {}
     # store appearance count of each trigram
     for index in range(0, len(text) + 1 - n):
-        ngram = " ".join(text[index : index + n])
+        ngram = " ".join(text[index: index + n])
         ngrams.setdefault(ngram, 0)  # sets curr ngram to 0 if non-existant
         ngrams[ngram] += 1
     return dict(sort_ngrams_by_count(ngrams))  # return sorted by count
