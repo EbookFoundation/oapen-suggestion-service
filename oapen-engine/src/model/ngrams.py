@@ -21,13 +21,7 @@ stopword_paths = ["model/stopwords_broken.txt",
 
 for p in stopword_paths:
     with open(p, "r") as f:
-        oapen_stopwords = [line.rstrip() for line in f]
-
-with open("model/stopwords.txt", "r") as f:
-    oapen_stopwords = [line.rstrip() for line in f]
-
-with open("model/stopwords.txt", "r") as f:
-    oapen_stopwords = [line.rstrip() for line in f]
+        oapen_stopwords += [line.rstrip() for line in f]
 
 nltk.download("stopwords")
 
