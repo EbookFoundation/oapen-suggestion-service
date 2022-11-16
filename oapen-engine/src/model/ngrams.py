@@ -14,10 +14,12 @@ from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     OapenNgram,
 )
 
-stopword_paths = ["model/stopwords_broken.txt",
-                  "model/stopwords_dutch.txt",
-                  "model/stopwords_filter.txt",
-                  "model/stopwords_publisher.txt"]
+stopword_paths = [
+    "model/stopwords_broken.txt",
+    "model/stopwords_dutch.txt",
+    "model/stopwords_filter.txt",
+    "model/stopwords_publisher.txt"
+]
 
 for p in stopword_paths:
     with open(p, "r") as f:
