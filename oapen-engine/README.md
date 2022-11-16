@@ -28,3 +28,9 @@ While the virtual environment is running, type:
 ```
 deactivate
 ```
+## How to remove/filter out bad ngrams
+Members of EbookFoundation can create a pull request to edit the stopwords used to filter out bad trigrams:
+```
+oapen-engine/src/model/stopwords_*.txt
+```
+This also can be done to remove a malformed trigram already in the database (during the next run)

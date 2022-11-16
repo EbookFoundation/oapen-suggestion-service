@@ -1,8 +1,8 @@
+import os
 import string
 from typing import List
 
 import data.oapen_db as OapenDB
-import model.stopwords as oapen_stopwords  # pylint: disable=import-error
 import nltk  # pylint: disable=import-error
 import pandas as pd  # pylint: disable=import-error
 from nltk import word_tokenize  # pylint: disable=import-error
@@ -14,15 +14,24 @@ from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     OapenNgram,
 )
 
+stopword_paths = [
+    "model/stopwords_broken.txt",
+    "model/stopwords_dutch.txt",
+    "model/stopwords_filter.txt",
+    "model/stopwords_publisher.txt",
+]
+
+for p in stopword_paths:
+    with open(p, "r") as f:
+        oapen_stopwords += [line.rstrip() for line in f]
+
 nltk.download("stopwords")
 
 STOPWORDS = (
     stopwords.words("english")
     + stopwords.words("german")
     + stopwords.words("dutch")
-    + oapen_stopwords.stopwords_dutch_extra
-    + oapen_stopwords.stopwords_filter
-    + oapen_stopwords.stopwords_publisher
+    + oapen_stopwords
 )
 
 
