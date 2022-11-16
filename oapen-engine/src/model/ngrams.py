@@ -67,7 +67,7 @@ def generate_ngram(text, n=3) -> NgramDict:
     ngrams = {}
     # store appearance count of each trigram
     for index in range(0, len(text) + 1 - n):
-        ngram = " ".join(text[index: index + n])
+        ngram = " ".join(text[index : index + n])
         ngrams.setdefault(ngram, 0)  # sets curr ngram to 0 if non-existant
         ngrams[ngram] += 1
     return dict(sort_ngrams_by_count(ngrams))  # return sorted by count
