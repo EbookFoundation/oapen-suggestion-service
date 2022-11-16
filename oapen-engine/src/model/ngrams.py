@@ -18,7 +18,7 @@ stopword_paths = [
     "model/stopwords_broken.txt",
     "model/stopwords_dutch.txt",
     "model/stopwords_filter.txt",
-    "model/stopwords_publisher.txt"
+    "model/stopwords_publisher.txt",
 ]
 
 for p in stopword_paths:
