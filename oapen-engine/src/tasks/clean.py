@@ -1,4 +1,4 @@
-from data.connection import get_connection
+from data.connection import connection
 
 
 def create_schema(connection) -> None:
@@ -54,8 +54,6 @@ def drop_schema(connection) -> None:
 
     cursor.close()
 
-
-connection = get_connection()
 
 drop_schema(connection)
 create_schema(connection)

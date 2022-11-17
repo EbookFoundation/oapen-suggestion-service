@@ -1,6 +1,7 @@
 import time
 from typing import List
 
+import config
 import data.oapen as OapenAPI
 import model.ngrams as OapenEngine
 from model.oapen_types import OapenItem
@@ -9,7 +10,7 @@ from model.oapen_types import OapenItem
 
 print("Getting items for OapenDB...")
 time_start = time.perf_counter()
-items: List[OapenItem] = OapenAPI.get_weekly_items()
+items: List[OapenItem] = OapenAPI.get_weekly_items(limit=config.ITEM_IMPORT_LIMIT)
 
 print(
     "Found "

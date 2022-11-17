@@ -8,7 +8,7 @@ SERVER_PATH = "https://library.oapen.org"
 GET_COMMUNITY = "/rest/communities/{id}"
 GET_COLLECTION = "/rest/collections/{id}"
 GET_ITEM_BITSTREAMS = "/rest/items/{id}/bitstreams"
-GET_COLLECTION_ITEMS = "/rest/collections/{id}/items"
+GET_COLLECTION_ITEMS = "/rest/collections/{id}/items?expand=bitstreams"
 GET_COMMUNITY_COLLECTIONS = "/rest/communities/{id}/collections"
 GET_ITEM = "/rest/search?query=handle:%22{handle}%22&expand=bitstreams"
 GET_COLLECTION_BY_LABEL = (
