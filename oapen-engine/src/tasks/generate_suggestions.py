@@ -1,3 +1,4 @@
+import math
 import time
 from threading import Lock, Thread, get_ident
 from typing import List
@@ -22,14 +23,15 @@ all_items: List[NgramRow] = OapenDB.get_all_ngrams()
 mutex = Lock()
 db_mutex = Lock()
 
-time_start = time.perf_counter()
 
 suggestions: List[SuggestionRow] = []
 
 
 def suggestion_task(items):
 
-    print("Starting thread " + str(get_ident) + " with " + str(len(items)) + " items.")
+    print(
+        "Starting thread " + str(get_ident()) + " with " + str(len(items)) + " items."
+    )
     for item_a in items:
         handle_a = item_a[0]
         ngrams_a = [
@@ -63,10 +65,11 @@ def suggestion_task(items):
 # for item in all_items:
 #     item = (item[0], [x[0] for x in item[1]][0 : min(len(item[1]), config.TOP_K_NGRAMS_COUNT)])
 
-chunks = [
-    all_items[i : i + config.SUGGESTION_BATCH_SIZE]
-    for i in range(0, len(all_items), config.SUGGESTION_BATCH_SIZE)
-]
+time_start = time.perf_counter()
+
+n = math.ceil(len(all_items) / config.SUGGESTION_THREAD_COUNT)
+
+chunks = [all_items[i : i + n] for i in range(0, len(all_items), n)]
 
 threads = []
 
