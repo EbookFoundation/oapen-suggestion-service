@@ -19,26 +19,31 @@ from model.oapen_types import NgramRow, SuggestionRow
 
 all_items: List[NgramRow] = OapenDB.get_all_ngrams()
 
-
 mutex = Lock()
 db_mutex = Lock()
 
 time_start = time.perf_counter()
 
+suggestions: List[SuggestionRow] = []
+
 
 def suggestion_task(items):
 
-    suggestions: List[SuggestionRow] = []
     print("Starting thread " + str(get_ident) + " with " + str(len(items)) + " items.")
     for item_a in items:
         handle_a = item_a[0]
-        ngrams_a = item_a[1]
+        ngrams_a = [
+            x[0] for x in item_a[1][0 : min(len(item_a[1]), config.TOP_K_NGRAMS_COUNT)]
+        ]
 
         item_suggestions = []
 
         for item_b in all_items:
             handle_b = item_b[0]
-            ngrams_b = item_b[1]
+            ngrams_b = [
+                x[0]
+                for x in item_b[1][0 : min(len(item_b[1]), config.TOP_K_NGRAMS_COUNT)]
+            ]
             if handle_a == handle_b:
                 continue
 
@@ -47,13 +52,11 @@ def suggestion_task(items):
             if repeated >= config.SCORE_THRESHOLD:
                 item_suggestions.append((handle_b, repeated))
 
+        mutex.acquire()
         item_suggestions.sort(key=lambda x: x[1], reverse=True)
+        mutex.release()
 
         suggestions.append((handle_a, handle_a, item_suggestions))
-
-    db_mutex.acquire()
-    OapenDB.add_many_suggestions(suggestions)
-    db_mutex.release()
 
 
 # Get only top k ngrams for all items before processing
@@ -64,6 +67,7 @@ chunks = [
     all_items[i : i + config.SUGGESTION_BATCH_SIZE]
     for i in range(0, len(all_items), config.SUGGESTION_BATCH_SIZE)
 ]
+
 threads = []
 
 for chunk in chunks:
@@ -76,6 +80,7 @@ for thread in threads:
 for thread in threads:
     thread.join()
 
+OapenDB.add_many_suggestions(suggestions)
 
 print(
     "Updated suggestions for "
