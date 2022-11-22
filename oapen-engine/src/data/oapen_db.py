@@ -115,9 +115,10 @@ def add_many_ngrams(ngrams: List[NgramRow]) -> None:
         cursor.close()
 
 
-def get_all_ngrams() -> List[NgramRow]:
+def get_all_ngrams(ngram_limit=None) -> List[NgramRow]:
 
     cursor = connection.cursor()
+
     query = """
             SELECT handle, CAST (ngrams AS oapen_suggestions.ngram[]), created_at, updated_at 
             FROM oapen_suggestions.ngrams

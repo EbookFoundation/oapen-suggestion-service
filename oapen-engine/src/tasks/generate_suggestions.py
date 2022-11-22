@@ -62,8 +62,11 @@ def suggestion_task(items):
 
 
 # Get only top k ngrams for all items before processing
-# for item in all_items:
-#     item = (item[0], [x[0] for x in item[1]][0 : min(len(item[1]), config.TOP_K_NGRAMS_COUNT)])
+for item in all_items:
+    item = (
+        item[0],
+        [x[0] for x in item[1]][0 : min(len(item[1]), config.TOP_K_NGRAMS_COUNT)],
+    )
 
 time_start = time.perf_counter()
 

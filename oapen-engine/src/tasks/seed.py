@@ -1,95 +1,112 @@
-import math
+import concurrent.futures
+import queue
 import time
-from threading import Lock, Thread, get_ident
-from typing import List
+from threading import Event, Lock, get_ident
 
 import config
 import data.oapen as OapenAPI
 import data.oapen_db as OapenDB
 import model.ngrams as OapenEngine
-from model.oapen_types import OapenItem
 
-all_items: List[OapenItem] = []
+# threadsafe queue
+items: queue.Queue = queue.Queue()
 
 mutex = Lock()
-items_mutex = Lock()
 
 
-def ngrams_task(items):
-    print(
-        "Starting thread " + str(get_ident()) + " with " + str(len(items)) + " items."
-    )
-    ngrams = OapenEngine.get_ngrams_for_items(items)
-    mutex.acquire()
-    try:
-        OapenDB.add_many_ngrams(ngrams)
-    finally:
-        mutex.release()
+def ngrams_task(items, event):
+    global items_consumed
+
+    print(str(get_ident()) + ": Starting consumer thread")
+
+    while True:
+        if not items.empty():
+            ngrams_items = []
+
+            ngrams_items.append(items.get())
+
+            print(
+                str(get_ident())
+                + ": Generating ngram for "
+                + str(len(ngrams_items))
+                + " item."
+            )
+
+            ngrams = OapenEngine.get_ngrams_for_items(ngrams_items)
+
+            mutex.acquire()
+            try:
+                OapenDB.add_many_ngrams(ngrams)
+                print(
+                    str(get_ident())
+                    + ": Generated ngrams for "
+                    + str(len(ngrams_items))
+                    + " items."
+                )
+                print("Items remaining: " + str(items.qsize()))
+
+            finally:
+                mutex.release()
+        elif event.is_set():
+            print(str(get_ident()) + ": Killing consumer thread")
+            break
 
 
-def data_task(collection, items):
-    print("Starting thread " + str(get_ident()) + " for " + collection["name"])
+def data_task(collection, limit, offset, items):
+    global ip_mutex
+    print(str(get_ident()) + ": Starting thread for " + collection["name"])
 
     collection_items = OapenAPI.get_collection_items_by_id(
-        collection["uuid"], limit=int(config.ITEM_IMPORT_LIMIT)
+        collection["uuid"], limit=limit, offset=offset
     )
 
-    items_mutex.acquire()
-    items += collection_items
-    items_mutex.release()
+    for i in collection_items:
+        items.put(i)
+
     print(
-        "Found " + str(len(collection_items)) + " from collection " + collection["name"]
+        str(get_ident())
+        + ": Found "
+        + str(len(collection_items))
+        + " from collection "
+        + collection["name"]
     )
+
+    print("Items remaining: " + str(items.qsize()))
 
 
 print("Getting items for OapenDB...")
 time_start = time.perf_counter()
 collections = OapenAPI.get_collections_from_community(OapenAPI.BOOKS_COMMUNITY_ID)
 
-threads = []
+expected_items = len(collections) * config.COLLECTION_IMPORT_LIMIT
 
-for collection in collections:
-    thread = Thread(target=data_task, args=(collection, all_items))
-    threads.append(thread)
+event = Event()
 
-for thread in threads:
-    thread.start()
+producers_done = 0
+producer_futures = []
+consumer_futures = []
+with concurrent.futures.ThreadPoolExecutor(max_workers=200) as executor:
+    for collection in collections:
+        for offset in range(
+            0, config.COLLECTION_IMPORT_LIMIT, config.ITEMS_PER_IMPORT_THREAD
+        ):
+            future = executor.submit(
+                data_task, collection, config.ITEMS_PER_IMPORT_THREAD, offset, items
+            )
+            producer_futures.append(future)
 
-for thread in threads:
-    thread.join()
+    for _ in range(0, config.DATA_IMPORT_CONSUMERS):
+        future = executor.submit(ngrams_task, items, event)
+        consumer_futures.append(future)
+
+    for future in concurrent.futures.as_completed(producer_futures):
+        result = future.result()
+        producers_done += 1
+
+    for future in concurrent.futures.as_completed(consumer_futures):
+        result = future.result()
+        if producers_done == len(producer_futures):
+            event.set()
 
 
-print(
-    "Found "
-    + str(len(all_items))
-    + " items in "
-    + str(time.perf_counter() - time_start)
-    + "s."
-)
-
-
-time_start = time.perf_counter()
-print("Storing ngrams in DB...")
-
-n = math.ceil(len(all_items) / config.NGRAMS_THREAD_COUNT)
-
-chunks = [all_items[i : i + n] for i in range(0, len(all_items), n)]
-threads = []
-
-for chunk in chunks:
-    thread = Thread(target=ngrams_task, args=(chunk,))
-    threads.append(thread)
-
-for thread in threads:
-    thread.start()
-
-for thread in threads:
-    thread.join()
-
-print(
-    "Updated "
-    + str(len(all_items))
-    + " items in "
-    + str(time.perf_counter() - time_start)
-    + "s."
-)
+print("Finished in " + str(time.perf_counter() - time_start) + "s.")

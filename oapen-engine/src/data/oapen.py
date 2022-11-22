@@ -8,7 +8,7 @@ SERVER_PATH = "https://library.oapen.org"
 GET_COMMUNITY = "/rest/communities/{id}"
 GET_COLLECTION = "/rest/collections/{id}"
 GET_ITEM_BITSTREAMS = "/rest/items/{id}/bitstreams"
-GET_COLLECTION_ITEMS = "/rest/collections/{id}/items?expand=bitstreams"
+GET_COLLECTION_ITEMS = "/rest/collections/{id}/items"
 GET_COMMUNITY_COLLECTIONS = "/rest/communities/{id}/collections"
 GET_ITEM = "/rest/search?query=handle:%22{handle}%22&expand=bitstreams"
 GET_COLLECTION_BY_LABEL = (
@@ -65,8 +65,11 @@ def get_collections_from_community(id):
     return res
 
 
-def get_collection_items_by_id(id, limit=None) -> List[OapenItem]:
-    res = get(endpoint=GET_COLLECTION_ITEMS.format(id=id), params={"limit": limit})
+def get_collection_items_by_id(id, limit=None, offset=None) -> List[OapenItem]:
+    res = get(
+        endpoint=GET_COLLECTION_ITEMS.format(id=id),
+        params={"expand": "bitstreams", "limit": limit, "offset": offset},
+    )
 
     if res is not None and len(res) > 0:
         return transform_multiple_items_data(res)
