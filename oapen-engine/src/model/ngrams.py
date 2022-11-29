@@ -3,6 +3,7 @@ import string
 from typing import List
 
 import data.oapen_db as OapenDB
+import model.stopwords as oapen_stopwords  # pylint: disable=import-error
 import nltk  # pylint: disable=import-error
 import pandas as pd  # pylint: disable=import-error
 from nltk import word_tokenize  # pylint: disable=import-error
