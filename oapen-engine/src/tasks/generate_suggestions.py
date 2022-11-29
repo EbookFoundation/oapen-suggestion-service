@@ -1,6 +1,6 @@
 import concurrent.futures
 import time
-from threading import Lock, get_ident
+from threading import Lock
 from typing import List
 
 import config
@@ -21,9 +21,6 @@ from tqdm import tqdm
 
 
 def suggestion_task(items, all_items, mutex, suggestions):
-    print(
-        "Starting thread " + str(get_ident()) + " with " + str(len(items)) + " items."
-    )
     for item_a in items:
         handle_a = item_a[0]
         ngrams_a = [
@@ -61,6 +58,8 @@ def main():
 
     all_items: List[NgramRow] = db.get_all_ngrams()
     suggestions: List[SuggestionRow] = []
+
+    print("Generating suggestions for {0} items.".format(str(len(all_items))))
 
     futures = []
 

@@ -10,6 +10,7 @@ psycopg2 = "*"
 pandas = "*"
 sklearn = "*"
 lxml = "*"
+psutil = "*"
 
 [dev-packages]
 pytest = "*"

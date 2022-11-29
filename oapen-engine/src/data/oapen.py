@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 from typing import List
 
@@ -41,7 +40,7 @@ def get(endpoint, params=None):
             return res.json()
         return res.content
     else:
-        logging.error(str(res.status_code) + str(res.text))
+        print(res.url + ": " + str(res.status_code))
         return None
 
 

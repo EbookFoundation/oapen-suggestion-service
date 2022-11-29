@@ -1,4 +1,5 @@
 import concurrent.futures
+import os
 import queue
 import time
 from multiprocessing import Manager
@@ -9,6 +10,7 @@ import data.oapen as OapenAPI
 import model.ngrams as OapenEngine
 from data.connection import close_connection, get_connection
 from data.oapen_db import OapenDB
+from util.kill_processes import kill_child_processes
 
 
 def ngrams_task(items):
@@ -54,23 +56,23 @@ def data_task(collection, limit, offset, items):
         print(
             str(get_ident()) + ": Error while getting items from " + collection["name"]
         )
-        return 0
+        return -1
 
 
 def db_task(db, items, lock):
-    try:
-        lock.acquire()
-        print("Inserting {0} items.".format(len(items)))
-        db.add_many_ngrams(items)
-        lock.release()
-        return len(items)
-    except Exception as e:
-        print(e)
-        return 0
+    with lock:
+        try:
+            print("Inserting {0} items.".format(len(items)))
+            db.add_many_ngrams(items)
+            print("Inserted {0} items.".format(len(items)))
+            return len(items)
+        except Exception as e:
+            print(e)
+            return 0
 
 
 def main():
-    print("Getting items for OapenDB...")
+    print(str(os.getpid()) + ": Getting items for OapenDB...")
     time_start = time.perf_counter()
     collections = OapenAPI.get_collections_from_community(OapenAPI.BOOKS_COMMUNITY_ID)
 
@@ -96,6 +98,14 @@ def main():
         max_workers=config.NGRAMS_MAX_WORKERS
     )
 
+    def shutdown():
+        print("Stopping import.")
+        db_pool.shutdown(wait=False)
+        io_pool.shutdown(wait=False)
+        ngrams_pool.shutdown(wait=False)
+        kill_child_processes(os.getpid())
+        close_connection(connection)
+
     for collection in collections:
         for offset in range(
             0, config.COLLECTION_IMPORT_LIMIT, config.ITEMS_PER_IMPORT_THREAD
@@ -109,12 +119,8 @@ def main():
     for future in concurrent.futures.as_completed(producer_futures):
         result = future.result()
 
-        if result == 0:
-            print("Stopping import.")
-            db_pool.shutdown()
-            io_pool.shutdown()
-            ngrams_pool.shutdown()
-            close_connection(connection)
+        if result == -1:
+            shutdown()
             return
 
         items_produced += result
@@ -139,8 +145,10 @@ def main():
 
     io_pool.shutdown(wait=True)
 
-    if not items.empty():
-        ngrams_items = [items.get() for _ in range(items.qsize())]
+    while not items.empty():
+        ngrams_items = [
+            items.get() for _ in range(min(items.qsize(), config.NGRAMS_PER_PROCESS))
+        ]
         consumer_futures.append(ngrams_pool.submit(ngrams_task, ngrams_items))
 
     for future in concurrent.futures.as_completed(consumer_futures):
@@ -168,8 +176,11 @@ def main():
 
     ngrams_pool.shutdown(wait=True)
 
-    if not db_queue.empty():
-        items = [db_queue.get() for _ in range(db_queue.qsize())]
+    while not db_queue.empty():
+        items = [
+            db_queue.get()
+            for _ in range(min(config.NGRAMS_PER_INSERT, db_queue.qsize()))
+        ]
         db_futures.append(db_pool.submit(db_task, db, items, lock))
 
     items_stored = 0
