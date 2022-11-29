@@ -1,13 +1,13 @@
 # Limit of how many items per collection to import from OAPEN in seed.py
-COLLECTION_IMPORT_LIMIT = 100
+COLLECTION_IMPORT_LIMIT = 250
 
-ITEMS_PER_IMPORT_THREAD = 5
+ITEMS_PER_IMPORT_THREAD = 25
 
-IO_MAX_WORKERS = 20
+IO_MAX_WORKERS = 10
 NGRAMS_MAX_WORKERS = 10
 
 # Size of list of items to process into ngrams per process
-NGRAMS_PER_PROCESS = 20
+NGRAMS_PER_PROCESS = 25
 NGRAMS_PER_INSERT = 100
 
 
