@@ -1,26 +1,188 @@
-from typing import List
+import concurrent.futures
+import queue
+import time
+from multiprocessing import Manager
+from threading import get_ident
 
+import config
 import data.oapen as OapenAPI
-from data.connection import close_connection, connection
-from data.oapen_db import add_many_suggestions
-from model.oapen_types import OapenItem
+import model.ngrams as OapenEngine
+from data.connection import close_connection, get_connection
+from data.oapen_db import OapenDB
 
 
-def mock_suggestion_rows(n=10):
-    items: List[OapenItem] = OapenAPI.get_collection_items_by_label(
-        "Knowledge Unlatched (KU)"
+def ngrams_task(items):
+    print(
+        str(get_ident()) + ": Generating ngrams for " + str(len(items)) + " items.",
+        flush=True,
     )
 
-    rows = []
-    for i in range(min(n, len(items))):
-        rows.append(
-            (items[i].handle, items[i].name, [(items[i].handle, j) for j in range(3)])
+    ngrams = OapenEngine.get_ngrams_for_items(items)
+
+    print(
+        str(get_ident())
+        + ": DONE generating ngrams for "
+        + str(len(ngrams))
+        + " items.",
+        flush=True,
+    )
+
+    return ngrams
+
+
+def data_task(collection, limit, offset, items):
+    print(str(get_ident()) + ": Starting thread for " + collection["name"])
+
+    try:
+        collection_items = OapenAPI.get_collection_items_by_id(
+            collection["uuid"], limit=limit, offset=offset
         )
 
-    return rows
+        print(
+            str(get_ident())
+            + ": Got "
+            + str(len(collection_items))
+            + " from collection "
+            + collection["name"]
+        )
+
+        for x in collection_items:
+            items.put(x)
+
+        return len(collection_items)
+    except Exception:
+        print(
+            str(get_ident()) + ": Error while getting items from " + collection["name"]
+        )
+        return 0
 
 
-rows = mock_suggestion_rows(30)
-add_many_suggestions(rows)
+def db_task(db, items, lock):
+    try:
+        lock.acquire()
+        print("Inserting {0} items.".format(len(items)))
+        db.add_many_ngrams(items)
+        lock.release()
+        return len(items)
+    except Exception as e:
+        print(e)
+        return 0
 
-close_connection(connection)
+
+def main():
+    print("Getting items for OapenDB...")
+    time_start = time.perf_counter()
+    collections = OapenAPI.get_collections_from_community(OapenAPI.BOOKS_COMMUNITY_ID)
+
+    items: queue.Queue() = queue.Queue()
+    db_queue: queue.Queue() = queue.Queue()
+
+    connection = get_connection()
+    db = OapenDB(connection)
+    manager = Manager()
+    lock = manager.Lock()
+
+    items_produced = 0
+    items_consumed = 0
+    producers_done = 0
+    consumers_done = 0
+    producer_futures = []
+    consumer_futures = []
+    db_futures = []
+
+    db_pool = concurrent.futures.ThreadPoolExecutor()
+    io_pool = concurrent.futures.ThreadPoolExecutor(max_workers=config.IO_MAX_WORKERS)
+    ngrams_pool = concurrent.futures.ProcessPoolExecutor(
+        max_workers=config.NGRAMS_MAX_WORKERS
+    )
+
+    for collection in collections:
+        for offset in range(
+            0, config.COLLECTION_IMPORT_LIMIT, config.ITEMS_PER_IMPORT_THREAD
+        ):
+            producer_futures.append(
+                io_pool.submit(
+                    data_task, collection, config.ITEMS_PER_IMPORT_THREAD, offset, items
+                )
+            )
+
+    for future in concurrent.futures.as_completed(producer_futures):
+        result = future.result()
+
+        if result == 0:
+            print("Stopping import.")
+            db_pool.shutdown()
+            io_pool.shutdown()
+            ngrams_pool.shutdown()
+            close_connection(connection)
+            return
+
+        items_produced += result
+        producers_done += 1
+        if items.qsize() >= config.NGRAMS_PER_PROCESS:
+            ngrams_items = [
+                items.get()
+                for _ in range(min(config.NGRAMS_PER_PROCESS, items.qsize()))
+            ]
+            consumer_futures.append(ngrams_pool.submit(ngrams_task, ngrams_items))
+
+        print(
+            "Producers done: {0}/{1}\t\tItems imported: {2}\t\tConsumers done: {3}/{4}\t\tItems completed: {5}".format(
+                str(producers_done),
+                str(len(producer_futures)),
+                str(items_produced),
+                str(consumers_done),
+                str(len(consumer_futures)),
+                str(items_consumed),
+            )
+        )
+
+    io_pool.shutdown(wait=True)
+
+    if not items.empty():
+        ngrams_items = [items.get() for _ in range(items.qsize())]
+        consumer_futures.append(ngrams_pool.submit(ngrams_task, ngrams_items))
+
+    for future in concurrent.futures.as_completed(consumer_futures):
+        result = future.result()
+        items_consumed += len(result)
+        consumers_done += 1
+
+        for res in result:
+            db_queue.put(res)
+
+        if db_queue.qsize() >= config.NGRAMS_PER_INSERT:
+            items = [db_queue.get() for _ in range(config.NGRAMS_PER_INSERT)]
+            db_futures.append(db_pool.submit(db_task, db, items, lock))
+
+        print(
+            "Producers done: {0}/{1}\t\tItems imported: {2}\t\tConsumers done: {3}/{4}\t\tItems completed: {5}".format(
+                str(producers_done),
+                str(len(producer_futures)),
+                str(items_produced),
+                str(consumers_done),
+                str(len(consumer_futures)),
+                str(items_consumed),
+            )
+        )
+
+    ngrams_pool.shutdown(wait=True)
+
+    if not db_queue.empty():
+        items = [db_queue.get() for _ in range(db_queue.qsize())]
+        db_futures.append(db_pool.submit(db_task, db, items, lock))
+
+    items_stored = 0
+    for future in concurrent.futures.as_completed(db_futures):
+        res = future.result()
+        items_stored += res
+        print("Items stored: {0}".format(items_stored))
+
+    db_pool.shutdown(wait=True)
+
+    print("Finished in " + str(time.perf_counter() - time_start) + "s.")
+    close_connection(connection)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,12 +1,9 @@
 import logging
+from datetime import datetime
 from typing import List
 
 import requests
-from model.oapen_types import (
-    OapenItem,
-    transform_item_data,
-    transform_multiple_items_data,
-)
+from model.oapen_types import OapenItem, transform_item_data
 
 SERVER_PATH = "https://library.oapen.org"
 GET_COMMUNITY = "/rest/communities/{id}"
@@ -15,10 +12,26 @@ GET_ITEM_BITSTREAMS = "/rest/items/{id}/bitstreams"
 GET_COLLECTION_ITEMS = "/rest/collections/{id}/items"
 GET_COMMUNITY_COLLECTIONS = "/rest/communities/{id}/collections"
 GET_ITEM = "/rest/search?query=handle:%22{handle}%22&expand=bitstreams"
-GET_COLLECTION_BY_LABEL = "/rest/search?query=oapen.collection:%22{label}%22"
+GET_COLLECTION_BY_LABEL = (
+    "/rest/search?query=oapen.collection:%22{label}%22&expand=bitstreams"
+)
+
+GET_WEEKLY_ITEMS = (
+    "/rest/search?query=dc.date.accessioned_dt:[NOW-7DAY/DAY+TO+NOW]&expand=bitstreams"
+)
+GET_UPDATED_ITEMS = (
+    "/rest/search?query=lastModified%3E{date}&expand=metadata"  # YYYY-MM-DD
+)
 
 # This is the only community we care about right now
 BOOKS_COMMUNITY_ID = "3579505d-9d1b-4745-bcaf-a37329d25c69"
+
+
+def transform_multiple_items_data(items) -> List[OapenItem]:
+    return [
+        transform_item_data(item, get_bitstream_text(item["bitstreams"]))
+        for item in items
+    ]
 
 
 def get(endpoint, params=None):
@@ -57,8 +70,11 @@ def get_collections_from_community(id):
     return res
 
 
-def get_collection_items_by_id(id, limit=None) -> List[OapenItem]:
-    res = get(endpoint=GET_COLLECTION_ITEMS.format(id=id), params={"limit": limit})
+def get_collection_items_by_id(id, limit=None, offset=None) -> List[OapenItem]:
+    res = get(
+        endpoint=GET_COLLECTION_ITEMS.format(id=id),
+        params={"expand": "bitstreams", "limit": limit, "offset": offset},
+    )
 
     if res is not None and len(res) > 0:
         return transform_multiple_items_data(res)
@@ -77,9 +93,32 @@ def get_collection_items_by_label(label, limit=None) -> List[OapenItem]:
 
 
 def get_bitstream_text(bitstreams, limit=None) -> str:
-    for bitstream in bitstreams:
-        if bitstream["mimeType"] == "text/plain":
-            retrieveLink = bitstream["retrieveLink"]
-            text = str(get(retrieveLink).decode("utf-8"))
-            return text if limit is None else text[:limit]
+    if bitstreams is not None:
+        for bitstream in bitstreams:
+            if bitstream["mimeType"] == "text/plain":
+                retrieveLink = bitstream["retrieveLink"]
+                text = str(get(retrieveLink).decode("utf-8"))
+                return text if limit is None else text[:limit]
     return ""
+
+
+# Gets all items added in the last week
+def get_weekly_items(limit=None) -> List[OapenItem]:
+    res = get(endpoint=GET_WEEKLY_ITEMS, params={"limit": limit})
+
+    if res is not None and len(res) > 0:
+        return transform_multiple_items_data(res)
+    return res
+
+
+def get_updated_items(date: datetime, limit=None, offset=None) -> List[OapenItem]:
+
+    date = date.strftime("%Y-%m-%d")
+    res = get(
+        endpoint=GET_UPDATED_ITEMS.format(date=date),
+        params={"limit": limit, "offset": offset},
+    )
+
+    if res is not None and len(res) > 0:
+        return transform_multiple_items_data(res)
+    return res

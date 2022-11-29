@@ -2,7 +2,6 @@ import os
 import string
 from typing import List
 
-import data.oapen_db as OapenDB
 import model.stopwords as oapen_stopwords  # pylint: disable=import-error
 import nltk  # pylint: disable=import-error
 import pandas as pd  # pylint: disable=import-error
@@ -11,8 +10,8 @@ from nltk.corpus import stopwords  # pylint: disable=import-error
 
 from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     NgramDict,
+    NgramRowWithoutDate,
     OapenItem,
-    OapenNgram,
 )
 
 stopword_paths = [
@@ -88,14 +87,16 @@ def get_n_most_occuring(dic: NgramDict, n=100):
 
 # Currently, this uses the n most occuring ngrams to compare
 # This could also count the instances in the highest
-def get_similarity_score(ngram1: NgramDict, ngram2: NgramDict, n=100) -> float:
+def get_similarity_score(
+    ngram1: NgramDict, ngram2: NgramDict, n=100, as_percent=True
+) -> float:
     n_most_occ_1 = get_n_most_occuring(ngram1, n)
     n_most_occ_2 = get_n_most_occuring(ngram2, n)
     repeated = 0
     for n_gram in n_most_occ_1:
         if n_gram in n_most_occ_2:
             repeated += 1
-    return repeated / n
+    return repeated / n if as_percent else repeated
 
 
 # this treats ngrams1 as primary ngrams, since we want a
@@ -114,23 +115,12 @@ def get_similarity_score_by_dict_count(ngrams1: NgramDict, ngrams2: NgramDict) -
     return repeated / total
 
 
-def get_ngrams_for_items(items: List[OapenItem], n=3) -> List[OapenNgram]:
+def get_ngrams_for_items(
+    items: List[OapenItem], n=3, ngram_limit=30
+) -> List[NgramRowWithoutDate]:
     rows = []
     for item in items:
         text = process_text(item.text)
         ngrams = generate_ngram(text, n)
-        rows.append((item.handle, list(sort_ngrams_by_count(ngrams))))
-    return rows
-
-
-# @params: handle = handle of item; ngrams = {str : int}
-def cache_ngrams(handle: str, ngrams: NgramDict):
-    OapenDB.add_single_ngrams((handle, list(sort_ngrams_by_count(ngrams))))
-
-
-def cache_ngrams_from_items(items: List[OapenItem], n=3):
-    rows = get_ngrams_for_items(items)
-
-    OapenDB.add_many_ngrams(rows)
-
+        rows.append((item.handle, list(sort_ngrams_by_count(ngrams))[0:ngram_limit]))
     return rows
