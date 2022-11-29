@@ -1,3 +1,4 @@
+import os
 import string
 from typing import List
 
@@ -13,15 +14,24 @@ from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     OapenItem,
 )
 
+stopword_paths = [
+    "model/stopwords_broken.txt",
+    "model/stopwords_dutch.txt",
+    "model/stopwords_filter.txt",
+    "model/stopwords_publisher.txt",
+]
+
+for p in stopword_paths:
+    with open(p, "r") as f:
+        oapen_stopwords += [line.rstrip() for line in f]
+
 nltk.download("stopwords")
 
 STOPWORDS = (
     stopwords.words("english")
     + stopwords.words("german")
     + stopwords.words("dutch")
-    + oapen_stopwords.stopwords_dutch_extra
-    + oapen_stopwords.stopwords_filter
-    + oapen_stopwords.stopwords_publisher
+    + oapen_stopwords
 )
 
 

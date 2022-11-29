@@ -184,6 +184,7 @@ def main():
         db_futures.append(db_pool.submit(db_task, db, items, lock))
 
     items_stored = 0
+
     for future in concurrent.futures.as_completed(db_futures):
         res = future.result()
         items_stored += res
