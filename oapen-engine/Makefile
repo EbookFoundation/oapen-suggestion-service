@@ -22,7 +22,7 @@ generate_suggestions:
 	cd src && pipenv run python tasks/generate_suggestions.py
 
 run:
-	$(MAKE) seed_db
+	$(MAKE) clean_and_seed
 	$(MAKE) generate_suggestions 
 
 run-tests:

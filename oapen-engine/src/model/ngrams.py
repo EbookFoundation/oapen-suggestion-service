@@ -1,7 +1,6 @@
 import string
 from typing import List
 
-import data.oapen_db as OapenDB
 import model.stopwords as oapen_stopwords  # pylint: disable=import-error
 import nltk  # pylint: disable=import-error
 import pandas as pd  # pylint: disable=import-error
@@ -9,8 +8,8 @@ from nltk import word_tokenize  # pylint: disable=import-error
 from nltk.corpus import stopwords  # pylint: disable=import-error
 
 from .oapen_types import (  # pylint: disable=relative-beyond-top-level
-    Ngram,
     NgramDict,
+    NgramRowWithoutDate,
     OapenItem,
 )
 
@@ -106,23 +105,12 @@ def get_similarity_score_by_dict_count(ngrams1: NgramDict, ngrams2: NgramDict) -
     return repeated / total
 
 
-def get_ngrams_for_items(items: List[OapenItem], n=3) -> List[Ngram]:
+def get_ngrams_for_items(
+    items: List[OapenItem], n=3, ngram_limit=30
+) -> List[NgramRowWithoutDate]:
     rows = []
     for item in items:
         text = process_text(item.text)
         ngrams = generate_ngram(text, n)
-        rows.append((item.handle, list(sort_ngrams_by_count(ngrams))))
-    return rows
-
-
-# @params: handle = handle of item; ngrams = {str : int}
-def cache_ngrams(handle: str, ngrams: NgramDict):
-    OapenDB.add_single_ngrams((handle, list(sort_ngrams_by_count(ngrams))))
-
-
-def cache_ngrams_from_items(items: List[OapenItem], n=3):
-    rows = get_ngrams_for_items(items)
-
-    OapenDB.add_many_ngrams(rows)
-
+        rows.append((item.handle, list(sort_ngrams_by_count(ngrams))[0:ngram_limit]))
     return rows

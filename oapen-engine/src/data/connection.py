@@ -15,11 +15,7 @@ def get_connection():
 
         cur = conn.cursor()
 
-        print("PostgreSQL database version:")
-        cur.execute("SELECT version()")
-
-        db_version = cur.fetchone()
-        print(db_version)
+        print("Connected to database.")
 
         cur.close()
 
@@ -37,9 +33,3 @@ def close_connection(conn):
     if conn is not None:
         conn.close()
         print("Database connection closed.")
-
-
-connection = get_connection()
-
-register_composite("oapen_suggestions.suggestion", connection, globally=True)
-register_composite("oapen_suggestions.ngram", connection, globally=True)

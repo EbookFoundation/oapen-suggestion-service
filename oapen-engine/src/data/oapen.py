@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import List
 
 import requests
@@ -14,8 +15,12 @@ GET_ITEM = "/rest/search?query=handle:%22{handle}%22&expand=bitstreams"
 GET_COLLECTION_BY_LABEL = (
     "/rest/search?query=oapen.collection:%22{label}%22&expand=bitstreams"
 )
+
 GET_WEEKLY_ITEMS = (
     "/rest/search?query=dc.date.accessioned_dt:[NOW-7DAY/DAY+TO+NOW]&expand=bitstreams"
+)
+GET_UPDATED_ITEMS = (
+    "/rest/search?query=lastModified%3E{date}&expand=metadata"  # YYYY-MM-DD
 )
 
 # This is the only community we care about right now
@@ -100,6 +105,19 @@ def get_bitstream_text(bitstreams, limit=None) -> str:
 # Gets all items added in the last week
 def get_weekly_items(limit=None) -> List[OapenItem]:
     res = get(endpoint=GET_WEEKLY_ITEMS, params={"limit": limit})
+
+    if res is not None and len(res) > 0:
+        return transform_multiple_items_data(res)
+    return res
+
+
+def get_updated_items(date: datetime, limit=None, offset=None) -> List[OapenItem]:
+
+    date = date.strftime("%Y-%m-%d")
+    res = get(
+        endpoint=GET_UPDATED_ITEMS.format(date=date),
+        params={"limit": limit, "offset": offset},
+    )
 
     if res is not None and len(res) > 0:
         return transform_multiple_items_data(res)
