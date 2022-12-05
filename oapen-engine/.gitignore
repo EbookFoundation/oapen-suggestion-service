@@ -167,3 +167,5 @@ bin
 bin/*
 .pytest_cache
 lib/
+
+out
