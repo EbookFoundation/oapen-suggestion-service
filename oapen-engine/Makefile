@@ -32,3 +32,6 @@ run-tests:
 
 refresh-items:
 	cd src && $(PYTHONEX) -m pipenv run python tasks/refresh_items.py
+
+run-docker:
+	cd src && python tasks/refresh_items.py
