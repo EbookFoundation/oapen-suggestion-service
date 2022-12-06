@@ -1,34 +1,36 @@
 PYTHONEX ?= "python"
+PYTHONPATH = "$(CURDIR)/src"
+PYTHON = PYTHONPATH="$(PYTHONPATH)" $(PYTHONEX)
 
 setup-env:
 ifeq ($(OS),Windows_NT)
 	py -m pip install --upgrade pip
 else
-	$(PYTHONEX) -m pip install --upgrade pip
+	$(PYTHON) -m pip install --upgrade pip
 endif
-	$(PYTHONEX) -m pip install pipenv
-	$(PYTHONEX) -m pipenv install --skip-lock
-	$(PYTHONEX) -m pipenv shell
+	$(PYTHON) -m pip install pipenv
+	$(PYTHON) -m pipenv install --skip-lock
+	$(PYTHON) -m pipenv shell
 
 seed_db:
-	cd src && $(PYTHONEX) -m pipenv run python tasks/seed.py
+	cd src && $(PYTHON) -m pipenv run python tasks/seed.py
 
 clean_db:
-	cd src && $(PYTHONEX) -m pipenv run python tasks/clean.py
+	cd src && $(PYTHON) -m pipenv run python tasks/clean.py
 
 clean_and_seed:
 	$(MAKE) clean_db 
 	$(MAKE) seed_db
 	
 generate_suggestions:
-	cd src && $(PYTHONEX) -m pipenv run python tasks/generate_suggestions.py
+	cd src && $(PYTHON) -m pipenv run python tasks/generate_suggestions.py
 
 run:
 	$(MAKE) clean_and_seed
 	$(MAKE) generate_suggestions 
 
 run-tests:
-	cd src && $(PYTHONEX) -m pipenv run pytest
+	cd src && $(PYTHON) -m pipenv run pytest
 
 refresh-items:
-	cd src && $(PYTHONEX) -m pipenv run python tasks/refresh_items.py
+	cd src && $(PYTHON) -m pipenv run python tasks/refresh_items.py
