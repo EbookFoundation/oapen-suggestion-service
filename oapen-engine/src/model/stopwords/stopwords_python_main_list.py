@@ -431,5 +431,5 @@ stopwords_broken = [
     "öst err ur",
 ]
 
-# A list of Dutch  stop words, not part of stopwords_nl
+# A list of Dutch stop words, not part of stopwords_nl
 stopwords_dutch_extra = ["een", "te", "ten"]
