@@ -34,7 +34,7 @@ You can find the code for the mining engine in `oapen-engine/`.
     * Most popular PostgreSQL database adapter for Python
 * `pandas` -- data analysis library
     * Maintained by [PYData](https://pandas.pydata.org/) with large amounts of sponsors. 2,700+ contributors.
-* `sklearn` -- Scikit Learn
+* `scikit-learn` -- Scikit Learn
     * Maintained by [a large consortium of corporations and open-source developers](https://scikit-learn.org/stable/).
 
 
