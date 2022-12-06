@@ -34,3 +34,6 @@ run-tests:
 
 refresh-items:
 	cd src && $(PYTHON) -m pipenv run python tasks/refresh_items.py
+
+test-stopword-generation:
+	cd src && $(PYTHON) -m pipenv run python model/stopwords_processor.py
