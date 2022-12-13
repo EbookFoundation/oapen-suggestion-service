@@ -1,5 +1,5 @@
 # Limit of how many items per collection to import from OAPEN in seed.py
-COLLECTION_IMPORT_LIMIT = 250
+COLLECTION_IMPORT_LIMIT = 10
 
 ITEMS_PER_IMPORT_THREAD = 25
 

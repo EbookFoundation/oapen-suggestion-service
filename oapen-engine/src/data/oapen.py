@@ -7,19 +7,18 @@ from model.oapen_types import OapenItem, transform_item_data
 SERVER_PATH = "https://library.oapen.org"
 GET_COMMUNITY = "/rest/communities/{id}"
 GET_COLLECTION = "/rest/collections/{id}"
+GET_COLLECTIONS = "/rest/collections/"
 GET_ITEM_BITSTREAMS = "/rest/items/{id}/bitstreams"
 GET_COLLECTION_ITEMS = "/rest/collections/{id}/items"
 GET_COMMUNITY_COLLECTIONS = "/rest/communities/{id}/collections"
-GET_ITEM = "/rest/search?query=handle:%22{handle}%22&expand=bitstreams"
+GET_ITEM = "/rest/search?query=handle:%22{handle}%22&expand=bitstreams,metadata"
 GET_COLLECTION_BY_LABEL = (
-    "/rest/search?query=oapen.collection:%22{label}%22&expand=bitstreams"
+    "/rest/search?query=oapen.collection:%22{label}%22&expand=metadata"
 )
 
-GET_WEEKLY_ITEMS = (
-    "/rest/search?query=dc.date.accessioned_dt:[NOW-7DAY/DAY+TO+NOW]&expand=bitstreams"
-)
+GET_WEEKLY_ITEMS = "/rest/search?query=dc.date.accessioned_dt:[NOW-7DAY/DAY+TO+NOW]&expand=bitstreams,metadata"
 GET_UPDATED_ITEMS = (
-    "/rest/search?query=lastModified%3E{date}&expand=metadata"  # YYYY-MM-DD
+    "/rest/search?query=lastModified%3E{date}&expand=metadata,bitsteams"  # YYYY-MM-DD
 )
 
 # This is the only community we care about right now
@@ -69,10 +68,15 @@ def get_collections_from_community(id):
     return res
 
 
+def get_all_collections():
+    res = get(endpoint=GET_COLLECTIONS)
+    return res
+
+
 def get_collection_items_by_id(id, limit=None, offset=None) -> List[OapenItem]:
     res = get(
         endpoint=GET_COLLECTION_ITEMS.format(id=id),
-        params={"expand": "bitstreams", "limit": limit, "offset": offset},
+        params={"expand": "bitstreams,metadata", "limit": limit, "offset": offset},
     )
 
     if res is not None and len(res) > 0:

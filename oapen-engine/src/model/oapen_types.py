@@ -13,7 +13,16 @@ class OapenItem:
         self.link = link
         self.metadata = metadata
         self.bitstreams = bitstreams
+
+        language = list(filter(lambda x: x["key"] == "dc.language", self.metadata))
+        self.language = None if len(language) == 0 else language[0]["value"]
         self.text = text
+
+    def __eq__(self, other):
+        return self.handle == other.handle
+
+    def __hash__(self):
+        return hash(self.handle, "handle")
 
 
 Suggestion = Tuple[str, float]
