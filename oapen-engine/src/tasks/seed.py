@@ -52,10 +52,11 @@ def data_task(collection, limit, offset, items):
             items.put(x)
 
         return len(collection_items)
-    except Exception:
+    except Exception as e:
         print(
             str(get_ident()) + ": Error while getting items from " + collection["name"]
         )
+        print(e)
         return -1
 
 
@@ -74,7 +75,7 @@ def db_task(db, items, lock):
 def main():
     print(str(os.getpid()) + ": Getting items for OapenDB...")
     time_start = time.perf_counter()
-    collections = OapenAPI.get_collections_from_community(OapenAPI.BOOKS_COMMUNITY_ID)
+    collections = OapenAPI.get_all_collections()
 
     items: queue.Queue() = queue.Queue()
     db_queue: queue.Queue() = queue.Queue()
@@ -107,9 +108,12 @@ def main():
         close_connection(connection)
 
     for collection in collections:
-        for offset in range(
-            0, config.COLLECTION_IMPORT_LIMIT, config.ITEMS_PER_IMPORT_THREAD
-        ):
+        num_items = (
+            collection["numberItems"]
+            if config.COLLECTION_IMPORT_LIMIT is None
+            else config.COLLECTION_IMPORT_LIMIT
+        )
+        for offset in range(0, num_items, config.ITEMS_PER_IMPORT_THREAD):
             producer_futures.append(
                 io_pool.submit(
                     data_task, collection, config.ITEMS_PER_IMPORT_THREAD, offset, items

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 import psycopg2
 from model.oapen_types import NgramRow, SuggestionRow
@@ -8,8 +8,18 @@ class OapenDB:
     def __init__(self, connection):
         self.connection = connection
 
+    def deduplicate(self, items: Union[List[NgramRow], List[SuggestionRow]]):
+        seen = set()
+        res = []
+        for i in items:
+            if i[0] not in seen:
+                res.append(i)
+                seen.add(i[0])
+        return res
+
     def mogrify_ngrams(self, ngrams: List[NgramRow]) -> str:
         cursor = self.connection.cursor()
+        ngrams = self.deduplicate(ngrams)
         args = ",".join(
             cursor.mogrify("(%s,%s::oapen_suggestions.ngram[])", x).decode("utf-8")
             for x in ngrams
@@ -19,6 +29,7 @@ class OapenDB:
 
     def mogrify_suggestions(self, suggestions: List[SuggestionRow]) -> str:
         cursor = self.connection.cursor()
+        suggestions = self.deduplicate(suggestions)
         args = ",".join(
             cursor.mogrify("(%s,%s,%s::oapen_suggestions.suggestion[])", x).decode(
                 "utf-8"

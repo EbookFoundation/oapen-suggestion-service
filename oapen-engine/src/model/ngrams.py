@@ -1,8 +1,6 @@
-import os
 import string
 from typing import List
 
-import model.stopwords as oapen_stopwords  # pylint: disable=import-error
 import nltk  # pylint: disable=import-error
 import pandas as pd  # pylint: disable=import-error
 from nltk import word_tokenize  # pylint: disable=import-error
@@ -21,17 +19,22 @@ stopword_paths = [
     "model/stopwords_publisher.txt",
 ]
 
+stopwords_list = []
+
 for p in stopword_paths:
     with open(p, "r") as f:
-        oapen_stopwords += [line.rstrip() for line in f]
+        stopwords_list += [line.rstrip() for line in f]
 
-nltk.download("stopwords")
+try:
+    stopwords.words("english")
+except LookupError:
+    nltk.download("stopwords")
 
 STOPWORDS = (
     stopwords.words("english")
     + stopwords.words("german")
     + stopwords.words("dutch")
-    + oapen_stopwords
+    + stopwords_list
 )
 
 
@@ -47,11 +50,11 @@ def process_text(text):
 
 
 def make_df(data: List[OapenItem]):
-    df = pd.DataFrame(columns=["handle", "name", "text"])
+    df = pd.DataFrame(columns=["handle", "name", "lang", "text"])
 
     for item in data:
         text = process_text(item.text)
-        df.loc[len(df.index)] = [item.handle, item.name, text]
+        df.loc[len(df.index)] = [item.handle, item.name, item.language, text]
     return df
 
 
