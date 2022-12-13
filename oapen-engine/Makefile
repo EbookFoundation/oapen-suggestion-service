@@ -34,3 +34,6 @@ run-tests:
 
 refresh-items:
 	cd src && $(PYTHON) -m pipenv run python tasks/refresh_items.py
+
+run-daemon:
+	cd src && $(PYTHON) -m pipenv run python tasks/daemon.py

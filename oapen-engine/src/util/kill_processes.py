@@ -1,13 +1,13 @@
 import signal
 
-import psutil
+# import psutil
 
 
-def kill_child_processes(parent_pid, sig=signal.SIGTERM):
-    try:
-        parent = psutil.Process(parent_pid)
-    except psutil.NoSuchProcess:
-        return
-    children = parent.children(recursive=True)
-    for process in children:
-        process.send_signal(sig)
+# def kill_child_processes(parent_pid, sig=signal.SIGTERM):
+#     try:
+#         parent = psutil.Process(parent_pid)
+#     except psutil.NoSuchProcess:
+#         return
+#     children = parent.children(recursive=True)
+#     for process in children:
+#         process.send_signal(sig)

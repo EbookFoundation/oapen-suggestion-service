@@ -10,7 +10,7 @@ import data.oapen as OapenAPI
 import model.ngrams as OapenEngine
 from data.connection import close_connection, get_connection
 from data.oapen_db import OapenDB
-from util.kill_processes import kill_child_processes
+# from util.kill_processes import kill_child_processes
 
 
 def ngrams_task(items):
@@ -103,7 +103,7 @@ def main():
         db_pool.shutdown(wait=False)
         io_pool.shutdown(wait=False)
         ngrams_pool.shutdown(wait=False)
-        kill_child_processes(os.getpid())
+        # kill_child_processes(os.getpid())
         close_connection(connection)
 
     for collection in collections:
