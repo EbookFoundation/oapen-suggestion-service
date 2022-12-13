@@ -5,8 +5,8 @@ import { fetchSingleItemProps, SingleItemProps } from "../../lib/item/single";
 
 export default function ItemSingle({ item }: SingleItemProps) {
   const name =
-    item.name || item.metadata.find(({ key }) => key == "grantor.name")?.value;
-  const type = item.metadata.find(({ key }) => key == "dc.type")?.value;
+    item?.name || item?.metadata.find(({ key }) => key == "grantor.name")?.value;
+  const type = item?.metadata.find(({ key }) => key == "dc.type")?.value;
   console.log({ item });
   return (
     <>
