@@ -8,9 +8,8 @@ nltk = "*"
 requests = "*"
 psycopg2-binary = "*"
 pandas = "*"
-sklearn = "*"
+scikit-learn = "*"
 lxml = "*"
-psutil = "*"
 
 [dev-packages]
 pytest = "*"

@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  oapen-engine :
+    build: ./oapen-engine/
+  api:
+    build: ./api/
+    expose:
+       - 3001
+    ports:
+        - "127.0.0.1:3001:3001"
+  web:
+    build: ./web/
+    expose:
+        - 3000
+    ports:
+        - "127.0.0.1:3000:3000"
+volumes:
+  db:
+    driver: local
