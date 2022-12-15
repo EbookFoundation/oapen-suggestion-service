@@ -7,19 +7,17 @@ const data = require("./db/data.js");
 //GET endpoint for suggestions
 router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)", async (req, res) => {
   try {
-    let handle = req.params.handle;
+    const handle = req.params.handle;
     await validate.checkHandle(handle);
 
-    let responseData = await data.querySuggestions(handle);
-
-    const user = {};
+    const responseData = await data.querySuggestions(handle);
 
     if (
-      responseData?.["error"] &&
-      responseData?.["error"]?.name === pgp.errors.QueryResultError.name
+      responseData.error &&
+      responseData.error.name === pgp.errors.QueryResultError.name
     ) {
-      return res.status(404).json({ error: responseData?.["error"].message });
-    } else if (responseData?.["error"]) {
+      return res.status(404).json({ error: responseData.error.message });
+    } else if (responseData.error) {
       return res.status(500).json(responseData);
     }
 
@@ -33,12 +31,12 @@ router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)", async (req, res) => {
 });
 
 //GET endpoint for ngrams
-router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)/ngrams", async (req, res) => {
+router.get("/ngrams/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)", async (req, res) => {
   try {
     const handle = req.params.handle;
     await validate.checkHandle(handle);
 
-    let responseData = await data.queryNgrams(handle);
+    const responseData = await data.queryNgrams(handle);
 
     if (
       responseData.error &&

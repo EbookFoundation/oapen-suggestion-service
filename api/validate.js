@@ -10,16 +10,20 @@ class UserError extends Error {
 // RegEx to match formatting of handle
 const handleRegExpression = new RegExp("([0-9]+.[0-9]+.[0-9]+/[0-9]+)", "g");
 
-let checkHandle = async (handle) => {
+const checkHandle = async (handle) => {
+  console.log(handle);
+  console.log(typeof handle);
   if (!handle) throw new UserError("Handle must not be null");
   if (typeof handle !== "string")
     throw new UserError("Handle must be a string");
   if (!handle.includes("/")) throw new UserError("Invalid handle format");
-  if (!handle || typeof handle !== "string" || !handle.trim())
-    throw "Invalid handle, cannot be undefined.";
+  if (!handle.trim())
+    throw new UserError("You must provide a handle and it must be non-empty");
 
-  if (!handleRegExpression.test(handle))
-    throw "Invalid handle, exmaple format: 20.500.12657/47586";
+  if (!handleRegExpression.test(handle.toString()))
+    throw new UserError(
+      `Invalid handle "${handle}", example format: 20.500.12657/47586`
+    );
   return true;
 };
 
