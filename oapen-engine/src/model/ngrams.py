@@ -1,42 +1,54 @@
 import string
 from typing import List
 
-import nltk  # pylint: disable=import-error
-import pandas as pd  # pylint: disable=import-error
-from nltk import word_tokenize  # pylint: disable=import-error
-from nltk.corpus import stopwords  # pylint: disable=import-error
+import nltk  
+import pandas as pd  
+from nltk import word_tokenize  
+from nltk.corpus import stopwords  
 
-from .oapen_types import (  # pylint: disable=relative-beyond-top-level
+nltk.download('punkt')
+
+from .oapen_types import (
     NgramDict,
     NgramRowWithoutDate,
     OapenItem,
 )
 
-stopword_paths = [
-    "model/stopwords_broken.txt",
-    "model/stopwords_dutch.txt",
-    "model/stopwords_filter.txt",
-    "model/stopwords_publisher.txt",
+# define nltk package preset stopwords langauges
+# for more options, see: https://pypi.org/project/stop-words/
+stopwords_languages = [
+    "english",
+    "german",
+    "dutch"
 ]
 
-stopwords_list = []
+# define paths for additionally defined stopwords
+stopword_paths = [
+    "model/stopwords/broken.txt",
+    "model/stopwords/dutch.txt",
+    "model/stopwords/filter.txt",
+    "model/stopwords/publisher.txt",
+]
 
+# collect the words into a list, pull from each file
+custom_stopwords = []
 for p in stopword_paths:
     with open(p, "r") as f:
-        stopwords_list += [line.rstrip() for line in f]
+        custom_stopwords += [line.rstrip() for line in f]
 
+# confirm stopwords package, download if not present
 try:
     stopwords.words("english")
 except LookupError:
     nltk.download("stopwords")
 
-STOPWORDS = (
-    stopwords.words("english")
-    + stopwords.words("german")
-    + stopwords.words("dutch")
-    + stopwords_list
-)
+# add languages
+nltk_stopwords = []
+for language in stopwords_languages:
+    nltk_stopwords += stopwords.words(language)
 
+# add languages and custom stopwords for final stopwords var
+STOPWORDS = (nltk_stopwords + custom_stopwords)
 
 def process_text(text):
     l_text = text.lower()
