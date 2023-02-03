@@ -10,6 +10,7 @@ import data.oapen as OapenAPI
 import model.ngrams as OapenEngine
 from data.connection import close_connection, get_connection
 from data.oapen_db import OapenDB
+
 # from util.kill_processes import kill_child_processes
 
 
@@ -72,7 +73,7 @@ def db_task(db, items, lock):
             return 0
 
 
-def main():
+def run():
     print(str(os.getpid()) + ": Getting items for OapenDB...")
     time_start = time.perf_counter()
     collections = OapenAPI.get_all_collections()
@@ -198,6 +199,10 @@ def main():
 
     print("Finished in " + str(time.perf_counter() - time_start) + "s.")
     close_connection(connection)
+
+
+def main():
+    run()
 
 
 if __name__ == "__main__":

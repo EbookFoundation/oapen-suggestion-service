@@ -13,10 +13,10 @@ from .oapen_types import (  # pylint: disable=relative-beyond-top-level
 )
 
 stopword_paths = [
-    "model/stopwords_broken.txt",
-    "model/stopwords_dutch.txt",
-    "model/stopwords_filter.txt",
-    "model/stopwords_publisher.txt",
+    "src/model/stopwords_broken.txt",
+    "src/model/stopwords_dutch.txt",
+    "src/model/stopwords_filter.txt",
+    "src/model/stopwords_publisher.txt",
 ]
 
 stopwords_list = []
