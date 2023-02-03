@@ -12,6 +12,17 @@ from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     OapenItem,
 )
 
+try:
+    nltk.data.find("tokenizers/punkt.zip")
+except LookupError:
+    nltk.download("punkt")
+
+try:
+    stopwords.words("english")
+except LookupError:
+    nltk.download("stopwords")
+
+
 stopword_paths = [
     "src/model/stopwords_broken.txt",
     "src/model/stopwords_dutch.txt",
@@ -24,11 +35,6 @@ stopwords_list = []
 for p in stopword_paths:
     with open(p, "r") as f:
         stopwords_list += [line.rstrip() for line in f]
-
-try:
-    stopwords.words("english")
-except LookupError:
-    nltk.download("stopwords")
 
 STOPWORDS = (
     stopwords.words("english")
