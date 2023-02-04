@@ -2,7 +2,7 @@ import concurrent.futures
 import os
 import queue
 import time
-from multiprocessing import Manager
+from multiprocessing import Manager, cpu_count
 from threading import get_ident
 
 import config
@@ -96,9 +96,7 @@ def run():
 
     db_pool = concurrent.futures.ThreadPoolExecutor()
     io_pool = concurrent.futures.ThreadPoolExecutor(max_workers=config.IO_MAX_WORKERS)
-    ngrams_pool = concurrent.futures.ProcessPoolExecutor(
-        max_workers=config.NGRAMS_MAX_WORKERS
-    )
+    ngrams_pool = concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count())
 
     def shutdown():
         print("Stopping import.")

@@ -3,8 +3,8 @@ COLLECTION_IMPORT_LIMIT = 10
 
 ITEMS_PER_IMPORT_THREAD = 25
 
+# Max thread count for data ingest
 IO_MAX_WORKERS = 10
-NGRAMS_MAX_WORKERS = 10
 
 # Size of list of items to process into ngrams per process
 NGRAMS_PER_PROCESS = 25
