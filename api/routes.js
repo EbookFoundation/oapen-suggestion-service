@@ -12,8 +12,6 @@ router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)", async (req, res) => {
 
     let responseData = await data.querySuggestions(handle);
 
-    const user = {};
-
     if (
       responseData?.["error"] &&
       responseData?.["error"]?.name === pgp.errors.QueryResultError.name
