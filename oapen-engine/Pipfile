@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 nltk = "*"
 requests = "*"
-psycopg2-binary = "*"
+psycopg2 = "2.9.3"
 pandas = "*"
 scikit-learn = "*"
 lxml = "*"

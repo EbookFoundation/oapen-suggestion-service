@@ -55,9 +55,18 @@ def drop_schema(connection) -> None:
     cursor.close()
 
 
-connection = get_connection()
+def run():
+    connection = get_connection()
 
-drop_schema(connection)
-create_schema(connection)
+    drop_schema(connection)
+    create_schema(connection)
 
-connection.close()
+    connection.close()
+
+
+def main():
+    run()
+
+
+if __name__ == "__main__":
+    main()

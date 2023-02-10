@@ -50,7 +50,7 @@ def suggestion_task(items, all_items, mutex, suggestions):
         suggestions.append((handle_a, handle_a, item_suggestions))
 
 
-def main():
+def run():
 
     mutex = Lock()
     connection = get_connection()
@@ -103,6 +103,10 @@ def main():
     )
 
     close_connection(connection)
+
+
+def main():
+    run()
 
 
 if __name__ == "__main__":

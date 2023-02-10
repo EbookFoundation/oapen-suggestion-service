@@ -10,7 +10,7 @@ from data.oapen_db import OapenDB
 from model.oapen_types import OapenItem
 
 
-def main():
+def run():
     connection = get_connection()
     db = OapenDB(connection)
 
@@ -46,6 +46,10 @@ def main():
     )
 
     close_connection(connection)
+
+
+def main():
+    run()
 
 
 if __name__ == "__main__":
