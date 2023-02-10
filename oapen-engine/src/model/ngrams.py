@@ -5,6 +5,7 @@ import nltk
 import pandas as pd  
 from nltk import word_tokenize  
 from nltk.corpus import stopwords  
+from .stopwords_processor import STOPWORDS
 
 nltk.download('punkt')
 
@@ -13,42 +14,6 @@ from .oapen_types import (
     NgramRowWithoutDate,
     OapenItem,
 )
-
-# define nltk package preset stopwords langauges
-# for more options, see: https://pypi.org/project/stop-words/
-stopwords_languages = [
-    "english",
-    "german",
-    "dutch"
-]
-
-# define paths for additionally defined stopwords
-stopword_paths = [
-    "model/stopwords/broken.txt",
-    "model/stopwords/dutch.txt",
-    "model/stopwords/filter.txt",
-    "model/stopwords/publisher.txt",
-]
-
-# collect the words into a list, pull from each file
-custom_stopwords = []
-for p in stopword_paths:
-    with open(p, "r") as f:
-        custom_stopwords += [line.rstrip() for line in f]
-
-# confirm stopwords package, download if not present
-try:
-    stopwords.words("english")
-except LookupError:
-    nltk.download("stopwords")
-
-# add languages
-nltk_stopwords = []
-for language in stopwords_languages:
-    nltk_stopwords += stopwords.words(language)
-
-# add languages and custom stopwords for final stopwords var
-STOPWORDS = (nltk_stopwords + custom_stopwords)
 
 def process_text(text):
     l_text = text.lower()
