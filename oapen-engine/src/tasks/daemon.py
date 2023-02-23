@@ -1,9 +1,9 @@
 # Daemon to run processes in the background
+import os
 import signal
 import sys
 import time
 
-import config
 from clean import run as run_clean
 from data.connection import get_connection
 from data.oapen_db import OapenDB
@@ -19,13 +19,14 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-
 print("Daemon up and running")
 
 conn = get_connection()
 db = OapenDB(conn)
 
-if not db.table_exists("suggestions") or not db.table_exists("ngrams"):
+if int(os.environ["RUN_CLEAN"]) == 1 or (
+    not db.table_exists("suggestions") or not db.table_exists("ngrams")
+):
     print("STARTED: clean.py")
     run_clean()
     print("STOPPED: clean.py")
@@ -42,7 +43,7 @@ acc = 0
 while True:
     print("Daemon still running")
 
-    if acc >= config.REFRESH_PERIOD:
+    if acc >= int(os.environ["REFRESH_PERIOD"]):
         print("STARTED: refresh items")
         run_refresh_items()
         print("STOPPED: refresh items")

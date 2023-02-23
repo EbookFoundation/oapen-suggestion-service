@@ -170,16 +170,17 @@ def run():
     db_futures.append(db_pool.submit(db_task, db, db_queue, db_event))
 
     #
-    #  Data import: Get config.COLLECTION_IMPORT_LIMIT items from all collections in the OAPEN catalog
+    #  Data import: COLLECTION_IMPORT_LIMIT items from all collections in the OAPEN catalog
     #
 
     url_params = []
+    COLLECTION_IMPORT_LIMIT = int(os.environ["COLLECTION_IMPORT_LIMIT"])
 
     for collection in collections:
         num_items = (
             collection["numberItems"]
-            if config.COLLECTION_IMPORT_LIMIT is None
-            else min(config.COLLECTION_IMPORT_LIMIT, collection["numberItems"])
+            if COLLECTION_IMPORT_LIMIT == 0
+            else min(COLLECTION_IMPORT_LIMIT, collection["numberItems"])
         )
 
         total_items += num_items

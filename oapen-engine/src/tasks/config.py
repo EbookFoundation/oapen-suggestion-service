@@ -1,6 +1,3 @@
-# Limit of how many items per collection to import from OAPEN in seed.py
-COLLECTION_IMPORT_LIMIT = None
-
 ITEMS_PER_IMPORT_THREAD = 50
 
 # Max thread count for data ingest
@@ -22,6 +19,3 @@ SUGGESTIONS_MAX_ITEMS = 25
 # Update items that were modifed since X days ago
 UPDATE_DAYS_BEFORE = 30
 REFRESH_IMPORT_LIMIT = 50
-
-# Seconds between each item refresh period
-REFRESH_PERIOD = 300
