@@ -8,9 +8,11 @@ const data = require("./db/data.js");
 router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)", async (req, res) => {
   try {
     let handle = req.params.handle;
+    let threshold = parseInt(req.query.threshold) || 0;
+
     await validate.checkHandle(handle);
 
-    let responseData = await data.querySuggestions(handle);
+    let responseData = await data.querySuggestions(handle, threshold);
 
     if (
       responseData?.["error"] &&
@@ -24,6 +26,7 @@ router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)", async (req, res) => {
     res.status(200).json({
       items: responseData,
     });
+
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: "Internal server error" });
