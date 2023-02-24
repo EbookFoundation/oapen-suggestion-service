@@ -2,6 +2,10 @@ version: "3.8"
 services:
   oapen-engine :
     build: ./oapen-engine/
+    environment:
+      - RUN_CLEAN=0
+      - COLLECTION_IMPORT_LIMIT=0 # Set to 0 for full harvest
+      - REFRESH_PERIOD=300
   api:
     build: ./api/
     expose:

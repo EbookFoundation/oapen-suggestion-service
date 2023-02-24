@@ -39,19 +39,21 @@ class OapenDB:
         return args
 
     def table_exists(self, table):
-        cursor = self.connection.cursor
+        cursor = self.connection.cursor()
         query = """
                 SELECT EXISTS (
-                    SELECT * FROM oapen_suggestions.tables WHERE table_name=%s
+                    SELECT * FROM information_schema.tables WHERE table_name=%s
                 )
                 """
 
         try:
-            cursor.execute(query, (table))
+            cursor.execute(query, (table,))
             res = cursor.fetchone()[0]
-            return res
+
+            return res is not None
         except (Exception, psycopg2.Error) as error:
             print(error)
+            return False
         finally:
             cursor.close()
 
@@ -108,43 +110,40 @@ class OapenDB:
             cursor.close()
 
     def add_many_ngrams(self, ngrams: List[NgramRow]) -> None:
-        cursor = self.connection.cursor()
-        args = self.mogrify_ngrams(ngrams)
-        query = f"""
-                INSERT INTO oapen_suggestions.ngrams (handle, ngrams)
-                VALUES {args}
-                ON CONFLICT (handle)
-                    DO
-                        UPDATE SET ngrams = excluded.ngrams
+        try:
+            cursor = self.connection.cursor()
+            args = self.mogrify_ngrams(ngrams)
+            query = f"""
+                    INSERT INTO oapen_suggestions.ngrams (handle, ngrams)
+                    VALUES {args}
+                    ON CONFLICT (handle)
+                        DO
+                            UPDATE SET ngrams = excluded.ngrams
                 """
 
-        try:
             cursor.execute(query)
         except (Exception, psycopg2.Error) as error:
             print(error)
-            print(query[0:100])
         finally:
             cursor.close()
 
     def get_all_ngrams(self, ngram_limit=None) -> List[NgramRow]:
         cursor = self.connection.cursor()
-
         query = """
                 SELECT handle, CAST (ngrams AS oapen_suggestions.ngram[]), created_at, updated_at 
                 FROM oapen_suggestions.ngrams
                 """
-
+        ret = None
         try:
-
             cursor.execute(query)
             records = cursor.fetchall()
-
-            return records
+            ret = records
 
         except (Exception, psycopg2.Error) as error:
             print(error)
         finally:
             cursor.close()
+            return ret
 
     def get_all_suggestions(self) -> List[SuggestionRow]:
         cursor = self.connection.cursor()
@@ -152,15 +151,35 @@ class OapenDB:
                 SELECT handle, name, CAST (suggestions AS oapen_suggestions.suggestion[]), created_at, updated_at 
                 FROM oapen_suggestions.suggestions
                 """
-
+        ret = None
         try:
-
             cursor.execute(query)
             records = cursor.fetchall()
 
-            return records
+            ret = records
 
         except (Exception, psycopg2.Error) as error:
             print(error)
         finally:
             cursor.close()
+            return ret
+
+    def count_table(self, table_name) -> int or None:
+        cursor = self.connection.cursor()
+        query = "SELECT COUNT(*) FROM %s"
+        ret = None
+        try:
+            cursor.execute(query, (table_name,))
+            count = cursor.fetchone()[0]
+            ret = count
+        except (Exception, psycopg2.Error) as error:
+            print(error)
+        finally:
+            cursor.close()
+            return ret
+
+    def count_ngrams(self) -> int:
+        return self.count_table("oapen_suggestions.ngrams")
+
+    def count_suggestions(self) -> int:
+        return self.count_table("oapen_suggestions.suggestions")
