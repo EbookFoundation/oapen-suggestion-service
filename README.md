@@ -2,9 +2,49 @@
 
 The OAPEN Suggestion Engine will suggest ebooks based on other books with similar content.
 
-## Running server
+## Running the project
 
-You can run all the servers together with `./all-dev.sh` -- after installing dependencies with `./setup.sh`
+The project uses Docker. To run the project, you will need to have Docker installed. You can find instructions for installing Docker [here](https://docs.docker.com/get-docker/).
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/EbookFoundation/oapen-suggestion-service.git
+```
+
+### 2. Install PostgreSQL
+
+The project uses PostgreSQL as a database. You can find instructions for installing PostgreSQL [here](https://www.postgresql.org/download/). 
+Make sure it is running, and a database is created.
+
+### 3. Link database to mining engine
+
+Create a `database.ini` file in `oapen-engine/src` with the following:
+
+```
+[postgresql]
+host=127.0.0.1
+database=postgres
+user=<username>
+password=<your-password>
+```
+
+### 4. Link database to API
+
+Edit `config.env` in `api/` with the following:
+
+```
+DATABASE_URL="postgres://<username>:<your-password>@127.0.0.1:5432/postgres"
+PORT=3001
+```
+
+### 5. Run the project
+
+```bash
+docker compose up
+```
+
+Try connecting to the API at `http://localhost:3001/`.
 
 ## Monorepo components
 
