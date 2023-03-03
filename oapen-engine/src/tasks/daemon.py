@@ -48,7 +48,7 @@ harvest_acc = 0
 refresh_acc = 0
 
 while True:
-    if harvest_acc >= 180:
+    if harvest_acc >= int(os.environ["HARVEST_PERIOD"]):
         urls = db.get_incomplete_urls()
         if len(urls) > 0:
             harvest()
