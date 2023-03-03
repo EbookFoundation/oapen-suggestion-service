@@ -9,7 +9,7 @@ async function mountSuggestions() {
     return;
   }
 
-  const url = (handle) => FETCH_URL_HOST + "/api/" + encodeURIComponent(handle);
+  const url = (handle) => FETCH_URL_HOST + "/api/" + handle;
 
   // get handle from property on mount element
   // TODO also get from URL
