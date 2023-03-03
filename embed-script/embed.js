@@ -1,3 +1,5 @@
+const FETCH_URL_HOST = "http://159.65.185.229:3001";
+
 async function mountSuggestions() {
   // get element to mount suggestions engine to: mount-suggestions
   const mountElement = document.getElementById("mount-suggestions");
@@ -7,8 +9,7 @@ async function mountSuggestions() {
     return;
   }
 
-  const url = (handle) =>
-    "http://159.65.185.229:3001/api/" + encodeURIComponent(handle);
+  const url = (handle) => FETCH_URL_HOST + "/api/" + encodeURIComponent(handle);
 
   // get handle from property on mount element
   // TODO also get from URL
