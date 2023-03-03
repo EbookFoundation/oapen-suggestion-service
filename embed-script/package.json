@@ -4,7 +4,7 @@
   "description": "",
   "main": "embed.js",
   "scripts": {
-    "start": "serve"
+    "start": "serve -p 3002"
   },
   "keywords": [],
   "author": "",
