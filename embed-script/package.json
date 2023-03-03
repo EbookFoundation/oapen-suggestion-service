@@ -1,0 +1,15 @@
+{
+  "name": "embed-script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "embed.js",
+  "scripts": {
+    "start": "serve"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
