@@ -1,10 +1,13 @@
-ITEMS_PER_IMPORT_THREAD = 50
+ITEMS_PER_IMPORT_THREAD = 25
 
 # Max thread count for data ingest
-IO_MAX_WORKERS = 5
+IO_MAX_WORKERS = 10
+
+# Delay for submitting new API call thread
+HARVEST_THREAD_SPAWN_DELAY = 2
 
 # Size of list of items to process into ngrams per process
-NGRAMS_PER_INSERT = 500
+NGRAMS_PER_INSERT = 100
 
 # Minimum number of ngrams that two items need to share in order to be similar
 SCORE_THRESHOLD = 1

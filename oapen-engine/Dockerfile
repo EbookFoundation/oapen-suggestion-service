@@ -10,13 +10,15 @@ ENV PYTHONFAULTHANDLER 1
 FROM base AS python-deps
 
 # Install pipenv and compilation dependencies
-RUN pip install pipenv
+RUN pip install pipenv nltk
 RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev build-essential linux-libc-dev python-dev gcc postgresql postgresql-contrib && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies in /.venv
 COPY Pipfile .
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy --skip-lock --verbose
 
+RUN python -m nltk.downloader punkt
+RUN python -m nltk.downloader stopwords
 
 FROM base AS runtime
 
@@ -27,15 +29,18 @@ ENV PATH="$PATH:/usr/local/bin"
 
 
 RUN apt-get update && apt-get install libpq5 -y
+
 # Create and switch to a new user
 RUN useradd --create-home appuser
 WORKDIR /home/appuser
 USER appuser
 
+
 ENV PYTHONPATH="/home/appuser/src"
 
 # Install application into container
 COPY . .
+
 
 # Run the application
 ENTRYPOINT ["python", "src/tasks/daemon.py"]

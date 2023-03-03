@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List
 
 import requests
+from logger.base_logger import logger
 from model.oapen_types import OapenItem, transform_item_data
 
 SERVER_PATH = "https://library.oapen.org"
@@ -32,7 +33,7 @@ def transform_multiple_items_data(items) -> List[OapenItem]:
     ]
 
 
-def get(endpoint, params=None, log=False):
+def get(endpoint, params=None):
     res = requests.get(url=SERVER_PATH + endpoint, params=params, timeout=(None, 120))
 
     ret = None
@@ -42,10 +43,9 @@ def get(endpoint, params=None, log=False):
         else:
             ret = res.content
     else:
-        print("GET {}: {}".format(res.url, res.status_code))
+        logger.error("ERROR - GET {}: {}".format(res.url, res.status_code))
 
-    if log:
-        print("GET {}: {}".format(res.url, res.status_code))
+        logger.debug("GET {}: {}".format(res.url, res.status_code))
     return ret
 
 
@@ -75,7 +75,15 @@ def get_collections_from_community(id):
 
 
 def get_all_collections():
-    res = get(endpoint=GET_COLLECTIONS, log=True)
+    res = get(endpoint=GET_COLLECTIONS)
+    return res
+
+
+def get_collection_items_by_endpoint(endpoint) -> List[OapenItem]:
+    res = get(endpoint=endpoint)
+
+    if res is not None and len(res) > 0:
+        return transform_multiple_items_data(res)
     return res
 
 
@@ -83,7 +91,6 @@ def get_collection_items_by_id(id, limit=None, offset=None) -> List[OapenItem]:
     res = get(
         endpoint=GET_COLLECTION_ITEMS.format(id=id),
         params={"expand": "bitstreams,metadata", "limit": limit, "offset": offset},
-        log=True,
     )
 
     if res is not None and len(res) > 0:
@@ -96,7 +103,6 @@ def get_collection_items_by_label(label, limit=None) -> List[OapenItem]:
     res = get(
         endpoint=GET_COLLECTION_BY_LABEL.format(label=label),
         params={"limit": limit},
-        log=True,
     )
 
     if res is not None and len(res) > 0:

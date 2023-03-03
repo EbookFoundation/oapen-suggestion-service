@@ -4,10 +4,11 @@ from threading import Lock
 from typing import List
 
 import config
+import tqdm
 from data.connection import close_connection, get_connection
 from data.oapen_db import OapenDB
+from logger.base_logger import logger
 from model.oapen_types import NgramRow, SuggestionRow
-from tqdm import tqdm
 
 # for each item in ngrams
 #   get suggestions for item
@@ -59,7 +60,10 @@ def run():
     all_items: List[NgramRow] = db.get_all_ngrams()
     suggestions: List[SuggestionRow] = []
 
-    print("Generating suggestions for {0} items.".format(str(len(all_items))))
+    # Remove any empty entries
+    all_items = list(filter(lambda item: len(item[1]) != 0))
+
+    logger.info("Generating suggestions for {0} items.".format(str(len(all_items))))
 
     futures = []
 
@@ -86,7 +90,14 @@ def run():
             )
             futures.append(future)
 
-        with tqdm(total=len(futures)) as pbar:
+        with tqdm.tqdm(
+            total=len(futures),
+            mininterval=0,
+            miniters=1,
+            leave=True,
+            position=0,
+            initial=0,
+        ) as pbar:
 
             for future in concurrent.futures.as_completed(futures):
                 future.result()
@@ -94,7 +105,7 @@ def run():
 
     db.add_many_suggestions(suggestions)
 
-    print(
+    logger.info(
         "Updated suggestions for "
         + str(len(all_items))
         + " items in "
