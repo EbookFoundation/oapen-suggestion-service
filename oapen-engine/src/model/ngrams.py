@@ -1,7 +1,6 @@
 import string
 from typing import List
 
-import nltk  # pylint: disable=import-error
 import pandas as pd  # pylint: disable=import-error
 from nltk import word_tokenize  # pylint: disable=import-error
 from nltk.corpus import stopwords  # pylint: disable=import-error
@@ -11,17 +10,6 @@ from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     NgramRowWithoutDate,
     OapenItem,
 )
-
-try:
-    nltk.data.find("tokenizers/punkt.zip")
-except LookupError:
-    nltk.download("punkt")
-
-try:
-    stopwords.words("english")
-except LookupError:
-    nltk.download("stopwords")
-
 
 stopword_paths = [
     "src/model/stopwords_broken.txt",

@@ -37,6 +37,8 @@ NgramRow = Union[NgramRowWithDate, NgramRowWithoutDate]
 
 NgramDict = Dict[str, int]
 
+UrlRow = Tuple[str, bool]
+
 
 def transform_item_data(item, text) -> OapenItem:
     return OapenItem(
