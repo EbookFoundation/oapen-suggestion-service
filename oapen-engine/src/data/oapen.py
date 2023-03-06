@@ -25,6 +25,10 @@ GET_UPDATED_ITEMS = (
 # This is the only community we care about right now
 BOOKS_COMMUNITY_ID = "3579505d-9d1b-4745-bcaf-a37329d25c69"
 
+GET_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36"
+}
+
 
 def transform_multiple_items_data(items) -> List[OapenItem]:
     return [
@@ -34,7 +38,13 @@ def transform_multiple_items_data(items) -> List[OapenItem]:
 
 
 def get(endpoint, params=None):
-    res = requests.get(url=SERVER_PATH + endpoint, params=params, timeout=(None, 120))
+
+    res = requests.get(
+        url=SERVER_PATH + endpoint,
+        params=params,
+        timeout=(None, 120),
+        headers=GET_HEADERS,
+    )
 
     ret = None
     if res.status_code == 200:

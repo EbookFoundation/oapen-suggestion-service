@@ -4,6 +4,7 @@ import signal
 import sys
 import threading
 import time
+from collections import Counter
 
 import config
 from data.connection import close_connection, get_connection
@@ -39,7 +40,8 @@ def run():
     ngrams_event = manager.Event()
     db_event = threading.Event()
 
-    items_produced, producers_done, consumers_done, items_finished = 0, 0, 0, 0
+    counter = Counter(items_found=0, ngrams_generated=0, items_inserted=0)
+    producers_done, consumers_done = 0, 0
     producer_futures = []
     consumer_futures = []
     db_futures = []
@@ -55,7 +57,7 @@ def run():
         miniters=1,
         initial=0,
     )
-    pbar.set_postfix({"items found": items_produced})
+    pbar.set_postfix({"items found": counter["items_found"]})
 
     time_start = time.perf_counter()
 
@@ -77,19 +79,19 @@ def run():
     # Start db thread to keep inserting as ngrams are generated
     db_futures.append(db_executor.submit(db_task, db, db_queue, db_event))
 
-    def refresh(future, pbar):
+    def refresh(future, pbar, counter):
         pbar.update(1)
-        pbar.set_postfix({"items found": items_produced})
+        counter["items_found"] += future.result()
+        pbar.set_postfix({"items found": counter["items_found"]})
         pbar.refresh()
 
     for url in urls:
         future = io_executor.submit(harvest_task, url[0], item_queue)
-        future.add_done_callback(lambda x: refresh(x, pbar))
+        future.add_done_callback(lambda x: refresh(x, pbar, counter))
         producer_futures.append(future)
         time.sleep(config.HARVEST_THREAD_SPAWN_DELAY)
 
     for future in concurrent.futures.as_completed(producer_futures):
-        items_produced += future.result()
         producers_done += 1
 
     if producers_done == len(producer_futures) or io_executor._shutdown:
@@ -100,7 +102,7 @@ def run():
     for future in concurrent.futures.as_completed(consumer_futures):
         res = future.result()
         consumers_done += 1
-        items_finished += res
+        counter["ngrams_generated"] += res
 
     db_queue.join()
     ngrams_executor.shutdown(wait=True)
@@ -109,7 +111,7 @@ def run():
 
     pbar.close()
 
-    logger.info("Completed {0} items".format(items_finished))
+    logger.info("Completed {0} items".format(counter["ngrams_generated"]))
     logger.info("Harvest finished in " + str(time.perf_counter() - time_start) + "s.")
 
     close_connection(connection)
