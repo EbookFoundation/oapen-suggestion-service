@@ -30,6 +30,7 @@ def signal_handler(signal, frame):
 
 
 def run():
+    logger.info("Getting items for OAPEN Suggestion DB...")
     manager = multiprocessing.Manager()
 
     item_queue = multiprocessing.JoinableQueue()
@@ -56,7 +57,6 @@ def run():
     )
     pbar.set_postfix({"items found": items_produced})
 
-    logger.info("Getting items for OapenDB...")
     time_start = time.perf_counter()
 
     ngrams_executor = concurrent.futures.ThreadPoolExecutor(

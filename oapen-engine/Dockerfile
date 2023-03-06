@@ -17,8 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev build
 COPY Pipfile .
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy --skip-lock --verbose
 
-RUN python -m nltk.downloader punkt
-RUN python -m nltk.downloader stopwords
+
 
 FROM base AS runtime
 
@@ -35,11 +34,19 @@ RUN useradd --create-home appuser
 WORKDIR /home/appuser
 USER appuser
 
+RUN [ "python", "-c", "import nltk; nltk.download('punkt', download_dir='/home/appuser/nltk_data'); nltk.download('stopwords', download_dir='/home/appuser/nltk_data')" ]
 
 ENV PYTHONPATH="/home/appuser/src"
 
 # Install application into container
 COPY . .
+
+USER root
+
+RUN chmod u+x scripts/clean.sh
+RUN chmod u+x scripts/refresh.sh
+
+USER appuser
 
 
 # Run the application
