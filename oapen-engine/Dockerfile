@@ -43,11 +43,9 @@ COPY . .
 
 USER root
 
-RUN chmod u+x scripts/clean.sh
-RUN chmod u+x scripts/refresh.sh
+RUN chmod -R +x scripts
 
 USER appuser
 
-
 # Run the application
-ENTRYPOINT ["python", "src/tasks/daemon.py"]
+ENTRYPOINT ["./scripts/run.sh"]

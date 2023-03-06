@@ -1,32 +1,17 @@
 # OAPEN Suggestion Service
 ## Getting Started
-### Database Configuration (Local)
-Create a `database.ini` file in `oapen-engine/src` with the following:
+### Running the application
+Ensure that you have followed the setup instructions in the top level README, then run:
 ```
-[postgresql]
-host=localhost
-database=postgres
-user=<username>
-password=<your-password>
+docker-compose up --build
 ```
-### Environment setup
+### Cleaning the database manually
 ```
-cd oapen-engine
-make setup-env
+./scripts/clean.sh
 ```
-### Seeding the database
+### Refreshing items + suggestions manually
 ```
-make clean_db
-make seed_db
-```
-### Running ngrams
-```
-make run
-```
-## How to deactivate virtual environment
-While the virtual environment is running, type:
-```
-deactivate
+./scripts/refresh.sh
 ```
 ## How to remove/filter out bad ngrams
 Members of EbookFoundation can create a pull request to edit the stopwords used to filter out bad trigrams:
