@@ -34,7 +34,7 @@ def run():
     logger.info("Getting items for OAPEN Suggestion DB...")
     manager = multiprocessing.Manager()
 
-    item_queue = multiprocessing.JoinableQueue()
+    item_queue = multiprocessing.JoinableQueue(config.IO_MAX_WORKERS * 2)
     db_queue = multiprocessing.JoinableQueue()
 
     ngrams_event = manager.Event()

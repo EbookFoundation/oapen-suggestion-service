@@ -61,7 +61,7 @@ def run():
     suggestions: List[SuggestionRow] = []
 
     # Remove any empty entries
-    all_items = list(filter(lambda item: len(item[1]) != 0))
+    all_items = list(filter(lambda item: len(item[1]) != 0, all_items))
 
     logger.info("Generating suggestions for {0} items.".format(str(len(all_items))))
 
