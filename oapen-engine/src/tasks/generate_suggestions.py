@@ -4,15 +4,11 @@ from threading import Lock
 from typing import List
 
 import config
-import tqdm
 from data.connection import close_connection, get_connection
 from data.oapen_db import OapenDB
 from logger.base_logger import logger
 from model.oapen_types import NgramRow, SuggestionRow
-
-# for each item in ngrams
-#   get suggestions for item
-#   store in database
+from tqdm.auto import tqdm
 
 # initial seed -> get suggestions on everything n^2
 # weekly update ->
@@ -21,49 +17,54 @@ from model.oapen_types import NgramRow, SuggestionRow
 # optimization: only suggest once per pair
 
 
-def suggestion_task(items, all_items, mutex, suggestions):
+def get_ngrams_list(arr: List[NgramRow]):
+    return [x[0] for x in arr[1][0 : min(len(arr[1]), config.TOP_K_NGRAMS_COUNT)]]
+
+
+def suggestion_task(items, all_items, db_mutex, db):
+    suggestions: List[SuggestionRow] = []
     for item_a in items:
         handle_a = item_a[0]
-        ngrams_a = [
-            x[0] for x in item_a[1][0 : min(len(item_a[1]), config.TOP_K_NGRAMS_COUNT)]
-        ]
+        ngrams_a = get_ngrams_list(item_a)
 
         item_suggestions = []
 
         for item_b in all_items:
             handle_b = item_b[0]
-            ngrams_b = [
-                x[0]
-                for x in item_b[1][0 : min(len(item_b[1]), config.TOP_K_NGRAMS_COUNT)]
-            ]
+
             if handle_a == handle_b:
                 continue
 
-            repeated = len(list(filter(lambda x: x in ngrams_b, ngrams_a)))
+            ngrams_b = get_ngrams_list(item_b)
 
-            if repeated >= config.SCORE_THRESHOLD:
-                item_suggestions.append((handle_b, repeated))
+            ngrams_shared = len(list(filter(lambda x: x in ngrams_b, ngrams_a)))
 
-        mutex.acquire()
+            if ngrams_shared >= config.SCORE_THRESHOLD:
+                item_suggestions.append((handle_b, ngrams_shared))
+
         item_suggestions.sort(key=lambda x: x[1], reverse=True)
-        mutex.release()
-
         suggestions.append((handle_a, handle_a, item_suggestions))
+
+    count = len(suggestions)
+
+    db_mutex.acquire()
+    db.add_many_suggestions(suggestions)
+    db_mutex.release()
+
+    return count
 
 
 def run():
-
-    mutex = Lock()
+    db_mutex = Lock()
     connection = get_connection()
     db = OapenDB(connection)
 
     all_items: List[NgramRow] = db.get_all_ngrams()
-    suggestions: List[SuggestionRow] = []
 
     # Remove any empty entries
     all_items = list(filter(lambda item: len(item[1]) != 0, all_items))
 
-    logger.info("Generating suggestions for {0} items.".format(str(len(all_items))))
+    logger.info("Getting suggestions for {0} items...".format(str(len(all_items))))
 
     futures = []
 
@@ -80,38 +81,38 @@ def run():
 
     chunks = [all_items[i : i + n] for i in range(0, len(all_items), n)]
 
-    with concurrent.futures.ThreadPoolExecutor(
+    items_updated = 0
+
+    executor = concurrent.futures.ThreadPoolExecutor(
         max_workers=config.SUGGESTIONS_MAX_WORKERS
-    ) as executor:
+    )
 
-        for chunk in chunks:
-            future = executor.submit(
-                suggestion_task, chunk, all_items, mutex, suggestions
-            )
-            futures.append(future)
+    for chunk in chunks:
+        future = executor.submit(suggestion_task, chunk, all_items, db_mutex, db)
+        futures.append(future)
 
-        with tqdm.tqdm(
-            total=len(futures),
-            mininterval=0,
-            miniters=1,
-            leave=True,
-            position=0,
-            initial=0,
-        ) as pbar:
-
-            for future in concurrent.futures.as_completed(futures):
-                future.result()
-                pbar.update(1)
-
-    db.add_many_suggestions(suggestions)
+    with tqdm(
+        total=len(all_items),
+        mininterval=0,
+        miniters=1,
+        leave=True,
+        position=0,
+        initial=0,
+    ) as pbar:
+        for future in concurrent.futures.as_completed(futures):
+            logger.info(future.result())
+            items_updated += future.result()
+            pbar.update(future.result())
 
     logger.info(
         "Updated suggestions for "
-        + str(len(all_items))
+        + str(items_updated)
         + " items in "
         + str(time.perf_counter() - time_start)
         + "s."
     )
+
+    executor.shutdown(wait=True)
 
     close_connection(connection)
 
