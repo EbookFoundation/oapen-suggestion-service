@@ -42,7 +42,9 @@ if int(os.environ["RUN_CLEAN"]) == 1 or (
 ):
     run_clean()
 
-harvest()
+# harvest()
+
+run_generate_suggestions()
 
 harvest_acc = 0
 refresh_acc = 0

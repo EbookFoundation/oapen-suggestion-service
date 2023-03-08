@@ -24,10 +24,9 @@ def get_ngrams_list(arr: List[NgramRow]):
 def suggestion_task(items, all_items, db_mutex, db):
     suggestions: List[SuggestionRow] = []
     for item_a in items:
-        handle_a = item_a[0]
-        ngrams_a = get_ngrams_list(item_a)
-
         item_suggestions = []
+
+        handle_a = item_a[0]
 
         for item_b in all_items:
             handle_b = item_b[0]
@@ -35,9 +34,7 @@ def suggestion_task(items, all_items, db_mutex, db):
             if handle_a == handle_b:
                 continue
 
-            ngrams_b = get_ngrams_list(item_b)
-
-            ngrams_shared = len(list(filter(lambda x: x in ngrams_b, ngrams_a)))
+            ngrams_shared = len(list(filter(lambda x: x in item_b[1], item_a[1])))
 
             if ngrams_shared >= config.SCORE_THRESHOLD:
                 item_suggestions.append((handle_b, ngrams_shared))
@@ -59,10 +56,7 @@ def run():
     connection = get_connection()
     db = OapenDB(connection)
 
-    all_items: List[NgramRow] = db.get_all_ngrams()
-
-    # Remove any empty entries
-    all_items = list(filter(lambda item: len(item[1]) != 0, all_items))
+    all_items: List[NgramRow] = db.get_all_ngrams(get_empty=False)
 
     logger.info("Getting suggestions for {0} items...".format(str(len(all_items))))
 
@@ -70,10 +64,8 @@ def run():
 
     # Get only top k ngrams for all items before processing
     for item in all_items:
-        item = (
-            item[0],
-            [x[0] for x in item[1]][0 : min(len(item[1]), config.TOP_K_NGRAMS_COUNT)],
-        )
+        ngrams = get_ngrams_list(item)
+        item = (item[0], ngrams)
 
     time_start = time.perf_counter()
 
@@ -91,18 +83,18 @@ def run():
         future = executor.submit(suggestion_task, chunk, all_items, db_mutex, db)
         futures.append(future)
 
-    with tqdm(
+    pbar = tqdm(
         total=len(all_items),
         mininterval=0,
         miniters=1,
         leave=True,
         position=0,
         initial=0,
-    ) as pbar:
-        for future in concurrent.futures.as_completed(futures):
-            logger.info(future.result())
-            items_updated += future.result()
-            pbar.update(future.result())
+    )
+
+    for future in concurrent.futures.as_completed(futures):
+        items_updated += future.result()
+        pbar.update(future.result())
 
     logger.info(
         "Updated suggestions for "
@@ -114,6 +106,7 @@ def run():
 
     executor.shutdown(wait=True)
 
+    pbar.close()
     close_connection(connection)
 
 
