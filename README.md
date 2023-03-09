@@ -4,7 +4,7 @@ The OAPEN Suggestion Engine will suggest ebooks based on other books with simila
 
 ## Running server
 
-You can run all the servers together with `./all-dev.sh` -- after installing dependencies with `./setup.sh`
+You can run all the servers together with `./all-dev.sh` -- after installing dependencies with `. ./setup.sh`
 
 ## Monorepo components
 
