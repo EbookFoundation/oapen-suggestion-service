@@ -1,5 +1,6 @@
 import concurrent.futures
 import time
+from collections import Counter
 from threading import Lock
 from typing import List
 
@@ -73,15 +74,16 @@ def run():
 
     chunks = [all_items[i : i + n] for i in range(0, len(all_items), n)]
 
-    items_updated = 0
+    counter = Counter(items_updated=0)
 
     executor = concurrent.futures.ThreadPoolExecutor(
         max_workers=config.SUGGESTIONS_MAX_WORKERS
     )
 
-    for chunk in chunks:
-        future = executor.submit(suggestion_task, chunk, all_items, db_mutex, db)
-        futures.append(future)
+    def refresh(future, counter, pbar):
+        pbar.update(future.result())
+        counter["items_updated"] += future.result()
+        pbar.refresh()
 
     pbar = tqdm(
         total=len(all_items),
@@ -92,13 +94,17 @@ def run():
         initial=0,
     )
 
+    for chunk in chunks:
+        future = executor.submit(suggestion_task, chunk, all_items, db_mutex, db)
+        future.add_done_callback(lambda x: refresh(x, counter, pbar))
+        futures.append(future)
+
     for future in concurrent.futures.as_completed(futures):
-        items_updated += future.result()
-        pbar.update(future.result())
+        pass
 
     logger.info(
         "Updated suggestions for "
-        + str(items_updated)
+        + str(counter["items_updated"])
         + " items in "
         + str(time.perf_counter() - time_start)
         + "s."
