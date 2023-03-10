@@ -147,7 +147,7 @@ class OapenDB:
         finally:
             cursor.close()
 
-    # get_empty = True -> return all rows with at least one ngram
+    # get_empty = True -> Include rows with no ngrams in result
     def get_all_ngrams(self, get_empty=True) -> List[NgramRow]:
         cursor = self.connection.cursor()
         query = """
