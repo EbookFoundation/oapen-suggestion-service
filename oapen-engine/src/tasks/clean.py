@@ -46,6 +46,10 @@ def create_schema(connection) -> None:
             updated_at  timestamp default current_timestamp
         );
 
+        CREATE TABLE IF NOT EXISTS oapen_suggestions.stopwords (
+            stopword    text        PRIMARY KEY
+        );
+
         CREATE TRIGGER update_suggestion_modtime BEFORE UPDATE ON oapen_suggestions.suggestions FOR EACH ROW EXECUTE PROCEDURE update_modtime();
         CREATE TRIGGER update_ngrams_modtime BEFORE UPDATE ON oapen_suggestions.ngrams FOR EACH ROW EXECUTE PROCEDURE update_modtime();
         CREATE TRIGGER update_endpoint_modtime BEFORE UPDATE ON oapen_suggestions.endpoints FOR EACH ROW EXECUTE PROCEDURE update_modtime();
@@ -63,6 +67,7 @@ def drop_schema(connection) -> None:
         DROP TABLE IF EXISTS oapen_suggestions.suggestions CASCADE;
         DROP TABLE IF EXISTS oapen_suggestions.ngrams CASCADE;
         DROP TABLE IF EXISTS oapen_suggestions.endpoints CASCADE;
+        DROP TABLE IF EXISTS oapen_suggestions.stopwords CASCADE;
         DROP TYPE IF EXISTS oapen_suggestions.suggestion CASCADE;
         DROP TYPE IF EXISTS oapen_suggestions.ngram CASCADE;
         """

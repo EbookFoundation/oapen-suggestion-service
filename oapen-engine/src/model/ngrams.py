@@ -10,26 +10,9 @@ from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     NgramRowWithoutDate,
     OapenItem,
 )
+from .stopwords import get_all_stopwords
 
-stopword_paths = [
-    "src/model/stopwords_broken.txt",
-    "src/model/stopwords_dutch.txt",
-    "src/model/stopwords_filter.txt",
-    "src/model/stopwords_publisher.txt",
-]
-
-stopwords_list = []
-
-for p in stopword_paths:
-    with open(p, "r") as f:
-        stopwords_list += [line.rstrip() for line in f]
-
-STOPWORDS = (
-    stopwords.words("english")
-    + stopwords.words("german")
-    + stopwords.words("dutch")
-    + stopwords_list
-)
+STOPWORDS = get_all_stopwords()
 
 
 def process_text(text):

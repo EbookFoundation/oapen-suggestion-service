@@ -58,6 +58,40 @@ class OapenDB:
         cursor.close()
         return args
 
+    def mogrify_stopwords(self, stopwords: List[str]) -> str:
+        cursor = self.connection.cursor()
+        stopwords = [(s,) for s in stopwords]
+        args = ",".join(
+            cursor.mogrify(
+                "(%s)",
+                (
+                    tuple(
+                        x,
+                    )
+                ),
+            ).decode("utf-8")
+            for x in stopwords
+        )
+        cursor.close()
+        return args
+
+    def mogrify_handles(self, handles: List[str]) -> str:
+        cursor = self.connection.cursor()
+        stopwords = [(h,) for h in handles]
+        args = ",".join(
+            cursor.mogrify(
+                "%s",
+                (
+                    tuple(
+                        x,
+                    )
+                ),
+            ).decode("utf-8")
+            for x in stopwords
+        )
+        cursor.close()
+        return args
+
     def table_exists(self, table):
         cursor = self.connection.cursor()
         query = """
@@ -165,6 +199,27 @@ class OapenDB:
             cursor.close()
             return ret
 
+    def get_ngrams_with_handles(self, handles: List[str]) -> List[NgramRow]:
+        cursor = self.connection.cursor()
+        ret = None
+        try:
+            args = self.mogrify_handles(handles)
+            query = """
+                    SELECT handle, CAST (ngrams AS oapen_suggestions.ngram[]), created_at, updated_at 
+                    FROM oapen_suggestions.ngrams
+                    WHERE handle IN ({});
+                    """.format(
+                args
+            )
+            cursor.execute(query)
+            records = cursor.fetchall
+            ret = records
+        except (Exception, psycopg2.Error) as error:
+            logger.error(error)
+        finally:
+            cursor.close()
+            return ret
+
     def get_all_suggestions(self) -> List[SuggestionRow]:
         cursor = self.connection.cursor()
         query = """
@@ -203,6 +258,9 @@ class OapenDB:
 
     def count_suggestions(self) -> int:
         return self.count_table("'oapen_suggestions.suggestions'")
+
+    def count_stopwords(self) -> int:
+        return self.count_table("'oapen_suggestions.stopwords'")
 
     def add_urls(self, urls):
         try:
@@ -258,3 +316,74 @@ class OapenDB:
             logger.error(error)
         finally:
             cursor.close()
+
+    def get_new_stopwords(self, stopwords):
+        ret = None
+        try:
+            cursor = self.connection.cursor()
+            args = self.mogrify_stopwords(stopwords)
+            query = """
+                DROP TABLE IF EXISTS temp_stopwords;
+                CREATE TEMPORARY TABLE temp_stopwords (stopword text);
+                INSERT INTO temp_stopwords (stopword) VALUES {};
+                SELECT DISTINCT temp_stopwords.stopword
+                FROM (
+                    temp_stopwords LEFT OUTER JOIN oapen_suggestions.stopwords
+                    ON temp_stopwords.stopword=oapen_suggestions.stopwords.stopword
+                    )
+                WHERE oapen_suggestions.stopwords.stopword IS NULL;
+                """.format(
+                args
+            )
+
+            cursor.execute(query)
+            records = cursor.fetchall()
+            ret = records
+        except (Exception, psycopg2.Error) as error:
+            logger.error(error)
+        finally:
+            cursor.close()
+            return ret
+
+    def update_stopwords(self, stopwords):
+        try:
+            cursor = self.connection.cursor()
+            args = self.mogrify_stopwords(stopwords)
+            query = """
+                DELETE FROM oapen_suggestions.stopwords;
+                INSERT INTO oapen_suggestions.stopwords (stopword)
+                VALUES {args};
+                """.format(
+                args
+            )
+
+            cursor.execute(query)
+        except (Exception, psycopg2.Error) as error:
+            logger.error(error)
+        finally:
+            cursor.close()
+
+    def get_all_items_containing_stopwords(self, stopwords):
+        ret = None
+        try:
+            cursor = self.connection.cursor()
+            query = """
+                    SELECT handle
+                    FROM oapen_suggestions.ngrams
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM UNNEST(ngrams) AS ng
+                        WHERE ng.ngram ~ '(^|\s)({})($|\s)'
+                    );
+                """.format(
+                "|".join(stopwords)
+            )
+
+            cursor.execute(query)
+            records = cursor.fetchall()
+            ret = records
+        except (Exception, psycopg2.Error) as error:
+            logger.error(error)
+        finally:
+            cursor.close()
+            return ret
