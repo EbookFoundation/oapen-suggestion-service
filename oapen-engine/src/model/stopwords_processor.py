@@ -1,13 +1,20 @@
 import nltk
 from nltk.corpus import stopwords
 from functools import reduce
+import os
 
 # This is run as a precaution in case of the error "NLTK stop words not found",
 # which makes sure to download the stop words after installing nltk
 nltk.download("stopwords")
 
 # add additional custom stopwords to ./custom_lists/ folder and update the reference here
-custom_lists_folder = "model/stopwords/"
+# print working directory
+print("Working directory: " + os.getcwd())
+
+current_dir = os.path.realpath(os.path.dirname(__file__))
+print("Local script directory: " + current_dir)
+
+custom_lists_folder = current_dir + "/stopwords/"
 custom_stopwords_in_use = [
     "broken",
     "dutch",
