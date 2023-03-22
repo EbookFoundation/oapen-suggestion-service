@@ -25,9 +25,8 @@ class OapenItem:
         return hash(self.handle, "handle")
 
 
-Suggestion = Tuple[str, float]
-SuggestionRowWithoutDate = Tuple[str, str, List[Suggestion]]
-SuggestionRowWithDate = Tuple[str, str, List[Suggestion], datetime, datetime]
+SuggestionRowWithoutDate = Tuple[str, str, str, int]
+SuggestionRowWithDate = Tuple[str, str, str, int, datetime, datetime]
 SuggestionRow = Union[SuggestionRowWithDate, SuggestionRowWithoutDate]
 
 Ngram = Tuple[str, int]

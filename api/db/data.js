@@ -8,11 +8,10 @@ async function querySuggestions(handle, threshold = 0) {
   await validate.checkHandle(handle);
 
   const query = new PQ({
-    text: `SELECT s.*
-    FROM (SELECT handle, unnest(suggestions::oapen_suggestions.suggestion[]) AS suggestion 
-    FROM oapen_suggestions.suggestions) s
+    text: `SELECT suggestion AS handle, score
+    FROM oapen_suggestions.suggestions
     WHERE handle = $1
-    AND (s.suggestion).similarity >= $2`,
+    AND score >= $2`,
     values: [handle, threshold],
   });
 
@@ -22,10 +21,12 @@ async function querySuggestions(handle, threshold = 0) {
 
   if (result?.["error"])
     return result;
+
+  console.log(result);
   
   const data = {
     "handle": handle,
-    "suggestions": result.map((e) => {return e["suggestion"];})
+    "suggestions": result
   };
   
   return data;

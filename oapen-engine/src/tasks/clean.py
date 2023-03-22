@@ -14,7 +14,6 @@ def create_schema(connection) -> None:
         """
         CREATE SCHEMA oapen_suggestions;
 
-        CREATE TYPE oapen_suggestions.suggestion AS (handle text, similarity float);
         CREATE TYPE oapen_suggestions.ngram AS (ngram text, count int);
 
         CREATE OR REPLACE FUNCTION update_modtime() 
@@ -26,11 +25,13 @@ def create_schema(connection) -> None:
         $$ language 'plpgsql';
 
         CREATE TABLE IF NOT EXISTS oapen_suggestions.suggestions (
-            handle      text    PRIMARY KEY,
+            handle      text,
             name		text,
-            suggestions	oapen_suggestions.suggestion[],
+            suggestion	text,
+            score       int,
             created_at  timestamp default current_timestamp,
-            updated_at  timestamp default current_timestamp
+            updated_at  timestamp default current_timestamp,
+            PRIMARY KEY (handle, suggestion)
         );
 
         CREATE TABLE IF NOT EXISTS oapen_suggestions.ngrams (
@@ -49,6 +50,12 @@ def create_schema(connection) -> None:
         CREATE TRIGGER update_suggestion_modtime BEFORE UPDATE ON oapen_suggestions.suggestions FOR EACH ROW EXECUTE PROCEDURE update_modtime();
         CREATE TRIGGER update_ngrams_modtime BEFORE UPDATE ON oapen_suggestions.ngrams FOR EACH ROW EXECUTE PROCEDURE update_modtime();
         CREATE TRIGGER update_endpoint_modtime BEFORE UPDATE ON oapen_suggestions.endpoints FOR EACH ROW EXECUTE PROCEDURE update_modtime();
+
+        CREATE INDEX idx_suggestion
+        ON oapen_suggestions.suggestions(handle, suggestion);
+
+        ALTER TABLE oapen_suggestions.suggestions
+            ADD CONSTRAINT uq_Suggestion UNIQUE(handle, suggestion);
         """
     )
 
@@ -63,7 +70,6 @@ def drop_schema(connection) -> None:
         DROP TABLE IF EXISTS oapen_suggestions.suggestions CASCADE;
         DROP TABLE IF EXISTS oapen_suggestions.ngrams CASCADE;
         DROP TABLE IF EXISTS oapen_suggestions.endpoints CASCADE;
-        DROP TYPE IF EXISTS oapen_suggestions.suggestion CASCADE;
         DROP TYPE IF EXISTS oapen_suggestions.ngram CASCADE;
         """
     )

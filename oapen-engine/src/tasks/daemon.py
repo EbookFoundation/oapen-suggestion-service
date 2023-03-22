@@ -23,12 +23,6 @@ def refresh():
     run_generate_suggestions()
 
 
-logger.info("Daemon up")
-
-conn = get_connection()
-db = OapenDB(conn)
-
-
 def signal_handler(signal, frame):
     conn.close()
     logger.info("Daemon exiting.")
@@ -37,8 +31,15 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
+logger.info("Daemon up")
+
+conn = get_connection()
+db = OapenDB(conn)
+
 if int(os.environ["RUN_CLEAN"]) == 1 or (
-    not db.table_exists("suggestions") or not db.table_exists("ngrams")
+    not db.table_exists("suggestions")
+    or not db.table_exists("ngrams")
+    or not db.table_exists("endpoints")
 ):
     run_clean()
 
