@@ -1,11 +1,11 @@
 import string
 from typing import List
 
-import nltk  
-import pandas as pd  
-from nltk import word_tokenize  
-from nltk.corpus import stopwords  
+import nltk 
+from nltk import word_tokenize 
+from nltk.corpus import stopwords 
 from .stopwords_processor import STOPWORDS
+import pandas as pd  
 
 nltk.download('punkt')
 
@@ -15,6 +15,25 @@ from .oapen_types import (
     OapenItem,
 )
 
+stopword_paths = [
+    "src/model/stopwords_broken.txt",
+    "src/model/stopwords_dutch.txt",
+    "src/model/stopwords_filter.txt",
+    "src/model/stopwords_publisher.txt",
+]
+
+stopwords_list = []
+
+for p in stopword_paths:
+    with open(p, "r") as f:
+        stopwords_list += [line.rstrip() for line in f]
+
+STOPWORDS = (
+    stopwords.words("english")
+    + stopwords.words("german")
+    + stopwords.words("dutch")
+    + stopwords_list
+)
 def process_text(text):
     l_text = text.lower()
     p_text = "".join([c for c in l_text if c not in string.punctuation])

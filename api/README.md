@@ -35,6 +35,12 @@ npm start
 
   - e.g. http://localhost:3001/api/20.400.12657/47581
 
+- `Endpoint: /GET http://localhost:3001/api/{handle}/?threshold={integer}`
+
+  - e.g. http://localhost:3001/api/20.400.12657/47581/?threshold=5
+
 - `Endpoint: /GET http://localhost:3001/api/{handle}/ngrams`
 
   - e.g. http://localhost:3001/api/20.400.12657/47581/ngrams
+
+

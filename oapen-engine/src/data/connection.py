@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import psycopg2
 from data.config import config
+from logger.base_logger import logger
 from psycopg2.extras import register_composite
 
 
@@ -9,13 +10,13 @@ def get_connection():
     try:
         params = config()
 
-        print("Connecting to the PostgreSQL database...")
+        logger.info("Connecting to the PostgreSQL database...")
         conn = psycopg2.connect(**params)
         conn.autocommit = True
 
         cur = conn.cursor()
 
-        print("Connected to database.")
+        logger.info("Connected to database.")
 
         cur.close()
 
@@ -24,7 +25,7 @@ def get_connection():
 
         return conn
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+        logger.error(error)
     finally:
         return conn
 
@@ -32,4 +33,4 @@ def get_connection():
 def close_connection(conn):
     if conn is not None:
         conn.close()
-        print("Database connection closed.")
+        logger.info("Database connection closed.")

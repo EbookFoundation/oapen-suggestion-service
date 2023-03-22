@@ -9,6 +9,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", apiRoutes);
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+
+  next();
+});
+
 app.use("*", (req, res) => {
   return res.status(404).json({ error: "Resource not found" });
 });

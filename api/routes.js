@@ -8,11 +8,11 @@ const data = require("./db/data.js");
 router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)", async (req, res) => {
   try {
     let handle = req.params.handle;
+    let threshold = parseInt(req.query.threshold) || 0;
+
     await validate.checkHandle(handle);
 
-    let responseData = await data.querySuggestions(handle);
-
-    const user = {};
+    let responseData = await data.querySuggestions(handle, threshold);
 
     if (
       responseData?.["error"] &&
@@ -22,6 +22,8 @@ router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)", async (req, res) => {
     } else if (responseData?.["error"]) {
       return res.status(500).json(responseData);
     }
+
+    res.header("Access-Control-Allow-Origin", "*");
 
     res.status(200).json({
       items: responseData,
@@ -48,6 +50,8 @@ router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)/ngrams", async (req, res) => {
     } else if (responseData.error) {
       return res.status(500).json(responseData);
     }
+
+    res.header("Access-Control-Allow-Origin", "*");
 
     return res.status(200).json(responseData);
   } catch (e) {
