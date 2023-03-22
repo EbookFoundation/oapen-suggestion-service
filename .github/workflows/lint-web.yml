@@ -1,4 +1,4 @@
-name: Web lint checker
+name: Build and test web
 on: push
 jobs:
   test:
