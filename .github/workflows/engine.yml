@@ -29,6 +29,6 @@ jobs:
       - name: Run unit tests
         working-directory: ${{env.working-directory}}
         run: |
-          pipenv run python src/test/data/run_tests.py
+          cd src && pipenv run python test/data/run_tests.py
         
       
