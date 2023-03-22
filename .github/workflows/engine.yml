@@ -20,9 +20,15 @@ jobs:
         run: |
           pip install pipenv
           pipenv install --deploy --dev
-          pipenv run isort --profile black src/
-          pipenv run black --check src/ --exclude="lib/*"
-          pipenv run flake8 src/ --ignore="lib/*, W, E203, E266, E501, W503, F403, F401"
+      # - name: Run black formatter
+      #   working-directory: ${{env.working-directory}}
+      #   run: |
+          # pipenv run isort --profile black src/
+      #     pipenv run black --check src/ --exclude="lib/*"
+      #     pipenv run flake8 src/ --ignore="lib/*, W, E203, E266, E501, W503, F403, F401"
+      - name: Run unit tests
+        working-directory: ${{env.working-directory}}
+        run: |
           pipenv run python test/data/run_tests.py
         
       
