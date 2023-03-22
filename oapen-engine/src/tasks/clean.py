@@ -91,7 +91,15 @@ def seed_endpoints(connection):
 
     COLLECTION_IMPORT_LIMIT = int(os.environ["COLLECTION_IMPORT_LIMIT"])
 
+    SKIPPED_COLLECTIONS = [
+        "1f7c8abd-677e-4275-8b4e-3d8da49f7b36",
+        "93223e33-3c7c-47bd-9356-a7878b2814a0",
+    ]
+
     for collection in collections:
+        if collection["uuid"] in SKIPPED_COLLECTIONS:
+            continue
+
         num_items = (
             collection["numberItems"]
             if COLLECTION_IMPORT_LIMIT == 0
