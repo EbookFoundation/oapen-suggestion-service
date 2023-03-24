@@ -21,4 +21,4 @@ SUGGESTIONS_MAX_ITEMS = 25
 
 # Update items that were modifed since X days ago
 UPDATE_DAYS_BEFORE = 30
-REFRESH_IMPORT_LIMIT = 50
+REFRESH_IMPORT_LIMIT = 0
