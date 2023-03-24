@@ -1,18 +1,16 @@
 import string
 from typing import List
 
-import nltk 
-from nltk import word_tokenize 
+import nltk
+import pandas as pd
+from nltk import word_tokenize
+
 from .stopwords_processor import STOPWORDS
-import pandas as pd  
 
-nltk.download('punkt')
+nltk.download("punkt")
 
-from .oapen_types import (
-    NgramDict,
-    NgramRowWithoutDate,
-    OapenItem,
-)
+from .oapen_types import NgramDict, NgramRowWithoutDate, OapenItem
+
 
 def process_text(text):
     l_text = text.lower()
