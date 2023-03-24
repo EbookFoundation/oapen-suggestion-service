@@ -10,6 +10,9 @@ psycopg2 = "2.9.3"
 pandas = "*"
 scikit-learn = "*"
 lxml = "*"
+charset_normalizer = "*"
+idna = "*"
+certifi = "*"
 
 [dev-packages]
 pytest = "*"
