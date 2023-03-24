@@ -38,9 +38,7 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 if int(os.environ["RUN_CLEAN"]) == 1 or (
-    not db.table_exists("suggestions")
-    or not db.table_exists("ngrams")
-    or not db.table_exists("endpoints")
+    not db.table_exists("suggestions") or not db.table_exists("ngrams")
 ):
     run_clean()
 

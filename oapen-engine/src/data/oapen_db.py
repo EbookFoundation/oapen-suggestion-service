@@ -181,17 +181,12 @@ class OapenDB:
         finally:
             cursor.close()
 
-    # get_empty = True -> Include rows with no ngrams in result
-    def get_all_ngrams(self, get_empty=True) -> List[NgramRow]:
+    def get_all_ngrams(self, ngram_limit=None) -> List[NgramRow]:
         cursor = self.connection.cursor()
         query = """
                 SELECT handle, CAST (ngrams AS oapen_suggestions.ngram[]), created_at, updated_at 
                 FROM oapen_suggestions.ngrams
                 """
-        if not get_empty:
-            query += """
-                     WHERE ngrams != \'{}\'
-                     """
         ret = None
         try:
             cursor.execute(query)

@@ -1,15 +1,15 @@
 import string
 from typing import List
 
-import nltk
-import pandas as pd
-from nltk import word_tokenize
+import pandas as pd  # pylint: disable=import-error
+from nltk import word_tokenize  # pylint: disable=import-error
+from nltk.corpus import stopwords  # pylint: disable=import-error
 
-from .stopwords_processor import STOPWORDS
-
-nltk.download("punkt")
-
-from .oapen_types import NgramDict, NgramRowWithoutDate, OapenItem
+from .oapen_types import (  # pylint: disable=relative-beyond-top-level
+    NgramDict,
+    NgramRowWithoutDate,
+    OapenItem,
+)
 from .stopwords import get_all_stopwords
 
 STOPWORDS = get_all_stopwords()

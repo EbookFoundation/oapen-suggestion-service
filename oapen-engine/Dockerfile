@@ -48,4 +48,4 @@ RUN chmod -R +x scripts
 USER appuser
 
 # Run the application
-ENTRYPOINT ["./scripts/test-and-run.sh"]
+ENTRYPOINT ["./scripts/run.sh"]
