@@ -11,6 +11,9 @@ pandas = "*"
 scikit-learn = "*"
 lxml = "*"
 schedule = "*"
+charset_normalizer = "*"
+idna = "*"
+certifi = "*"
 
 [dev-packages]
 pytest = "*"
