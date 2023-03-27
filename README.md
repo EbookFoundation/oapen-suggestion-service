@@ -4,7 +4,7 @@ The OAPEN Suggestion Engine will suggest ebooks based on other books with simila
 
 ## Running server
 
-You can run all the servers together with `./all-dev.sh` -- after installing dependencies with `./setup.sh`
+You can run all the servers together with `./all-dev.sh` -- after installing dependencies with `. ./setup.sh`
 
 ## Monorepo components
 
@@ -16,6 +16,8 @@ This engine is written in Python, and generates the recommendation data for user
 Our suggestion service is centered around the trigram semantic inferencing algorithm. This script should be run as a job on a cron schedule to periodically ingest new texts added to the OAPEN catalog through their API. It will populate the Database (see Database section) with pre-processed lists of suggestions for each entry in the catalog.
 
 You can find the code for the mining engine in `oapen-engine/`.
+
+Information about running the mining engine is in [`oapen-engine/README.md`](oapen-engine/README.md).
 
 **Base dependencies**:
 * Python v3.10
@@ -44,6 +46,8 @@ This API server returns a list of recommended books from the database.
 
 You can find the code for the API engine in `api/`.
 
+Configuration info for the API engine is in [`api/README.md`](api/README.md).
+
 **Base dependencies**:
 * NodeJS 14.x+
 * NPM package manager
@@ -63,6 +67,8 @@ You can find the code for the API engine in `api/`.
 This is a web-app demo that can be used to query the API engine and see suggested books. This does not have to be maintained if the API is used on another site, but is useful for development and a tech demo.
 
 You can find the code for the web demo in `web/`.
+
+Configuration info for the web demo is in [`web/README.md`](web/README.md).
 
 **Base dependencies**:
 * NodeJS 14.x+
