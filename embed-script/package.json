@@ -4,12 +4,15 @@
   "description": "",
   "main": "embed.js",
   "scripts": {
-    "start": "serve -p 3002"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "serve": "^14.2.0"
+    "axios": "^1.3.4",
+    "express": "^4.18.2",
+    "serve": "^14.2.0",
+    "xml2js": "^0.4.23"
   }
 }
