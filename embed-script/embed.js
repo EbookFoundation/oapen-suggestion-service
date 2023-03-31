@@ -2,7 +2,7 @@ const FETCH_URL_HOST = "http://159.65.185.229:3001";
 
 async function mountSelfData() {
   const metadata = (handle) =>
-    "http://localhost:3002" + "/metadata/" + encodeURIComponent(handle);
+    "http://159.65.185.229:3002" + "/metadata/" + encodeURIComponent(handle);
 
   // pattern should be in URL: /handle/[handle]
   if (!window.location.pathname.includes("/handle/")) {
@@ -116,7 +116,7 @@ async function mountSuggestions() {
   // promise all get metadata for each handle
 
   const metadata = (handle) =>
-    "http://localhost:3002" + "/metadata/" + encodeURIComponent(handle);
+    "http://159.65.185.229:3002" + "/metadata/" + encodeURIComponent(handle);
 
   const fetchMetadata = async (handle) => {
     const res = await fetch(metadata(handle));
