@@ -71,15 +71,12 @@ def drop_schema(connection) -> None:
     cursor.close()
 
 
-def seed_endpoints(connection):
-
+def get_endpoints():
     collections = OapenAPI.get_all_collections()
 
     if collections is None:
         logger.error("Could not fetch collections from OAPEN server. Is it down?")
         sys.exit(1)
-
-    db = OapenDB(connection)
 
     endpoints = []
 
@@ -108,6 +105,12 @@ def seed_endpoints(connection):
             )
             endpoints.append(x)
 
+    return endpoints
+
+
+def seed_endpoints(connection):
+    db = OapenDB(connection)
+    endpoints = get_endpoints()
     db.add_urls(endpoints)
 
 
