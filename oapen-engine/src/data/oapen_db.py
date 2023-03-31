@@ -1,3 +1,4 @@
+import re
 from typing import List, Union
 
 import psycopg2
@@ -217,7 +218,7 @@ class OapenDB:
                 args
             )
             cursor.execute(query)
-            records = cursor.fetchall
+            records = cursor.fetchall()
             ret = records
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
@@ -322,7 +323,7 @@ class OapenDB:
         finally:
             cursor.close()
 
-    def get_new_stopwords(self, stopwords):
+    def get_new_stopwords(self, stopwords) -> List[str]:
         ret = None
         try:
             cursor = self.connection.cursor()
@@ -331,12 +332,12 @@ class OapenDB:
                 DROP TABLE IF EXISTS temp_stopwords;
                 CREATE TEMPORARY TABLE temp_stopwords (stopword text);
                 INSERT INTO temp_stopwords (stopword) VALUES {};
-                SELECT DISTINCT temp_stopwords.stopword
-                FROM (
-                    temp_stopwords LEFT OUTER JOIN oapen_suggestions.stopwords
-                    ON temp_stopwords.stopword=oapen_suggestions.stopwords.stopword
-                    )
-                WHERE oapen_suggestions.stopwords.stopword IS NULL;
+                SELECT stopword from temp_stopwords
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM oapen_suggestions.stopwords
+                    WHERE stopword = oapen_suggestions.stopwords.stopword
+                )
                 """.format(
                 args
             )
@@ -350,14 +351,15 @@ class OapenDB:
             cursor.close()
             return ret
 
-    def update_stopwords(self, stopwords):
+    def update_stopwords(self, stopwords) -> None:
         try:
             cursor = self.connection.cursor()
             args = self.mogrify_stopwords(stopwords)
             query = """
                 DELETE FROM oapen_suggestions.stopwords;
                 INSERT INTO oapen_suggestions.stopwords (stopword)
-                VALUES {args};
+                VALUES {}
+                ON CONFLICT (stopword) DO NOTHING;
                 """.format(
                 args
             )
@@ -368,20 +370,20 @@ class OapenDB:
         finally:
             cursor.close()
 
-    def get_all_items_containing_stopwords(self, stopwords):
+    def get_all_items_containing_stopwords(self, stopwords) -> List[str]:
         ret = None
         try:
             cursor = self.connection.cursor()
             query = """
                     SELECT handle
                     FROM oapen_suggestions.ngrams
-                    WHERE EXISTS (
+                    WHERE ngrams != '{{}}' AND EXISTS (
                         SELECT 1
                         FROM UNNEST(ngrams) AS ng
-                        WHERE ng.ngram ~ '(^|\s)({})($|\s)'
+                        WHERE ng.ngram ~ '(^| )({})($| )'
                     );
                 """.format(
-                "|".join(stopwords)
+                "|".join([sw.replace("'", "''") for sw in stopwords])
             )
 
             cursor.execute(query)

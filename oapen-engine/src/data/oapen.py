@@ -19,7 +19,7 @@ GET_COLLECTION_BY_LABEL = (
 
 GET_WEEKLY_ITEMS = "/rest/search?query=dc.date.accessioned_dt:[NOW-7DAY/DAY+TO+NOW]&expand=bitstreams,metadata"
 GET_UPDATED_ITEMS = (
-    "/rest/search?query=lastModified%3E{date}&expand=metadata,bitsteams"  # YYYY-MM-DD
+    "/rest/search?query=lastModified%3E{date}&expand=metadata,bitstreams"  # YYYY-MM-DD
 )
 
 # This is the only community we care about right now

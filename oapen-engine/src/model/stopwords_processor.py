@@ -1,7 +1,8 @@
+import os
+from functools import reduce
+
 import nltk
 from nltk.corpus import stopwords
-from functools import reduce
-import os
 
 # This is run as a precaution in case of the error "NLTK stop words not found",
 # which makes sure to download the stop words after installing nltk
@@ -23,11 +24,7 @@ custom_stopwords_in_use = [
 ]
 
 # For reference on available languages, please reference https://pypi.org/project/stop-words/
-enabled_languages = [
-    "english",
-    "german",
-    "dutch"
-]
+enabled_languages = ["english", "german", "dutch"]
 
 # the combined stopwords of all enabled langauges
 nltk_stopwords = []
@@ -37,8 +34,10 @@ for language in enabled_languages:
 # get the custom lists
 custom_stopwords = []
 for custom_list in custom_stopwords_in_use:
-    with open(custom_lists_folder + custom_list + ".txt", "r") as file:  # specify folder name
+    with open(
+        custom_lists_folder + custom_list + ".txt", "r"
+    ) as file:  # specify folder name
         custom_stopwords += [line.rstrip() for line in file]
 
 # add languages and custom stopwords for final stopwords var
-STOPWORDS = (nltk_stopwords + custom_stopwords)
+STOPWORDS = set(nltk_stopwords + custom_stopwords)
