@@ -20,7 +20,6 @@ def get_connection():
 
         cur.close()
 
-        register_composite("oapen_suggestions.suggestion", conn, globally=True)
         register_composite("oapen_suggestions.ngram", conn, globally=True)
 
         return conn
