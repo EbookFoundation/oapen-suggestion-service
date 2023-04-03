@@ -15,22 +15,25 @@ from seed_tasks.harvest_task import harvest_task
 from seed_tasks.ngrams_task import ngrams_task
 from tqdm.auto import tqdm
 
-connection = get_connection()
-db = OapenDB(connection)
 
-
-def shutdown():
-    logger.info("Stopping import.")
-    close_connection(connection)
-
-
-def signal_handler(signal, frame):
-    logger.warning("Received shutdown for seed.py.")
-    shutdown()
-    sys.exit(0)
+def refresh_pbar(future, pbar, counter):
+    pbar.update(1)
+    counter["items_found"] += future.result()
+    pbar.set_postfix({"items found": counter["items_found"]})
+    pbar.refresh()
 
 
 def run():
+    connection = get_connection()
+    db = OapenDB(connection)
+
+    def signal_handler(signal, frame):
+        logger.warning("Received shutdown for seed.py. Stopping import.")
+        close_connection(connection)
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler, connection)
+
     logger.info("Getting items for OAPEN Suggestion DB...")
     manager = multiprocessing.Manager()
 
@@ -47,8 +50,6 @@ def run():
     db_futures = []
 
     urls = db.get_incomplete_urls()
-
-    signal.signal(signal.SIGINT, signal_handler)
 
     pbar = tqdm(
         total=len(urls),
@@ -79,15 +80,9 @@ def run():
     # Start db thread to keep inserting as ngrams are generated
     db_futures.append(db_executor.submit(db_task, db, db_queue, db_event))
 
-    def refresh(future, pbar, counter):
-        pbar.update(1)
-        counter["items_found"] += future.result()
-        pbar.set_postfix({"items found": counter["items_found"]})
-        pbar.refresh()
-
     for url in urls:
         future = io_executor.submit(harvest_task, url[0], item_queue)
-        future.add_done_callback(lambda x: refresh(x, pbar, counter))
+        future.add_done_callback(lambda x: refresh_pbar(x, pbar, counter))
         producer_futures.append(future)
         time.sleep(config.HARVEST_THREAD_SPAWN_DELAY)
 

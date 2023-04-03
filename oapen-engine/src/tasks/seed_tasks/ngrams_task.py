@@ -14,9 +14,7 @@ def ngrams_task(
     while True:
         try:
             entry = item_queue.get_nowait()
-
             url, items = entry[0], entry[1]
-
             ngrams = OapenEngine.get_ngrams_for_items(items)
 
             db_queue.put((url, ngrams))

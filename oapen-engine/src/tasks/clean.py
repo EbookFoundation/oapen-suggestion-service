@@ -71,16 +71,7 @@ def drop_schema(connection) -> None:
     cursor.close()
 
 
-def seed_endpoints(connection):
-
-    collections = OapenAPI.get_all_collections()
-
-    if collections is None:
-        logger.error("Could not fetch collections from OAPEN server. Is it down?")
-        sys.exit(1)
-
-    db = OapenDB(connection)
-
+def get_endpoints(collections):
     endpoints = []
 
     COLLECTION_IMPORT_LIMIT = int(os.environ["COLLECTION_IMPORT_LIMIT"])
@@ -99,6 +90,20 @@ def seed_endpoints(connection):
                 offset=offset,
             )
             endpoints.append(x)
+
+    return endpoints
+
+
+def seed_endpoints(connection):
+    db = OapenDB(connection)
+
+    collections = OapenAPI.get_all_collections()
+
+    if collections is None:
+        logger.error("Could not fetch collections from OAPEN server. Is it down?")
+        sys.exit(1)
+
+    endpoints = get_endpoints(collections)
 
     db.add_urls(endpoints)
 

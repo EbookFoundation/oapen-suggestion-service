@@ -13,10 +13,11 @@ def db_task(db: OapenDB, db_queue: multiprocessing.Queue, event: Event):
 
     def insert_items(entries):
         try:
-            urls = [e[0] for e in entries]
+            urls = []
             items = []
 
             for e in entries:
+                urls += e[0]
                 items += e[1]
 
             logger.debug("(DB) - Inserting {0} item(s).".format(len(items)))
@@ -28,6 +29,9 @@ def db_task(db: OapenDB, db_queue: multiprocessing.Queue, event: Event):
             for url in urls:
                 db.update_url(url, True)
 
+            for _ in range(len(items)):
+                db_queue.task_done()
+
             return len(items)
         except Exception as e:
             logger.error(e)
@@ -36,19 +40,13 @@ def db_task(db: OapenDB, db_queue: multiprocessing.Queue, event: Event):
     while not event.is_set():
         if db_queue.qsize() >= ENTRIES_PER_INSERT:
             entries = [db_queue.get() for _ in range(ENTRIES_PER_INSERT)]
-            count = len(entries)
             insert_items(entries)
-            for _ in range(count):
-                db_queue.task_done()
 
     if not db_queue.empty():
         entries = []
         while not db_queue.empty():
             entries.append(db_queue.get())
-        count = len(entries)
         insert_items(entries)
-        for _ in range(count):
-            db_queue.task_done()
 
     logger.info("(DB) - Exiting...")
     return
