@@ -23,10 +23,11 @@ router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)", async (req, res) => {
       return res.status(500).json(responseData);
     }
 
+    res.header("Access-Control-Allow-Origin", "*");
+
     res.status(200).json({
       items: responseData,
     });
-
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: "Internal server error" });
@@ -49,6 +50,8 @@ router.get("/:handle([0-9]+.[0-9]+.[0-9]+/[0-9]+)/ngrams", async (req, res) => {
     } else if (responseData.error) {
       return res.status(500).json(responseData);
     }
+
+    res.header("Access-Control-Allow-Origin", "*");
 
     return res.status(200).json(responseData);
   } catch (e) {

@@ -1,0 +1,1 @@
+python src/tasks/clean.py

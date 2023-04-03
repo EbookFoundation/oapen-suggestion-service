@@ -1,48 +1,18 @@
 import string
 from typing import List
 
-import nltk  # pylint: disable=import-error
-import pandas as pd  # pylint: disable=import-error
-from nltk import word_tokenize  # pylint: disable=import-error
-from nltk.corpus import stopwords  # pylint: disable=import-error
+import nltk 
+from nltk import word_tokenize 
+from .stopwords_processor import STOPWORDS
+import pandas as pd  
 
-from .oapen_types import (  # pylint: disable=relative-beyond-top-level
+nltk.download('punkt')
+
+from .oapen_types import (
     NgramDict,
     NgramRowWithoutDate,
     OapenItem,
 )
-
-try:
-    nltk.data.find("tokenizers/punkt.zip")
-except LookupError:
-    nltk.download("punkt")
-
-try:
-    stopwords.words("english")
-except LookupError:
-    nltk.download("stopwords")
-
-
-stopword_paths = [
-    "src/model/stopwords_broken.txt",
-    "src/model/stopwords_dutch.txt",
-    "src/model/stopwords_filter.txt",
-    "src/model/stopwords_publisher.txt",
-]
-
-stopwords_list = []
-
-for p in stopword_paths:
-    with open(p, "r") as f:
-        stopwords_list += [line.rstrip() for line in f]
-
-STOPWORDS = (
-    stopwords.words("english")
-    + stopwords.words("german")
-    + stopwords.words("dutch")
-    + stopwords_list
-)
-
 
 def process_text(text):
     l_text = text.lower()

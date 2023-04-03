@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List
 
 import requests
+from logger.base_logger import logger
 from model.oapen_types import OapenItem, transform_item_data
 
 SERVER_PATH = "https://library.oapen.org"
@@ -24,6 +25,10 @@ GET_UPDATED_ITEMS = (
 # This is the only community we care about right now
 BOOKS_COMMUNITY_ID = "3579505d-9d1b-4745-bcaf-a37329d25c69"
 
+GET_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36"
+}
+
 
 def transform_multiple_items_data(items) -> List[OapenItem]:
     return [
@@ -32,8 +37,14 @@ def transform_multiple_items_data(items) -> List[OapenItem]:
     ]
 
 
-def get(endpoint, params=None, log=False):
-    res = requests.get(url=SERVER_PATH + endpoint, params=params, timeout=(None, 120))
+def get(endpoint, params=None):
+
+    res = requests.get(
+        url=SERVER_PATH + endpoint,
+        params=params,
+        timeout=(None, 120),
+        headers=GET_HEADERS,
+    )
 
     ret = None
     if res.status_code == 200:
@@ -42,10 +53,9 @@ def get(endpoint, params=None, log=False):
         else:
             ret = res.content
     else:
-        print("GET {}: {}".format(res.url, res.status_code))
+        logger.error("ERROR - GET {}: {}".format(res.url, res.status_code))
 
-    if log:
-        print("GET {}: {}".format(res.url, res.status_code))
+        logger.debug("GET {}: {}".format(res.url, res.status_code))
     return ret
 
 
@@ -75,7 +85,15 @@ def get_collections_from_community(id):
 
 
 def get_all_collections():
-    res = get(endpoint=GET_COLLECTIONS, log=True)
+    res = get(endpoint=GET_COLLECTIONS)
+    return res
+
+
+def get_collection_items_by_endpoint(endpoint) -> List[OapenItem]:
+    res = get(endpoint=endpoint)
+
+    if res is not None and len(res) > 0:
+        return transform_multiple_items_data(res)
     return res
 
 
@@ -83,7 +101,6 @@ def get_collection_items_by_id(id, limit=None, offset=None) -> List[OapenItem]:
     res = get(
         endpoint=GET_COLLECTION_ITEMS.format(id=id),
         params={"expand": "bitstreams,metadata", "limit": limit, "offset": offset},
-        log=True,
     )
 
     if res is not None and len(res) > 0:
@@ -96,7 +113,6 @@ def get_collection_items_by_label(label, limit=None) -> List[OapenItem]:
     res = get(
         endpoint=GET_COLLECTION_BY_LABEL.format(label=label),
         params={"limit": limit},
-        log=True,
     )
 
     if res is not None and len(res) > 0:

@@ -37,3 +37,6 @@ refresh-items:
 
 run-daemon:
 	cd src && $(PYTHON) -m pipenv run python tasks/daemon.py
+
+run-unit-tests:
+	cd src && $(PYTHON) -m pipenv run python test/data/run_tests.py

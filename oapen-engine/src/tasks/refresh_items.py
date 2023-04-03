@@ -7,6 +7,7 @@ import data.oapen as OapenAPI
 import model.ngrams as OapenEngine
 from data.connection import close_connection, get_connection
 from data.oapen_db import OapenDB
+from logger.base_logger import logger
 from model.oapen_types import OapenItem
 
 
@@ -14,7 +15,7 @@ def run():
     connection = get_connection()
     db = OapenDB(connection)
 
-    print("Getting items for OapenDB...")
+    logger.debug("Getting items for OapenDB...")
     time_start = time.perf_counter()
 
     items: List[OapenItem] = OapenAPI.get_updated_items(
@@ -22,7 +23,7 @@ def run():
         date=datetime.datetime.now() - datetime.timedelta(config.UPDATE_DAYS_BEFORE),
     )
 
-    print(
+    logger.debug(
         "Found "
         + str(len(items))
         + " items in "
@@ -31,13 +32,13 @@ def run():
     )
 
     time_start = time.perf_counter()
-    print("Storing ngrams in DB...")
+    logger.debug("Storing ngrams in DB...")
 
     ngrams = OapenEngine.get_ngrams_for_items(items)
 
     db.add_many_ngrams(ngrams)
 
-    print(
+    logger.info(
         "Updated "
         + str(len(items))
         + " items in "

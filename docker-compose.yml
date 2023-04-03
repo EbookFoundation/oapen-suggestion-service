@@ -4,8 +4,9 @@ services:
     build: ./oapen-engine/
     environment:
       - RUN_CLEAN=0
-      - COLLECTION_IMPORT_LIMIT=0 # Set to 0 for full harvest
-      - REFRESH_PERIOD=300
+      - COLLECTION_IMPORT_LIMIT=0   # Set to 0 for full harvest
+      - REFRESH_PERIOD=86400        # daily
+      - HARVEST_PERIOD=604800       # weekly
   api:
     build: ./api/
     expose:
@@ -18,6 +19,12 @@ services:
         - 3000
     ports:
         - "0.0.0.0:3000:3000"
+  embed-script-test:
+    build: ./embed-script/
+    expose:
+        - 3002
+    ports:
+        - "0.0.0.0:3002:3002"
 volumes:
   db:
     driver: local
