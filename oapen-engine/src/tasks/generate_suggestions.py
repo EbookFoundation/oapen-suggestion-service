@@ -25,8 +25,6 @@ def get_ngrams_list(arr: List[NgramRow]):
 def suggestion_task(items, all_items, db_mutex, db):
     suggestions: List[SuggestionRow] = []
     for item_a in items:
-        item_suggestions = []
-
         handle_a = item_a[0]
 
         for item_b in all_items:
@@ -38,52 +36,34 @@ def suggestion_task(items, all_items, db_mutex, db):
             ngrams_shared = len(list(filter(lambda x: x in item_b[1], item_a[1])))
 
             if ngrams_shared >= config.SCORE_THRESHOLD:
-                item_suggestions.append((handle_b, ngrams_shared))
-
-        item_suggestions.sort(key=lambda x: x[1], reverse=True)
-        suggestions.append((handle_a, handle_a, item_suggestions))
-
-    count = len(suggestions)
+                suggestions.append((handle_a, handle_a, handle_b, ngrams_shared))
 
     db_mutex.acquire()
     db.add_many_suggestions(suggestions)
     db_mutex.release()
 
-    return count
+    return len(items)
+
+
+def refresh(future, counter, pbar):
+    pbar.update(future.result())
+    counter["items_updated"] += future.result()
+    pbar.refresh()
 
 
 def run():
-    db_mutex = Lock()
     connection = get_connection()
     db = OapenDB(connection)
 
     all_items: List[NgramRow] = db.get_all_ngrams(get_empty=False)
 
-    logger.info("Getting suggestions for {0} items...".format(str(len(all_items))))
-
-    futures = []
-
-    # Get only top k ngrams for all items before processing
-    for item in all_items:
-        ngrams = get_ngrams_list(item)
-        item = (item[0], ngrams)
-
-    time_start = time.perf_counter()
-
-    n = config.SUGGESTIONS_MAX_ITEMS
-
-    chunks = [all_items[i : i + n] for i in range(0, len(all_items), n)]
-
-    counter = Counter(items_updated=0)
-
     executor = concurrent.futures.ThreadPoolExecutor(
         max_workers=config.SUGGESTIONS_MAX_WORKERS
     )
+    futures = []
+    db_mutex = Lock()
 
-    def refresh(future, counter, pbar):
-        pbar.update(future.result())
-        counter["items_updated"] += future.result()
-        pbar.refresh()
+    counter = Counter(items_updated=0)
 
     pbar = tqdm(
         total=len(all_items),
@@ -94,6 +74,19 @@ def run():
         initial=0,
     )
 
+    logger.info("Getting suggestions for {0} items...".format(str(len(all_items))))
+    time_start = time.perf_counter()
+
+    # Get only top k ngrams for all items before processing
+    for item in all_items:
+        ngrams = get_ngrams_list(item)
+        item = (item[0], ngrams)
+
+    chunks = [
+        all_items[i : i + config.SUGGESTIONS_MAX_ITEMS]
+        for i in range(0, len(all_items), config.SUGGESTIONS_MAX_ITEMS)
+    ]
+
     for chunk in chunks:
         future = executor.submit(suggestion_task, chunk, all_items, db_mutex, db)
         future.add_done_callback(lambda x: refresh(x, counter, pbar))
@@ -103,9 +96,9 @@ def run():
         pass
 
     logger.info(
-        "Updated suggestions for "
+        "Updated "
         + str(counter["items_updated"])
-        + " items in "
+        + " suggestions in "
         + str(time.perf_counter() - time_start)
         + "s."
     )
