@@ -1,27 +1,26 @@
+import re
 import string
 from typing import List
 
-import nltk 
-from nltk import word_tokenize 
+import nltk
+import pandas as pd
+from nltk import word_tokenize
+
 from .stopwords_processor import STOPWORDS
-import pandas as pd  
 
-nltk.download('punkt')
+nltk.download("punkt")
 
-from .oapen_types import (
-    NgramDict,
-    NgramRowWithoutDate,
-    OapenItem,
-)
+from .oapen_types import NgramDict, NgramRowWithoutDate, OapenItem
+
 
 def process_text(text):
-    l_text = text.lower()
-    p_text = "".join([c for c in l_text if c not in string.punctuation])
+    p_text = "".join([c for c in text.lower() if c not in string.punctuation])
+    stopwords_regex = re.compile(r"\b%s\b" % r"\b|\b".join(map(re.escape, STOPWORDS)))
+    p_text = stopwords_regex.sub("", p_text)
     words = word_tokenize(p_text)
     filtered_words = list(
-        filter(lambda x: x not in STOPWORDS and x.isalpha(), words)
+        filter(lambda x: x.isalpha(), words)
     )  # added isalpha to check that it contains only letters
-
     return filtered_words
 
 
