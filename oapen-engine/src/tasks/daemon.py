@@ -40,6 +40,11 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
+logger.info("Daemon up")
+
+conn = get_connection()
+db = OapenDB(conn)
+
 if int(os.environ["RUN_CLEAN"]) == 1 or (
     not db.table_exists("suggestions")
     or not db.table_exists("ngrams")

@@ -32,10 +32,7 @@ class OapenDB:
         suggestions = self.deduplicate(suggestions)
         cursor = self.connection.cursor()
         args = ",".join(
-            cursor.mogrify("(%s,%s,%s::oapen_suggestions.suggestion[])", x).decode(
-                "utf-8"
-            )
-            for x in suggestions
+            cursor.mogrify("(%s,%s,%s,%s)", x).decode("utf-8") for x in suggestions
         )
         cursor.close()
         return args
@@ -81,14 +78,13 @@ class OapenDB:
         cursor = self.connection.cursor()
         query = """
                 INSERT INTO oapen_suggestions.suggestions (handle, name, suggestions)
-                VALUES (%s, %s, %s::oapen_suggestions.suggestion[])
-                ON CONFLICT (handle)
-                DO
-                    UPDATE SET suggestions = excluded.suggestions
+                VALUES (%s, %s, %s, %s)
                 """
 
         try:
-            cursor.execute(query, (suggestion[0], suggestion[1], suggestion[2]))
+            cursor.execute(
+                query, (suggestion[0], suggestion[1], suggestion[2], suggestion[3])
+            )
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
@@ -98,11 +94,8 @@ class OapenDB:
         cursor = self.connection.cursor()
         args = self.mogrify_suggestions(suggestions)
         query = f"""
-                INSERT INTO oapen_suggestions.suggestions (handle, name, suggestions)
+                INSERT INTO oapen_suggestions.suggestions (handle, name, suggestion, score)
                 VALUES {args}
-                ON CONFLICT (handle)
-                    DO
-                        UPDATE SET suggestions = excluded.suggestions
                 """
 
         try:
@@ -158,7 +151,6 @@ class OapenDB:
             query += """
                      WHERE ngrams != \'{}\'
                      """
-        ret = None
         try:
             cursor.execute(query)
             records = cursor.fetchall()
@@ -173,12 +165,30 @@ class OapenDB:
     def get_all_suggestions(self) -> List[SuggestionRow]:
         cursor = self.connection.cursor()
         query = """
-                SELECT handle, name, CAST (suggestions AS oapen_suggestions.suggestion[]), created_at, updated_at 
-                FROM oapen_suggestions.suggestions
+                SELECT * FROM oapen_suggestions.suggestions
                 """
         ret = None
         try:
             cursor.execute(query)
+            records = cursor.fetchall()
+
+            ret = records
+
+        except (Exception, psycopg2.Error) as error:
+            logger.error(error)
+        finally:
+            cursor.close()
+            return ret
+
+    def get_suggestions_for_item(self, handle) -> List[SuggestionRow]:
+        cursor = self.connection.cursor()
+        query = """
+                SELECT * FROM oapen_suggestions.suggestions
+                WHERE handle = \'%s\'
+                """
+        ret = None
+        try:
+            cursor.execute(query, handle)
             records = cursor.fetchall()
 
             ret = records
