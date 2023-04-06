@@ -1,4 +1,3 @@
 .vercel
 oapen-engine/lib/
 .python-version
-.env
