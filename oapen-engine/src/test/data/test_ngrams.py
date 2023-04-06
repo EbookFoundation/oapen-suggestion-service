@@ -2,9 +2,11 @@ import model.ngrams as ngrams
 
 test_text1 = "Foxes are cunning animals. There was a quick, red fox known to avoid crossing roads during the day, doing so only at night."
 test_text2 = "The quick red fox jumped over the lazy brown dog. It had a fantastic time doing so, as it felt finally free. The fox had been in the zoo for far too long, held in captivity."
+test_text3 = "amsterdam amsterdam university publisher school tree dog"
 
 processed_text1 = ['foxes', 'cunning', 'animals', 'quick', 'red', 'fox', 'known', 'avoid', 'crossing', 'roads', 'day', 'night']
 processed_text2 = ['quick', 'red', 'fox', 'jumped', 'lazy', 'brown', 'dog', 'fantastic', 'time', 'felt', 'finally', 'free', 'fox', 'zoo', 'far', 'long', 'held', 'captivity']
+processed_text3 = ['publisher', 'school', 'tree', 'dog']
 
 ngrams1 = {
     'foxes cunning animals': 1, 
@@ -40,6 +42,7 @@ ngrams2 = {
 def test_process_text():
     assert(ngrams.process_text(test_text1) == processed_text1)
     assert(ngrams.process_text(test_text2) == processed_text2)
+    assert(ngrams.process_text(test_text3) == processed_text3)
 
 def test_generate_ngram():
     assert(ngrams.generate_ngram(processed_text1) == ngrams1)
