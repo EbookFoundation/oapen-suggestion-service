@@ -1,33 +1,9 @@
 # OAPEN Suggestion API
+## Configuration
 
-## About
+You can specify the port requests will be served on with the `API_PORT` variable. The default value is `3001`.
 
-A basic Node.js + Express api using pg-promise to interface with PostgreSQL and dotenv to read environment variables
-
-## Database Configuration
-
-To configure the database connection, create a file called `config.env` in `api/` with the contents
-
-```
-DATABASE_URL="postgres://username:password@host:port/database"
-PORT=PORT_NUMBER
-```
-
-e.g.
-
-```
-DATABASE_URL="postgres://postgres:password@localhost:5432/postgres"
-PORT=3001
-```
-
-To populate the database with seed data, run `make setup-env` from `oapen-engine/`
-
-## Running with npm
-
-```
-npm ci
-npm start
-```
+Follow the [setup instructions](https://github.com/EbookFoundation/oapen-suggestion-service#setup) to ensure the database environment variables are set.
 
 ## Endpoints
 
