@@ -20,7 +20,7 @@ logger.info("Daemon up")
 
 
 def harvest():
-    seed_endpoints()
+    seed_endpoints(conn)
     urls = db.get_incomplete_urls()
     if len(urls) > 0:
         run_seed()

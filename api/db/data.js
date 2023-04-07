@@ -2,7 +2,6 @@ const validate = require("../validate.js");
 const { ParameterizedQuery: PQ } = require("pg-promise");
 
 const db = require("./connection.js");
-const { result } = require("./connection.js");
 
 async function querySuggestions(handle, threshold = 0) {
   await validate.checkHandle(handle);

@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./config.env" });
 const express = require("express");
 const app = express();
 
@@ -19,7 +18,7 @@ app.use("*", (req, res) => {
   return res.status(404).json({ error: "Resource not found" });
 });
 
-const port = process.env.PORT || 3001;
+const port = process.env.API_PORT || 3001;
 
 app.listen(port, () => {
   console.log("Suggestion Service API is up on port " + port);
