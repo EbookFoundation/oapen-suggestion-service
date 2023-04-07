@@ -1,8 +1,16 @@
 # OAPEN Suggestion Engine
 
-The OAPEN Suggestion Engine will suggest ebooks based on other books with similar content.
+## Description
+The OAPEN Suggestion Engine will suggest e-books based on other books with similar content. It achieves this using a trigram semantic inferecing algorithm.
 
-## Setup
+## Table of Contents
+
+- [Setup](#setup)
+- [Configuration](#configuration)
+- [Endpoints](#dependencies)
+- [Service Components](#service-components)
+
+## Installation
 
 ### 1. Install Docker
 
@@ -27,7 +35,7 @@ And go into the project directory:
 cd oapen-suggestion-service
 ```
 
-### 4. Configure Environment
+### 4. Configure the environment
 
 And create a file `.env` with the following, replacing `<>` with the described values:
 
@@ -44,7 +52,7 @@ POSTGRES_PASSWORD=<Password of the postgres user>
 
 > The service **will not run** if this is improperly configured.
 
-### 5. Run the project
+### 5. Run the service
 
 Now you can simply start the service with:
 
@@ -53,6 +61,10 @@ docker compose up
 ```
 
 You can now connect to the API at `http://localhost:<API_PORT>`
+
+## Configuration
+
+> *More configuration options should go here*
 
 ## Endpoints
 
@@ -65,87 +77,36 @@ The API provides access to the following endpoints:
 - `http://localhost:3001/api/{handle}/ngrams`
   - e.g. http://localhost:3001/api/20.400.12657/47581/ngrams
 
-## Monorepo components
+## Service Components
 
-This project is a monorepo, with multiple pieces that can be added or removed as neccessary for deployment.
+This project is a monorepo, with multiple services that work in tandem to provide suggestions: the database, the suggestion engine, the API server, the embed script, and the web demo.
 
-### [Mining Engine (Core)](/oapen-engine)
+- [Database](#2-install-postgresql)
+- [Suggestion Engine](#suggestion-engine)
+- [API](#api)
+- [Embed Script](#)
+- [Web Demo](#)
+
+### Suggestion Engine
 
 This engine is written in Python, and generates the recommendation data for users.
-Our suggestion service is centered around the trigram semantic inferencing algorithm. This script should be run as a job on a cron schedule to periodically ingest new texts added to the OAPEN catalog through their API. It will populate the Database (see Database section) with pre-processed lists of suggestions for each entry in the catalog.
+Our suggestion service is centered around the trigram semantic inferencing algorithm. This script should be run as a job on a cron schedule to periodically ingest new texts added to the OAPEN catalog through their API. It populates the database with pre-processed lists of suggestions for each entry in the catalog.
 
-You can find the code for the mining engine in `oapen-engine/`.
+You can find the code for the suggestion engine in `oapen-engine/`, and read more about it in [`oapen-engine/README.md`](oapen-engine/README.md).
 
-Information about running the mining engine is in [`oapen-engine/README.md`](oapen-engine/README.md).
+### API
 
-**Base dependencies**:
+This API server serves book recommendations from the database over HTTP in a standard RESTful architecture.
 
-- Python v3.10
-- PIP package manager
-- `make`
+You can find the code for the API in `api/`, and readmore about it in [`api/README.md`](api/README.md).
 
-**Automatically-installed dependencies**:
+### Embed Script
+> To be added
 
-- `nltk` -- Natural language toolkit.
-  - Maintained on [GitHub](https://github.com/nltk/nltk) by 300+ contributors.
-  - Most recent update: 8 days ago
-- `requests` -- HTTP request library
-  - Maintained on [GitHub](https://github.com/psf/requests) by 600+ conributors, and backed by sponsors.
-  - Most recent update: 1 month ago.
-- `psycopg2` -- PostgreSQL Database Adapter
-  - Maintained on [GitHub](https://github.com/psycopg/psycopg2) by 100+ contributors, and used by 480,000+ packages.
-  - Most popular PostgreSQL database adapter for Python
-- `pandas` -- data analysis library
-  - Maintained by [PYData](https://pandas.pydata.org/) with large amounts of sponsors. 2,700+ contributors.
-- `scikit-learn` -- Scikit Learn
-  - Maintained by [a large consortium of corporations and open-source developers](https://scikit-learn.org/stable/).
-
-### [API Engine (Core)](/api)
-
-This API server returns a list of recommended books from the database.
-
-You can find the code for the API engine in `api/`.
-
-Configuration info for the API engine is in [`api/README.md`](api/README.md).
-
-**Base dependencies**:
-
-- NodeJS 14.x+
-- NPM package manager
-
-**Automatically-installed dependencies**:
-
-- `express` - Basic HTTP server
-  - Maintained by the [OpenJS foundation](https://expressjs.com/)
-  - Largest Node HTTP server
-
-* `pg-promise` -- basic PostgreSQL driver
-  - Maintained [on Github](https://github.com/vitaly-t/pg-promise)
-* `dotenv` -- loads environment variables from .env
-  - Maintained [on Github](https://github.com/motdotla/dotenv)
-
-### [Web Demo (Optional)](/web)
+### Web Demo (Optional)
 
 This is a web-app demo that can be used to query the API engine and see suggested books. This does not have to be maintained if the API is used on another site, but is useful for development and a tech demo.
 
 You can find the code for the web demo in `web/`.
 
 Configuration info for the web demo is in [`web/README.md`](web/README.md).
-
-**Base dependencies**:
-
-- NodeJS 14.x+
-- NPM package manager
-
-**Automatically-installed dependencies**:
-
-- `next` -- Framework for production-driven web apps
-  - Maintained by [Vercel](https://vercel.com) and the open source community
-- `react` -- Frontend design framework
-  - Maintained by [Meta](https://reactjs.org).
-  - Largest frontend web UI library.
-  - (Alternative considered: Angular -- however, was recently deprecated by Google)
-- `pg` -- basic PostgreSQL driver
-  - Maintained [on npm](https://www.npmjs.com/package/pg)
-- `typescript` -- Types for JavaScript
-  - Maintained by [Microsoft](https://www.typescriptlang.org/) and the open source community.
