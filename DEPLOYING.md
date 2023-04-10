@@ -122,10 +122,6 @@ Copy and paste the contents of the .pub file, typically id_rsa.pub, by using the
     git clone https://github.com/EbookFoundation/oapen-suggestion-service.git
     cd oapen-suggestion-service
     ```
-3. Make a copy of the `example.env` file just named `.env`:
-    ```
-    cp example.env .env
-    ```
 4. Now, edit the `.env` file using the editor of your choice, `nano` or `vim`, you will need to configure all of the options for the application to work properly:
     ```properties
     API_PORT=<Port to serve API on>
