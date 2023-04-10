@@ -1,7 +1,7 @@
 # OAPEN Suggestion Engine
 
 ## Description
-The OAPEN Suggestion Engine will suggest e-books based on other books with similar content. It achieves this using a trigram semantic inferecing algorithm.
+The OAPEN Suggestion Engine will suggest e-books based on other books with similar content. It achieves this using a trigram semantic inferecing algorithm. The proof-of-concept and paper that this service is built on is the work of Ronald Snijder of the OAPEN Foundation, you can read his original paper [here](https://liberquarterly.eu/article/view/10938).
 
 ## Table of Contents
 
