@@ -1,3 +1,5 @@
 .vercel
 oapen-engine/lib/
 .python-version
+private/
+.env
