@@ -1,13 +1,12 @@
 import string
 from typing import List
 
-import pandas as pd  # pylint: disable=import-error
 from nltk import word_tokenize  # pylint: disable=import-error
 from nltk.corpus import stopwords  # pylint: disable=import-error
 
 from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     NgramDict,
-    NgramRowWithoutDate,
+    NgramRow,
     OapenItem,
 )
 
@@ -43,19 +42,6 @@ def process_text(text):
     return filtered_words
 
 
-def make_df(data: List[OapenItem]):
-    df = pd.DataFrame(columns=["handle", "name", "lang", "text"])
-
-    for item in data:
-        text = process_text(item.text)
-        df.loc[len(df.index)] = [item.handle, item.name, item.language, text]
-    return df
-
-
-def get_text_by_handle(df, handle):
-    return df.loc[df.handle == handle].text[0]
-
-
 def sort_ngrams_by_count(ngrams: NgramDict):
     return sorted(ngrams.items(), key=lambda item: item[1], reverse=True)
 
@@ -68,11 +54,6 @@ def generate_ngram(text, n=3) -> NgramDict:
         ngrams.setdefault(ngram, 0)  # sets curr ngram to 0 if non-existant
         ngrams[ngram] += 1
     return dict(sort_ngrams_by_count(ngrams))  # return sorted by count
-
-
-def generate_ngram_by_handle(df, handle, n=3) -> NgramDict:
-    text = get_text_by_handle(df, handle)
-    return generate_ngram(text, n)
 
 
 def get_n_most_occuring(dic: NgramDict, n=100):
@@ -112,12 +93,16 @@ def get_similarity_score_by_dict_count(ngrams1: NgramDict, ngrams2: NgramDict) -
     return repeated / total
 
 
-def get_ngrams_for_items(
-    items: List[OapenItem], n=3, ngram_limit=30
-) -> List[NgramRowWithoutDate]:
+def get_ngrams_for_items(items: List[OapenItem], n=3, ngram_limit=30) -> List[NgramRow]:
     rows = []
     for item in items:
         text = process_text(item.text)
         ngrams = generate_ngram(text, n)
-        rows.append((item.handle, list(sort_ngrams_by_count(ngrams))[0:ngram_limit]))
+        row = NgramRow(
+            handle=item.handle,
+            name=item.name,
+            thumbnail=item.thumbnail,
+            ngrams=list(sort_ngrams_by_count(ngrams))[0:ngram_limit],
+        )
+        rows.append(row)
     return rows

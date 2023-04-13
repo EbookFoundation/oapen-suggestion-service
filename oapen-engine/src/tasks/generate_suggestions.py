@@ -8,7 +8,7 @@ import config
 from data.connection import close_connection, get_connection
 from data.oapen_db import OapenDB
 from logger.base_logger import logger
-from model.oapen_types import NgramRow, SuggestionRow
+from model.oapen_types import Ngram, NgramRow, SuggestionRow
 from tqdm.auto import tqdm
 
 # initial seed -> get suggestions on everything n^2
@@ -18,29 +18,38 @@ from tqdm.auto import tqdm
 # optimization: only suggest once per pair
 
 
-def get_ngrams_list(arr: List[NgramRow]):
-    return [x[0] for x in arr[1][0 : min(len(arr[1]), config.TOP_K_NGRAMS_COUNT)]]
+def truncate_ngrams_list(item: NgramRow) -> List[NgramRow]:
+    ngrams = [
+        Ngram(ngram=x[0], count=0)
+        for x in item.ngrams[0 : min(len(item.ngrams), config.TOP_K_NGRAMS_COUNT)]
+    ]
+    return item._replace(ngrams=ngrams)
 
 
-def suggestion_task(items, all_items, db_mutex, db):
+def suggestion_task(items: List[NgramRow], all_items: List[NgramRow], db_mutex, db):
     suggestions: List[SuggestionRow] = []
     for item_a in items:
-        handle_a = item_a[0]
-
         for item_b in all_items:
-            handle_b = item_b[0]
-
-            if handle_a == handle_b:
+            if item_a.handle == item_b.handle:
                 continue
 
-            ngrams_shared = len(list(filter(lambda x: x in item_b[1], item_a[1])))
+            score = len(list(filter(lambda x: x in item_b.ngrams, item_a.ngrams)))
 
-            if ngrams_shared >= config.SCORE_THRESHOLD:
-                suggestions.append((handle_a, handle_a, handle_b, ngrams_shared))
+            if score >= config.SCORE_THRESHOLD:
+                suggestions.append(
+                    SuggestionRow(
+                        handle=item_a.handle,
+                        suggestion=item_b.handle,
+                        suggestion_name=item_b.name,
+                        suggestion_thumbnail=item_b.thumbnail,
+                        score=score,
+                    )
+                )
 
-    db_mutex.acquire()
-    db.add_many_suggestions(suggestions)
-    db_mutex.release()
+    if len(suggestions) > 0:
+        db_mutex.acquire()
+        db.add_many_suggestions(suggestions)
+        db_mutex.release()
 
     return len(items)
 
@@ -78,9 +87,8 @@ def run():
     time_start = time.perf_counter()
 
     # Get only top k ngrams for all items before processing
-    for item in all_items:
-        ngrams = get_ngrams_list(item)
-        item = (item[0], ngrams)
+    for i in range(len(all_items)):
+        all_items[i] = truncate_ngrams_list(all_items[i])
 
     chunks = [
         all_items[i : i + config.SUGGESTIONS_MAX_ITEMS]

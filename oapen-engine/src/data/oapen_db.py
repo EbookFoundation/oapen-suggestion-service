@@ -13,16 +13,19 @@ class OapenDB:
         seen = set()
         res = []
         for i in items:
-            if i[0] not in seen:
+            if i not in seen:
                 res.append(i)
-                seen.add(i[0])
+                seen.add(i)
         return res
 
     def mogrify_ngrams(self, ngrams: List[NgramRow]) -> str:
         ngrams = self.deduplicate(ngrams)
         cursor = self.connection.cursor()
         args = ",".join(
-            cursor.mogrify("(%s,%s::oapen_suggestions.ngram[])", x).decode("utf-8")
+            cursor.mogrify(
+                "(%s,%s,%s,%s::oapen_suggestions.ngram[])",
+                (x.handle, x.name, x.thumbnail, x.ngrams),
+            ).decode("utf-8")
             for x in ngrams
         )
         cursor.close()
@@ -32,7 +35,17 @@ class OapenDB:
         suggestions = self.deduplicate(suggestions)
         cursor = self.connection.cursor()
         args = ",".join(
-            cursor.mogrify("(%s,%s,%s,%s)", x).decode("utf-8") for x in suggestions
+            cursor.mogrify(
+                "(%s,%s,%s,%s,%s)",
+                (
+                    x.handle,
+                    x.suggestion,
+                    x.suggestion_name,
+                    x.suggestion_thumbnail,
+                    x.score,
+                ),
+            ).decode("utf-8")
+            for x in suggestions
         )
         cursor.close()
         return args
@@ -93,11 +106,11 @@ class OapenDB:
     def add_many_suggestions(self, suggestions: List[SuggestionRow]) -> None:
         cursor = self.connection.cursor()
         args = self.mogrify_suggestions(suggestions)
+
         query = f"""
-                INSERT INTO oapen_suggestions.suggestions (handle, name, suggestion, score)
+                INSERT INTO oapen_suggestions.suggestions
                 VALUES {args}
                 """
-
         try:
             cursor.execute(query)
         except (Exception, psycopg2.Error) as error:
@@ -127,13 +140,12 @@ class OapenDB:
             cursor = self.connection.cursor()
             args = self.mogrify_ngrams(ngrams)
             query = f"""
-                    INSERT INTO oapen_suggestions.ngrams (handle, ngrams)
+                    INSERT INTO oapen_suggestions.ngrams
                     VALUES {args}
                     ON CONFLICT (handle)
                         DO
                             UPDATE SET ngrams = excluded.ngrams
                 """
-
             cursor.execute(query)
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
@@ -144,7 +156,7 @@ class OapenDB:
     def get_all_ngrams(self, get_empty=True) -> List[NgramRow]:
         cursor = self.connection.cursor()
         query = """
-                SELECT handle, CAST (ngrams AS oapen_suggestions.ngram[]), created_at, updated_at 
+                SELECT handle, name, thumbnail, CAST (ngrams AS oapen_suggestions.ngram[]), created_at, updated_at 
                 FROM oapen_suggestions.ngrams
                 """
         if not get_empty:
@@ -154,7 +166,7 @@ class OapenDB:
         try:
             cursor.execute(query)
             records = cursor.fetchall()
-            ret = records
+            ret = [NgramRow(*record) for record in records]
 
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
@@ -172,7 +184,7 @@ class OapenDB:
             cursor.execute(query)
             records = cursor.fetchall()
 
-            ret = records
+            ret = [SuggestionRow(*record) for record in records]
 
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
@@ -251,7 +263,7 @@ class OapenDB:
             cursor.execute(query)
             records = cursor.fetchall()
 
-            ret = records
+            ret = [UrlRow(*record) for record in records]
 
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
