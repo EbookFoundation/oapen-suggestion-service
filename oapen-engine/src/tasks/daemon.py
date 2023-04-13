@@ -4,7 +4,9 @@ import signal
 import sys
 import time
 
+import schedule
 from clean import run as run_clean
+from clean import seed_endpoints
 from data.connection import get_connection
 from data.oapen_db import OapenDB
 from generate_suggestions import run as run_generate_suggestions
@@ -12,16 +14,16 @@ from logger.base_logger import logger
 from refresh_items import run as run_refresh_items
 from seed import run as run_seed
 
-
 def harvest():
-    run_seed()
-    run_generate_suggestions()
-
+    seed_endpoints(conn)
+    urls = db.get_incomplete_urls()
+    if len(urls) > 0:
+        run_seed()
+        run_generate_suggestions()
 
 def refresh():
     run_refresh_items()
     run_generate_suggestions()
-
 
 def main():
     conn = get_connection()
@@ -45,26 +47,12 @@ def main():
 
     harvest()
 
-    harvest_acc = 0
-    refresh_acc = 0
+    schedule.every().day.at("20:00").do(refresh)
+    schedule.every().sunday.at("22:00").do(harvest)
 
     while True:
-        if harvest_acc >= int(os.environ["HARVEST_PERIOD"]):
-            urls = db.get_incomplete_urls()
-            if len(urls) > 0:
-                harvest()
-            harvest_acc = 0
-
-        if refresh_acc >= int(os.environ["REFRESH_PERIOD"]):
-            refresh()
-            refresh_acc = 0
-
-        time.sleep(60)
-        refresh_acc += 60
-        harvest_acc += 60
-
-    logger.info("Daemon down")
-
+      schedule.run_pending()
+      time.sleep(60)
 
 if __name__ == "__main__":
     main()

@@ -1,20 +1,25 @@
 #!/usr/bin/python
-from configparser import ConfigParser
+import os
 
 
-def config(filename="src/database.ini", section="postgresql"):
-    parser = ConfigParser()
+def config():
+    db_env_params = {
+        "POSTGRES_HOST": "host",
+        "POSTGRES_PORT": "port",
+        "POSTGRES_DB_NAME": "dbname",
+        "POSTGRES_USERNAME": "user",
+        "POSTGRES_PASSWORD": "password",
+    }
 
-    parser.read(filename)
+    db_params = {}
+    for env_var, db_param in db_env_params.items():
+        if env_var in os.environ:
+            db_params[db_param] = os.environ[env_var]
+        else:
+            raise Exception(
+                "Environment variable {} was not found. Please specify it in the .env file.".format(
+                    env_var
+                )
+            )
 
-    db = {}
-    if parser.has_section(section):
-        params = parser.items(section)
-        for param in params:
-            db[param[0]] = param[1]
-    else:
-        raise Exception(
-            "Section {0} not found in the {1} file".format(section, filename)
-        )
-
-    return db
+    return db_params

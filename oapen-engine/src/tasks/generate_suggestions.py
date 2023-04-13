@@ -53,7 +53,6 @@ def suggestion_task(items: List[NgramRow], all_items: List[NgramRow], db_mutex, 
 
     return len(items)
 
-
 def refresh(future, counter, pbar):
     pbar.update(future.result())
     counter["items_updated"] += future.result()

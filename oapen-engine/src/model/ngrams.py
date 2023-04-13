@@ -1,8 +1,6 @@
+import re
 import string
 from typing import List
-
-from nltk import word_tokenize  # pylint: disable=import-error
-from nltk.corpus import stopwords  # pylint: disable=import-error
 
 from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     NgramDict,
@@ -10,35 +8,22 @@ from .oapen_types import (  # pylint: disable=relative-beyond-top-level
     OapenItem,
 )
 
-stopword_paths = [
-    "src/model/stopwords_broken.txt",
-    "src/model/stopwords_dutch.txt",
-    "src/model/stopwords_filter.txt",
-    "src/model/stopwords_publisher.txt",
-]
+import nltk
+import pandas as pd
+from nltk import word_tokenize
 
-stopwords_list = []
+from .stopwords_processor import STOPWORDS
 
-for p in stopword_paths:
-    with open(p, "r") as f:
-        stopwords_list += [line.rstrip() for line in f]
-
-STOPWORDS = (
-    stopwords.words("english")
-    + stopwords.words("german")
-    + stopwords.words("dutch")
-    + stopwords_list
-)
-
+nltk.download("punkt")
 
 def process_text(text):
-    l_text = text.lower()
-    p_text = "".join([c for c in l_text if c not in string.punctuation])
+    p_text = "".join([c for c in text.lower() if c not in string.punctuation])
+    stopwords_regex = re.compile(r"\b%s\b" % r"\b|\b".join(map(re.escape, STOPWORDS)))
+    p_text = stopwords_regex.sub("", p_text)
     words = word_tokenize(p_text)
     filtered_words = list(
-        filter(lambda x: x not in STOPWORDS and x.isalpha(), words)
+        filter(lambda x: x.isalpha(), words)
     )  # added isalpha to check that it contains only letters
-
     return filtered_words
 
 

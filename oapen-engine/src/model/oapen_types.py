@@ -14,7 +14,6 @@ class OapenItem(NamedTuple):
     def __hash__(self):
         return hash(self.handle, "handle")
 
-
 class SuggestionRow(NamedTuple):
     handle: str
     suggestion: str
@@ -30,11 +29,9 @@ class SuggestionRow(NamedTuple):
     def __hash__(self) -> int:
         return hash((self.handle, self.suggestion))
 
-
 class Ngram(NamedTuple):
     ngram: str
     count: int
-
 
 class NgramRow(NamedTuple):
     handle: str

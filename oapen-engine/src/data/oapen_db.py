@@ -211,6 +211,25 @@ class OapenDB:
             cursor.close()
             return ret
 
+    def get_suggestions_for_item(self, handle) -> List[SuggestionRow]:
+        cursor = self.connection.cursor()
+        query = """
+                SELECT * FROM oapen_suggestions.suggestions
+                WHERE handle = \'%s\'
+                """
+        ret = None
+        try:
+            cursor.execute(query, handle)
+            records = cursor.fetchall()
+
+            ret = records
+
+        except (Exception, psycopg2.Error) as error:
+            logger.error(error)
+        finally:
+            cursor.close()
+            return ret
+
     def count_table(self, table_name) -> int or None:
         cursor = self.connection.cursor()
         query = "SELECT COUNT(*) FROM %s"
