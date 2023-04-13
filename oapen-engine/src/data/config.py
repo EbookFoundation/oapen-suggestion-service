@@ -9,6 +9,7 @@ def config():
         "POSTGRES_DB_NAME": "dbname",
         "POSTGRES_USERNAME": "user",
         "POSTGRES_PASSWORD": "password",
+        "POSTGRES_SSLMODE": "sslmode"
     }
 
     db_params = {}
