@@ -7,30 +7,37 @@ import time
 import schedule
 from clean import run as run_clean
 from clean import seed_endpoints
-from data.connection import get_connection
+from data.connection import close_connection, get_connection
 from data.oapen_db import OapenDB
 from generate_suggestions import run as run_generate_suggestions
 from logger.base_logger import logger
 from refresh_items import run as run_refresh_items
 from seed import run as run_seed
 
+conn = get_connection()
+db = OapenDB(conn)
+
+
 def harvest():
+    conn = get_connection()
+    db = OapenDB(conn)
     seed_endpoints(conn)
     urls = db.get_incomplete_urls()
+
+    close_connection(conn)
+
     if len(urls) > 0:
         run_seed()
         run_generate_suggestions()
+
 
 def refresh():
     run_refresh_items()
     run_generate_suggestions()
 
-def main():
-    conn = get_connection()
-    db = OapenDB(conn)
 
+def main():
     def signal_handler(signal, frame):
-        conn.close()
         logger.info("Daemon exiting.")
         sys.exit(0)
 
@@ -51,8 +58,9 @@ def main():
     schedule.every().sunday.at("22:00").do(harvest)
 
     while True:
-      schedule.run_pending()
-      time.sleep(60)
+        schedule.run_pending()
+        time.sleep(60)
+
 
 if __name__ == "__main__":
     main()

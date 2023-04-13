@@ -59,6 +59,10 @@ def get_all_collections():
     return res
 
 
+# i.e. /rest/collections/2154c0ca-7814-4cc8-a869-3de4215c4121/items?limit=25&offset=0&expand=bitstreams,metadata
+# This is a redundancy of get_collection_items_by_id meant to be used with endpoints that
+# are constructed in tasks/clean.py and cached in the database. This is not a high priority
+# issue, but it certainly can be cleaned up in the future.
 def get_collection_items_by_endpoint(endpoint) -> List[OapenItem]:
     res = get(endpoint=endpoint)
 
