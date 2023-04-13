@@ -66,6 +66,7 @@ def create_schema(connection) -> None:
 
 
 def drop_schema(connection) -> None:
+    logger.warn("WARNING: DROPPING DATABASE!")
     cursor = connection.cursor()
     cursor.execute(
         """

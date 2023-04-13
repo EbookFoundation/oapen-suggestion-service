@@ -13,7 +13,7 @@ def main():
     print("Testing connection to OAPEN.")
     try:
         run_test(
-            "Attempting to get collection limit by label [Knowledge Unlatched (KU)]:",
+            "Attempting to get collection limit by id (ea93f8f0-430f-4a03-b7e2-5b06053585b0):",
             test_oapen.test_get_collection_limit,
         )
         run_test(

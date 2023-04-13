@@ -10,4 +10,4 @@ def test_get_collection_limit():
 
 def test_get_collection_404():
     collection = OapenAPI.get_collection_items_by_id("hahaha", limit=10)
-    assert len(collection) == 0
+    assert collection is None
