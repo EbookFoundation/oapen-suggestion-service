@@ -12,6 +12,39 @@ The OAPEN Suggestion Engine will suggest e-books based on other books with simil
 
 ## Installation
 
+### 0. Configure Server
+
+#### Digital Ocean:
+
+0. small droplet 
+
+- 1 GB Memory / 25 GB Disk / FRA1 - Docker 20.10.21 on Ubuntu 22.04 
+- https://marketplace.digitalocean.com/apps/docker
+- https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04
+
+1. can add a reserved ip if desired.
+
+2. managed database
+
+-  1 GB RAM / 1vCPU / 10 GB Disk / Primary only / FRA1 - PostgreSQL 15
+
+3. open firewall ports 
+
+- https://cloud.digitalocean.com/networking/firewalls
+
+#### Setup Users
+
+Create a non-root oapen user and add it to the docker group to to manage the Docker daemon without sudo privileges. Logged in as root:
+
+`useradd -m oapen`
+
+`groupadd docker` (docker already exists if you use the docker Droplet)
+
+Then add the user to it:
+`usermod -aG docker oapen`
+
+Restart the machine for the changes to take effect or you can run `
+
 ### 1. Install Docker
 
 This project uses Docker. To run the project, you will need to have Docker installed. You can find instructions for installing Docker [here](https://docs.docker.com/get-docker/). Note that on Linux, if you do not install Docker with Docker Desktop, you will have to install Docker Compose separately, instructions for which can be found [here](https://docs.docker.com/compose/install/#scenario-two-install-the-compose-plugin).
@@ -48,6 +81,7 @@ POSTGRES_PORT=<Port postgres is running on, default of 5432 in most cases>
 POSTGRES_DB_NAME=<Name of the postgres database, "postgres" works fine here>
 POSTGRES_USERNAME=<Username of the postgres user>
 POSTGRES_PASSWORD=<Password of the postgres user>
+POSTGRES_SSLMODE=require # for Digital ocean managed db
 ```
 
 > The service **will not run** if this is improperly configured.
@@ -127,3 +161,4 @@ Configuration info for the web demo is in [`web/README.md`](web/README.md).
 * `typescript` -- Types for JavaScript
     * Maintained by [Microsoft](https://www.typescriptlang.org/) and the open source community.
 
+### Updates
