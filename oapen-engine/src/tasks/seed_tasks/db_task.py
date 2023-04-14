@@ -1,3 +1,4 @@
+import itertools
 import multiprocessing
 from threading import Event
 
@@ -13,22 +14,20 @@ def db_task(db: OapenDB, db_queue: multiprocessing.Queue, event: Event):
 
     def insert_items(entries):
         try:
+
             urls = [e[0] for e in entries]
-            items = []
+            items = list(itertools.chain(*[e[1] for e in entries]))
 
-            for e in entries:
-                items += e[1]
-
-            logger.debug("(DB) - Inserting {0} item(s).".format(len(items)))
+            logger.info("(DB) - Inserting {0} item(s).".format(len(items)))
 
             db.add_many_ngrams(items)
 
-            logger.debug("(DB) - Inserted {0} item(s).".format(len(items)))
+            logger.info("(DB) - Inserted {0} item(s).".format(len(items)))
 
             for url in urls:
                 db.update_url(url, True)
 
-            return len(items)
+            return
         except Exception as e:
             logger.error(e)
             return -1

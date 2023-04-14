@@ -33,7 +33,6 @@ def harvest_task(url: str, items: multiprocessing.JoinableQueue) -> int or None:
             continue
         except Exception as e:
             logger.error("(IO) (will retry) - " + str(e))
-
             time.sleep(RETRY_DELAY)
 
     return ret

@@ -1,5 +1,6 @@
 import concurrent.futures
 import multiprocessing
+import random
 import signal
 import sys
 import threading
@@ -89,7 +90,7 @@ def run():
         future = io_executor.submit(harvest_task, url[0], item_queue)
         future.add_done_callback(lambda x: refresh(x, pbar, counter))
         producer_futures.append(future)
-        time.sleep(config.HARVEST_THREAD_SPAWN_DELAY)
+        time.sleep(random.randint(1, config.HARVEST_THREAD_SPAWN_DELAY))
 
     for future in concurrent.futures.as_completed(producer_futures):
         producers_done += 1
