@@ -104,6 +104,10 @@ docker compose up
 
 and connect to the API at `http://localhost:<API_PORT>`.
 
+To view logs:
+```
+docker logs oapen-suggestion-service-oapen-engine-1
+```
 ## Configuration
 
 > *More configuration options should go here*
