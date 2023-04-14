@@ -25,17 +25,20 @@ def create_schema(connection) -> None:
         $$ language 'plpgsql';
 
         CREATE TABLE IF NOT EXISTS oapen_suggestions.suggestions (
-            handle      text,
-            name		text,
-            suggestion	text,
-            score       int,
-            created_at  timestamp default current_timestamp,
-            updated_at  timestamp default current_timestamp,
+            handle                  text,
+            suggestion	            text,
+            suggestion_name		    text,
+            suggestion_thumbnail    text,
+            score                   int,
+            created_at              timestamp default current_timestamp,
+            updated_at              timestamp default current_timestamp,
             PRIMARY KEY (handle, suggestion)
         );
 
         CREATE TABLE IF NOT EXISTS oapen_suggestions.ngrams (
             handle      text    PRIMARY KEY,
+            name        text,
+            thumbnail   text,
             ngrams      oapen_suggestions.ngram[],
             created_at  timestamp default current_timestamp,
             updated_at  timestamp default current_timestamp
@@ -63,6 +66,7 @@ def create_schema(connection) -> None:
 
 
 def drop_schema(connection) -> None:
+    logger.warn("WARNING: DROPPING DATABASE!")
     cursor = connection.cursor()
     cursor.execute(
         """

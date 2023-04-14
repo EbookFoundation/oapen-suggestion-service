@@ -4,7 +4,7 @@ ITEMS_PER_IMPORT_THREAD = 25
 IO_MAX_WORKERS = 5
 
 # Delay for submitting new API call thread
-HARVEST_THREAD_SPAWN_DELAY = 2
+HARVEST_THREAD_SPAWN_DELAY = 5
 
 # Size of list of items to process into ngrams per process
 NGRAMS_PER_INSERT = 100

@@ -7,7 +7,7 @@ import time
 import schedule
 from clean import run as run_clean
 from clean import seed_endpoints
-from data.connection import get_connection
+from data.connection import close_connection, get_connection
 from data.oapen_db import OapenDB
 from generate_suggestions import run as run_generate_suggestions
 from logger.base_logger import logger
@@ -16,12 +16,16 @@ from seed import run as run_seed
 
 conn = get_connection()
 db = OapenDB(conn)
-logger.info("Daemon up")
 
 
 def harvest():
+    conn = get_connection()
+    db = OapenDB(conn)
     seed_endpoints(conn)
     urls = db.get_incomplete_urls()
+
+    close_connection(conn)
+
     if len(urls) > 0:
         run_seed()
         run_generate_suggestions()
@@ -32,33 +36,31 @@ def refresh():
     run_generate_suggestions()
 
 
-def signal_handler(signal, frame):
-    conn.close()
-    logger.info("Daemon exiting.")
-    sys.exit(0)
+def main():
+    def signal_handler(signal, frame):
+        logger.info("Daemon exiting.")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    logger.info("Daemon up")
+
+    if int(os.environ["RUN_CLEAN"]) == 1 or (
+        not db.table_exists("suggestions")
+        or not db.table_exists("ngrams")
+        or not db.table_exists("endpoints")
+    ):
+        run_clean()
+
+    harvest()
+
+    schedule.every().day.at("20:00").do(refresh)
+    schedule.every().sunday.at("22:00").do(harvest)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
 
 
-signal.signal(signal.SIGINT, signal_handler)
-
-logger.info("Daemon up")
-
-conn = get_connection()
-db = OapenDB(conn)
-
-if int(os.environ["RUN_CLEAN"]) == 1 or (
-    not db.table_exists("suggestions")
-    or not db.table_exists("ngrams")
-    or not db.table_exists("endpoints")
-):
-    run_clean()
-
-harvest()
-
-schedule.every().day.at("20:00").do(refresh)
-schedule.every().sunday.at("22:00").do(harvest)
-
-while True:
-    schedule.run_pending()
-    time.sleep(60)
-
-logger.info("Daemon down")
+if __name__ == "__main__":
+    main()

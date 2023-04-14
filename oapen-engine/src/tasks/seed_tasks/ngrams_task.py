@@ -1,8 +1,10 @@
 import multiprocessing
 import queue
+from typing import List
 
 import model.ngrams as OapenEngine
 from logger.base_logger import logger
+from model.oapen_types import OapenItem
 
 
 def ngrams_task(
@@ -15,7 +17,8 @@ def ngrams_task(
         try:
             entry = item_queue.get_nowait()
 
-            url, items = entry[0], entry[1]
+            url: str = entry[0]
+            items: List[OapenItem] = entry[1]
 
             ngrams = OapenEngine.get_ngrams_for_items(items)
 
