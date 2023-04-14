@@ -10,7 +10,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-
+    - run: cp .env.template .env
     - name: Start containers
       run: docker-compose -f "docker-compose.yml" up -d --build
 
