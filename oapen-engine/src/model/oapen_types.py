@@ -1,22 +1,12 @@
 from datetime import datetime
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, NamedTuple
 
 
-class OapenItem:
-    def __init__(
-        self, uuid, name, handle, expand, link, metadata, bitstreams, text: str
-    ):
-        self.uuid = uuid
-        self.name = name
-        self.handle = handle
-        self.expand = expand
-        self.link = link
-        self.metadata = metadata
-        self.bitstreams = bitstreams
-
-        language = list(filter(lambda x: x["key"] == "dc.language", self.metadata))
-        self.language = None if len(language) == 0 else language[0]["value"]
-        self.text = text
+class OapenItem(NamedTuple):
+    handle: str
+    name: str
+    thumbnail: str
+    text: str
 
     def __eq__(self, other):
         return self.handle == other.handle
@@ -24,29 +14,44 @@ class OapenItem:
     def __hash__(self):
         return hash(self.handle, "handle")
 
+class SuggestionRow(NamedTuple):
+    handle: str
+    suggestion: str
+    suggestion_name: str
+    suggestion_thumbnail: str
+    score: int
+    created_at: datetime = None
+    updated_at: datetime = None
 
-SuggestionRowWithoutDate = Tuple[str, str, str, int]
-SuggestionRowWithDate = Tuple[str, str, str, int, datetime, datetime]
-SuggestionRow = Union[SuggestionRowWithDate, SuggestionRowWithoutDate]
+    def __eq__(self, other):
+        return self.handle == other.handle and self.suggestion == other.suggestion
 
-Ngram = Tuple[str, int]
-NgramRowWithoutDate = Tuple[str, List[Ngram]]
-NgramRowWithDate = Tuple[str, List[Ngram], datetime, datetime]
-NgramRow = Union[NgramRowWithDate, NgramRowWithoutDate]
+    def __hash__(self) -> int:
+        return hash((self.handle, self.suggestion))
+
+class Ngram(NamedTuple):
+    ngram: str
+    count: int
+
+class NgramRow(NamedTuple):
+    handle: str
+    name: str
+    thumbnail: str
+    ngrams: List[Ngram]
+    created_at: datetime = None
+    updated_at: datetime = None
+
+    def __eq__(self, other):
+        return self.handle == other.handle
+
+    def __hash__(self) -> int:
+        return hash(self.handle)
+
 
 NgramDict = Dict[str, int]
 
-UrlRow = Tuple[str, bool]
 
-
-def transform_item_data(item, text) -> OapenItem:
-    return OapenItem(
-        item["uuid"],
-        item["name"],
-        item["handle"],
-        item["expand"],
-        item["link"],
-        item["metadata"],
-        item["bitstreams"],
-        text,
-    )
+class UrlRow(NamedTuple):
+    url: str
+    completed: bool
+    updated_at: datetime = None
