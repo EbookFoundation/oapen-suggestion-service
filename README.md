@@ -158,10 +158,14 @@ docker compose down
 
 You can view the logs with:
 ```bash
-docker compose logs --follow
+docker compose logs -f
 ```
-
 > You can dump them with `docker compose logs > some_file.txt`
+
+To view the logs for just a specific service component - for example the mining enginge - use:
+```bash
+docker logs -f oapen-suggestion-service-oapen-engine-1
+```
 
 ## Endpoints
 
