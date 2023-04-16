@@ -4,21 +4,21 @@
 The OAPEN Suggestion Service uses natural-language processing to suggest books based on their content similarities. To protect user privacy, we utilize text analysis rather than usage data to provide recommendations. This service is built on the proof-of-concept and paper by Ronald Snijder from the OAPEN Foundation, and you can [read the paper here](https://liberquarterly.eu/article/view/10938).
 
 ## Table of Contents
-  * [Installation (Server)](#installation--server-)
+  * [Installation (Server)](#installation-server)
     + [DigitalOcean Droplet](#digitalocean-droplet)
     + [DigitalOcean Managed Database](#digitalocean-managed-database)
-    + [Setup Users & Install Requirements](#setup-users---install-requirements)
-    + [Clone & Configure the Project](#clone---configure-the-project)
+    + [Setup Users & Install Requirements](#setup-users--install-requirements)
+    + [Clone & Configure the Project](#clone--configure-the-project)
     + [SSL Certificate](#ssl-certificate)
   * [Running](#running)
   * [Endpoints](#endpoints)
   * [Service Components](#service-components)
-    + [Suggestion Engine](#-suggestion-engine--oapen-engine-readmemd-)
-    + [API](#-api--api-readmemd-)
-    + [Embed Script](#-embed-script--embed-script-readmemd-)
-    + [Web Demo](#-web-demo--web-readmemd-)
+    + [Suggestion Engine](#suggestion-engine)
+    + [API](#api)
+    + [Embed Script](#embed-script)
+    + [Web Demo](#web-demo)
   * [Updates](#updates)
-  * [Local Installation (No Server)](#local-installation--no-server-)
+  * [Local Installation (No Server)](#local-installation-no-server)
 
 ## Installation (Server)
 
