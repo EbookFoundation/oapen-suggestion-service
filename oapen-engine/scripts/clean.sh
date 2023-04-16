@@ -1,1 +1,3 @@
-python src/tasks/clean.py
+#!/bin/sh
+
+python src/tasks/clean.py "now"
