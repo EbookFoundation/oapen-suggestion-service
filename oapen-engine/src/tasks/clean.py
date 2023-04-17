@@ -156,22 +156,17 @@ def run():
 
 if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1] in ["now", "true", "false"]:
-        connection = get_connection()
         if sys.argv[1] == "now":
             run()
         elif sys.argv[1] == "true":
+            connection = get_connection()
             mark_for_cleaning(connection)
             logger.warning("WARNING: The database will be ERASED on the next run.")
+            connection.close()
         elif sys.argv[1] == "false":
+            connection = get_connection()
             mark_no_clean(connection)
             logger.info("The database will not be cleaned on the next run.")
-        connection.close()
+            connection.close()
     else:
-        logger.error("""
-            usage: clean.py [true or false]
-            options:
-            now         Clean the database now. Drops ALL DATA in the database!
-            true        Clean the database on the next run of the service. Drops ALL DATA in the database!
-            false       Do not clean the database on the next run. Leaves the database as it is.
-            """
-        )
+        logger.error("Invalid argument supplied to clean.py. Valid options are 'now', 'true', or 'false'.")

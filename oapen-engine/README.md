@@ -4,19 +4,19 @@ When you make database changes, or add new stopwords, you'll want to completely 
 
 To erase & recreate the database _NOW_, you can run:
 ```bash
-docker exec -it oapen-suggestion-service-oapen-engine-1 "/home/appuser/scripts/clean.sh"
+docker compose run oapen-engine clean now
 ```
-> *WARNING*: You will lose ALL database data! Reruns are resource-intensive and lengthy, be sure before running this. This _could_ cause unexpected errors if the running service is active, in which case you will need to restart with `docker compose up`.
+> *WARNING*: You will lose ALL database data! Reruns are resource-intensive and lengthy, be sure before running this. This _could_ cause unexpected errors if the running service is active, in which case you will need to restart the container.
 
 To erase & recreate the database _on the next run_, you can run:
 ```bash
-docker exec -it oapen-suggestion-service-oapen-engine-1 "/home/appuser/scripts/mark-for-cleaning.sh"
+docker compose run oapen-engine clean true
 ```
 > *WARNING*: You will lose ALL database data! Reruns are resource-intensive and lengthy, be sure before running this. This is safer than the last command and should not cause any breakage, even if the database is being used by the service actively.
 
 To cancel the operation above, so the database is _not_ erased on the next run, you can run:
 ```bash
-docker exec -it oapen-suggestion-service-oapen-engine-1 "/home/appuser/scripts/do-not-clean.sh"
+docker compose run oapen-engine clean false
 ```
 
 ### How it works
