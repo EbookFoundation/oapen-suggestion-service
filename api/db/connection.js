@@ -7,21 +7,22 @@ class DatabaseConnectionError extends Error {
   }
 }
 
-if (
-  !(
-    process.env.POSTGRES_USERNAME &&
-    process.env.POSTGRES_PASSWORD &&
-    process.env.POSTGRES_HOST &&
-    process.env.POSTGRES_PORT &&
-    process.env.POSTGRES_DB_NAME &&
-    process.env.POSTGRES_SSLMODE
-  )
-) throw new DatabaseConnectionError(
-  "Some Postgres environment variables weren't found. Please configure them in the .env file."
-);
-let connection_string = `postgresql://${process.env.POSTGRES_USERNAME}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB_NAME}`;
-if (process.env.POSTGRES_SSLMODE === "require")
-  connection_string += "?ssl=true";
-const db = pgp(connection_string);
+let db;
+
+try {
+  const cn = {
+    host: process.env.POSTGRES_HOST,
+    port: process.env.POSTGRES_PORT,
+    database: process.env.POSTGRES_DB_NAME,
+    user: process.env.POSTGRES_USERNAME,
+    password: process.env.POSTGRES_PASSWORD,
+    ssl: process.env.POSTGRES_SSLMODE === "require"
+  };
+  db = pgp(cn);
+} catch {
+  throw new DatabaseConnectionError(
+    "Postgres connection could not be created, please check your .env file."
+  );
+}
 
 module.exports = db;
