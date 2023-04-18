@@ -6,22 +6,26 @@ The OAPEN Suggestion Service uses natural-language processing to suggest books b
 
 ## Table of Contents
 
-  * [Installation (Server)](#installation-server)
-    + [DigitalOcean Droplet](#digitalocean-droplet)
-    + [DigitalOcean Managed Database](#digitalocean-managed-database)
-    + [Setup Users & Install Requirements](#setup-users--install-requirements)
-    + [Clone & Configure the Project](#clone--configure-the-project)
-    + [SSL Certificate](#ssl-certificate)
-  * [Running](#running)
-  * [Endpoints](#endpoints)
-  * [Logging](#logging)
-  * [Service Components](#service-components)
-    + [Suggestion Engine](#suggestion-engine)
-    + [API](#api)
-    + [Embed Script](#embed-script)
-    + [Web Demo](#web-demo)
-  * [Updates](#updates)
-  * [Local Installation (No Server)](#local-installation-no-server)
+- [Installation (Server)](#installation-server)
+  * [DigitalOcean Droplet](#digitalocean-droplet)
+  * [DigitalOcean Managed Database](#digitalocean-managed-database)
+  * [Setup Users & Install Requirements](#setup-users-install-requirements)
+  * [Clone & Configure the Project](#clone-configure-the-project)
+  * [SSL Certificate](#ssl-certificate)
+- [Running](#running)
+- [Endpoints](#endpoints)
+  * [/api](#get-api)
+  * [/api/ngrams](#get-apingrams)
+  * [/api/{handle}](#get-apihandle)
+  * [/api/{handle}/ngrams](#get-apihandlengrams)
+- [Logging](#logging)
+- [Service Components](#service-components)
+  * [Suggestion Engine](#suggestion-engine)
+  * [API](#api)
+  * [Embed Script](#embed-script)
+  * [Web Demo](#web-demo)
+- [Updates](#updates)
+- [Local Installation (No Server)](#local-installation-no-server)
 
 ## Installation (Server)
 
@@ -188,13 +192,93 @@ docker compose up -d --build
 
 The API provides access to the following endpoints:
 
-- `http://localhost:3001/api/{handle}`
-  - e.g. http://localhost:3001/api/20.400.12657/47581
-- `http://localhost:3001/api/{handle}/?threshold={integer}`
-  - e.g. http://localhost:3001/api/20.400.12657/47581/?threshold=5
-- `http://localhost:3001/api/{handle}/ngrams`
-  - e.g. http://localhost:3001/api/20.400.12657/47581/ngrams
-  
+### GET /api
+
+Returns an array of suggestions for each book as an array.
+
+The array of books is ordered by the date they were added (most recent first).
+
+#### Query Parameters
+
+- `limit` (optional): limits the number of results returned. Default is 25, maximum is 100.
+- `offset` (optional): offset the list of results. Default is 0.
+- `threshold` (optional): sets the minimum similarity score to receive suggestions for. Default is 0, returning all suggestions.
+
+#### Examples
+
+Any combination of the query parameters in any order are valid.
+
+- `/api?threshold=3`
+   
+   Returns suggestions with a similarity score of 3 or more for the 25 most recently added books.
+- `/api?threshold=5&limit=100`
+   
+   Returns suggestions with a similarity score of 3 or more for the 100 most recently added books.
+- `/api?limit=50&offset=1000`
+   
+   Returns 50 books and all of their suggestions, skipping the 1000 most recent.
+
+### GET /api/ngrams
+
+Returns an array of ngrams and their occurences for each book as an array.
+
+The array of books is ordered by the date they were added (most recent first).
+
+#### Query Parameters
+
+- `limit` (optional): limits the number of results returned. Default is 25, maximum is 100.
+- `offset` (optional): offset the list of results. Default is 0.
+
+#### Examples
+
+Any combination of the query parameters in any order are valid.
+
+- `/api?limit=100`
+   
+   Returns ngrams for the 100 most recent books.
+- `/api?offset=1000`
+   
+   Returns ngrams for 25 books, skipping the 1000 most recent.
+
+
+### GET /api/{handle}
+
+Returns suggestions for the book with the specified handle.
+
+#### Path Parameters
+
+`{handle}` (required): the handle of the book to retrieve.
+
+#### Query Parameters
+`threshold` (optional): sets the minimum similarity score to receive suggestions for. Default is 0, returning all suggestions.
+
+#### Examples
+
+> **NOTE**: You won't need to worry about the forward slash in handles causing problems, this is handled server-side.
+
+- `/api/20.400.12657/47581`
+
+Returns suggestions for [the book](https://library.oapen.org/handle/20.500.12657/37041) with the handle `20.400.12657/47581`.
+
+- `/api/20.400.12657/47581?threshold=3`
+
+Returns suggestions with a similarity score of 3 or more for [the book](https://library.oapen.org/handle/20.500.12657/37041) with the handle `20.400.12657/47581`.
+
+
+### GET /api/{handle}/ngrams
+
+Returns the ngrams and their occurences for the book with the specified handle.
+
+#### Path Parameters
+
+`{handle}` (required): the handle of the book to retrieve.
+
+#### Example
+
+`/api/20.400.12657/47581/ngrams`
+
+Returns ngrams and their occurences for [the book](https://library.oapen.org/handle/20.500.12657/37041) with the handle `20.400.12657/47581`.
+
 ## Logging
 
 Log files are automatically generated by Docker for each container. The log files can be found in `/var/lib/docker/containers/<container-id>/*-json.log`.
@@ -309,5 +393,5 @@ Configuration info for the web demo is in [`web/README.md`](web/README.md).
      POSTGRES_PASSWORD=<Password of the postgres user>
      POSTGRES_SSLMODE=<'allow' for a local installation>
      ```
-    
+
 4. See [Running](#running)
