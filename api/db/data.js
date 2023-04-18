@@ -1,9 +1,6 @@
 const validate = require("../validate.js");
 const { ParameterizedQuery: PQ } = require("pg-promise");
 
-const DEFAULT_ITEM_LIMIT = 25;
-const MAX_ITEM_LIMIT = 100;
-
 const db = require("./connection.js");
 
 async function querySuggestions(handle, threshold = 0) {
@@ -57,7 +54,7 @@ async function queryNgrams(handle) {
 
 async function queryManySuggestions(
   threshold = 0,
-  limit = DEFAULT_ITEM_LIMIT,
+  limit = validate.DEFAULT_ITEM_LIMIT,
   offset = 0
 ) {
   if (threshold < 0) threshold = 0;
@@ -82,7 +79,7 @@ async function queryManySuggestions(
   });
 }
 
-async function queryManyNgrams(limit = DEFAULT_ITEM_LIMIT, offset = 0) {
+async function queryManyNgrams(limit = validate.DEFAULT_ITEM_LIMIT, offset = 0) {
   if (limit > validate.MAX_ITEM_LIMIT) {
     limit = validate.MAX_ITEM_LIMIT;
   } else if (limit < 1) {
