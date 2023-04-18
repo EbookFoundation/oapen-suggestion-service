@@ -2,33 +2,30 @@ version: "3.8"
 services:
   oapen-engine :
     build: ./oapen-engine/
+    restart: always
     env_file:
       - .env
     environment:
-      - RUN_CLEAN=1
       - COLLECTION_IMPORT_LIMIT=0   # Set to 0 for full harvest
       - REFRESH_PERIOD=86400        # daily
       - HARVEST_PERIOD=604800       # weekly
   api:
     build: ./api/
+    restart: always
     env_file:
       - .env
-    expose:
-       - ${API_PORT}
     ports:
         - "0.0.0.0:${API_PORT}:${API_PORT}"
   web:
     build: ./web/
-    expose:
-        - ${WEB_DEMO_PORT}
+    restart: always
     ports:
-        - "0.0.0.0:${WEB_DEMO_PORT}:${WEB_DEMO_PORT}"
+        - "0.0.0.0:${WEB_DEMO_PORT}:3000"
   embed-script-test:
     build: ./embed-script/
-    expose:
-        - ${EMBED_SCRIPT_PORT}
+    restart: always
     ports:
-        - "0.0.0.0:${EMBED_SCRIPT_PORT}:${EMBED_SCRIPT_PORT}"
+        - "0.0.0.0:${EMBED_SCRIPT_PORT}:3002"
 volumes:
   db:
     driver: local
