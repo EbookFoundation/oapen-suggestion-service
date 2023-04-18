@@ -66,7 +66,7 @@ def create_schema(connection) -> None:
 
 
 def drop_schema(connection) -> None:
-    logger.warn("WARNING: DROPPING DATABASE!")
+    logger.warning("WARNING: DROPPING DATABASE!")
     cursor = connection.cursor()
     cursor.execute(
         """
@@ -74,6 +74,7 @@ def drop_schema(connection) -> None:
         DROP TABLE IF EXISTS oapen_suggestions.suggestions CASCADE;
         DROP TABLE IF EXISTS oapen_suggestions.ngrams CASCADE;
         DROP TABLE IF EXISTS oapen_suggestions.endpoints CASCADE;
+        DROP TABLE IF EXISTS oapen_suggestions.migrate;
         DROP TYPE IF EXISTS oapen_suggestions.ngram CASCADE;
         """
     )
@@ -123,12 +124,49 @@ def seed_endpoints(connection):
     endpoints = get_endpoints()
     db.add_urls(endpoints)
 
+def mark_for_cleaning(connection):
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        CREATE SCHEMA IF NOT EXISTS oapen_suggestions;
+        CREATE TABLE IF NOT EXISTS oapen_suggestions.migrate (migrate boolean);
+        """
+    )
+    cursor.close()
+
+def mark_no_clean(connection):
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        CREATE SCHEMA IF NOT EXISTS oapen_suggestions;
+        DROP TABLE IF EXISTS oapen_suggestions.migrate;
+        """
+    )
+    cursor.close()
 
 def run():
     connection = get_connection()
 
     drop_schema(connection)
     create_schema(connection)
+    mark_no_clean(connection)
     seed_endpoints(connection)
 
     connection.close()
+
+if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] in ["now", "true", "false"]:
+        if sys.argv[1] == "now":
+            run()
+        elif sys.argv[1] == "true":
+            connection = get_connection()
+            mark_for_cleaning(connection)
+            logger.warning("WARNING: The database will be ERASED on the next run.")
+            connection.close()
+        elif sys.argv[1] == "false":
+            connection = get_connection()
+            mark_no_clean(connection)
+            logger.info("The database will not be cleaned on the next run.")
+            connection.close()
+    else:
+        logger.error("Invalid argument supplied to clean.py. Valid options are 'now', 'true', or 'false'.")

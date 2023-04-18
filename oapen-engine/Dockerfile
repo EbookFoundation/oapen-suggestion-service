@@ -6,7 +6,6 @@ ENV LC_ALL C.UTF-8
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONFAULTHANDLER 1
 
-
 FROM base AS python-deps
 
 # Install pipenv and compilation dependencies
@@ -17,15 +16,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev build
 COPY Pipfile .
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy --skip-lock --verbose
 
-
-
 FROM base AS runtime
 
 # Copy virtual env from python-deps stage
 COPY --from=python-deps /.venv /.venv
 ENV PATH="/.venv/bin:$PATH"
 ENV PATH="$PATH:/usr/local/bin"
-
 
 RUN apt-get update && apt-get install libpq5 -y
 
@@ -48,4 +44,4 @@ RUN chmod -R +x scripts
 USER appuser
 
 # Run the application
-ENTRYPOINT ["./scripts/test-and-run.sh"]
+ENTRYPOINT ["./scripts/run.sh"]

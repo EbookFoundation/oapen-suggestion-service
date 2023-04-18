@@ -45,10 +45,11 @@ def main():
 
     logger.info("Daemon up")
 
-    if int(os.environ["RUN_CLEAN"]) == 1 or (
-        not db.table_exists("suggestions")
-        or not db.table_exists("ngrams")
-        or not db.table_exists("endpoints")
+    if db.table_exists("migrate") or not (
+        db.table_exists("suggestions")
+        and db.table_exists("ngrams")
+        and db.table_exists("endpoints")
+        and db.type_exists("ngram")
     ):
         run_clean()
 
