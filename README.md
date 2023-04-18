@@ -1,6 +1,7 @@
 # OAPEN Suggestion Service
 
 ## Description
+
 The OAPEN Suggestion Service uses natural-language processing to suggest books based on their content similarities. To protect user privacy, we utilize text analysis rather than usage data to provide recommendations. This service is built on the proof-of-concept and paper by Ronald Snijder from the OAPEN Foundation, and you can [read the paper here](https://liberquarterly.eu/article/view/10938).
 
 ## Table of Contents
@@ -25,21 +26,23 @@ The OAPEN Suggestion Service uses natural-language processing to suggest books b
 ## Installation (Server)
 
 ### DigitalOcean Droplet
+
 1. Log in to your DigitalOcean account.
 2. Create a new Droplet.
 3. Under "Choose an image" select "Marketplace" and search for "Docker". Select "Docker 20.10.21 on Ubuntu 22.04".
 4. Choose any size, but the cheapest option will work fine.
 5. If you do not have an ssh key, generate one with:
-    ```bash
-    ssh-keygen -t rsa -b 4096
-    ```
-    And copy the public key to your clipboard. If you have a key on your computer already, you can use that.
-7. Under "Choose Authentication Method" choose "SSH Key" and click "New SSH Key", and in the popup window paste the public key you copied to your clipboard. Make sure it is selected.
-8. Give the Droplet a name and click "Create".
-9. Open the firewall ports 
-    - https://cloud.digitalocean.com/networking/firewalls
+   ```bash
+   ssh-keygen -t rsa -b 4096
+   ```
+   And copy the public key to your clipboard. If you have a key on your computer already, you can use that.
+6. Under "Choose Authentication Method" choose "SSH Key" and click "New SSH Key", and in the popup window paste the public key you copied to your clipboard. Make sure it is selected.
+7. Give the Droplet a name and click "Create".
+8. Open the firewall ports
+   - https://cloud.digitalocean.com/networking/firewalls
 
 ### DigitalOcean Managed Database
+
 1. From the DigitalOcean dashboard, click "Databases" > "Create Database".
 2. Ideally, select the same region & datacenter as the Droplet you just created, so they can be part of the same VPC network.
 3. Choose "PostgreSQL v15".
@@ -50,9 +53,9 @@ The OAPEN Suggestion Service uses natural-language processing to suggest books b
 ### Setup Users & Install Requirements
 
 1. Log in to the droplet over SSH:
-    ```bash
-    ssh root@<your-droplet-ip>
-    ```
+   ```bash
+   ssh root@<your-droplet-ip>
+   ```
 2. Create a new user `oapen` and set a password, adding them to the `sudo` and `docker` groups, then login as the new user:
 
    ```bash
@@ -62,10 +65,11 @@ The OAPEN Suggestion Service uses natural-language processing to suggest books b
    ```
 
 3. Install the `docker compose` command:
-    ```bash
-    sudo apt-get update
-    sudo apt-get install docker-compose-plugin
-    ```
+
+   ```bash
+   sudo apt-get update
+   sudo apt-get install docker-compose-plugin
+   ```
 
 4. Change the SSH configuration file to disallow root login:
 
@@ -75,73 +79,64 @@ The OAPEN Suggestion Service uses natural-language processing to suggest books b
 
 5. Allow SSH login with non-root user with the same SSH keys you uploaded to DigitalOcean:
 
-    ```bash
-    mkdir -p ~/.ssh
-    sudo cp /root/.ssh/authorized_keys ~/.ssh/
-    sudo chown -R oapen:oapen ~/.ssh
-    sudo chmod 700 ~/.ssh
-    sudo chmod 600 ~/.ssh/authorized_keys
-    sudo systemctl restart ssh
-    ```
+   ```bash
+   mkdir -p ~/.ssh
+   sudo cp /root/.ssh/authorized_keys ~/.ssh/
+   sudo chown -R oapen:oapen ~/.ssh
+   sudo chmod 700 ~/.ssh
+   sudo chmod 600 ~/.ssh/authorized_keys
+   sudo systemctl restart ssh
+   ```
 
 6. Create a swapfile to avoid issues with high memory usage:
 
-    ```bash
-    sudo fallocate -l 1G /swapfile
-    sudo chmod 600 /swapfile
-    sudo mkswap /swapfile
-    sudo swapon /swapfile
-    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-    ```
+   ```bash
+   sudo fallocate -l 1G /swapfile
+   sudo chmod 600 /swapfile
+   sudo mkswap /swapfile
+   sudo swapon /swapfile
+   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+   ```
 
-    > Feel free to replace `1G` in the first command with `4G`. Although the service should never use this much memory, extra swap never hurts if you have the disk space to spare. More on swap [here](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04).
+   > Feel free to replace `1G` in the first command with `4G`. Although the service should never use this much memory, extra swap never hurts if you have the disk space to spare. More on swap [here](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04).
 
 7. Restart the droplet to persist all of the changes. From now on, login to the droplet with:
 
-    ```bash
-    ssh oapen@<your-droplet-ip>
-    ```
+   ```bash
+   ssh oapen@<your-droplet-ip>
+   ```
 
 ### Clone & Configure the Project
 
 1. Clone the repository and cd into the directory it creates:
-    ```bash
-    git clone https://github.com/EbookFoundation/oapen-suggestion-service.git
-    cd oapen-suggestion-service
-    ```
-    > You can clone this anywhere but in the home directory is easiest.
+   ```bash
+   git clone https://github.com/EbookFoundation/oapen-suggestion-service.git
+   cd oapen-suggestion-service
+   ```
+   > You can clone this anywhere but in the home directory is easiest.
 2. Copy the `.env.template` file to `.env`:
-    ```bash
-    cp .env.template .env
-    ```
+
+   ```bash
+   cp .env.template .env
+   ```
 
 3. Using a text editor like `vim` or `nano` configure all of the options in `.env`:
-    ```properties
-    API_PORT=<Port to serve API on>
-    POSTGRES_HOST=<Hostname of postgres server>
-    POSTGRES_PORT=<Port postgres is running on>
-    POSTGRES_DB_NAME=<Name of the postgres database>
-    POSTGRES_USERNAME=<Username of the postgres user>
-    POSTGRES_PASSWORD=<Password of the postgres user>
-    POSTGRES_SSLMODE=<'require' when using a managed database>
-    ```
 
-    > Postgres credentials can be found in the "Connection details" section of the managed database
+   ```properties
+   API_PORT=<Port to serve API on>
+   POSTGRES_HOST=<Hostname of postgres server>
+   POSTGRES_PORT=<Port postgres is running on>
+   POSTGRES_DB_NAME=<Name of the postgres database>
+   POSTGRES_USERNAME=<Username of the postgres user>
+   POSTGRES_PASSWORD=<Password of the postgres user>
+   POSTGRES_SSLMODE=<'require' when using a managed database>
+   ```
 
-4. Open the `docker-compose.yml` file and find the line:
-    ```dockerfile
-    - RUN_CLEAN=1
-    ```
-    This is set to `1` by default, which causes the database to be ***COMPLETELY*** deleted and the types recreated each time the server restarts. It is important to have this set to `1` only on the _first run of the application_, or after making changes that affect the structure of the database. As soon as you run the application with the following command, you should change the line to:
-    ```dockerfile
-    - RUN_CLEAN=0
-    ```
-    To prevent this behavior.
+   > Postgres credentials can be found in the "Connection details" section of the managed database
 
 ### SSL Certificate
 
- > TODO: add documentation
-
+> TODO: add documentation
 
 ## Running
 
@@ -150,24 +145,43 @@ You can start the services by running the following command in the directory whe
 ```bash
 docker compose up -d
 ```
+
 The API will be running on `https://<your-ip>:<API_PORT>`.
 
-> *NOTE*: The `-d` flag runs the services in the background, so you can safely exit the session and the services will continue to run.
+> _NOTE_: The `-d` flag runs the services in the background, so you can safely exit the session and the services will continue to run. The `--build` flag ensures any changes to the code are reflected in the containers.
 
 You can stop the services with:
+
 ```bash
 docker compose down
 ```
 
 You can view the logs with:
+
 ```bash
 docker compose logs -f
 ```
+
 > You can dump them with `docker compose logs > some_file.txt`
 
 To view the logs for just a specific service component - for example the mining enginge - use:
+
 ```bash
 docker logs -f oapen-suggestion-service-oapen-engine-1
+```
+
+> _NOTE_: `oapen-suggestion-service-oapen-engine-1` is the name of the docker container running the service component.
+
+If you make local changes to the source code, you should re-build the images before running with:
+
+```bash
+docker compose build
+```
+
+or by adding the `--build` flag when running:
+
+```bash
+docker compose up -d --build
 ```
 
 ## Endpoints
@@ -231,72 +245,69 @@ You can find the code for the web demo in `web/`.
 Configuration info for the web demo is in [`web/README.md`](web/README.md).
 
 **Base dependencies**:
-* NodeJS 14.x+
-* NPM package manager
+
+- NodeJS 14.x+
+- NPM package manager
 
 **Automatically-installed dependencies**:
-* `next` -- Framework for production-driven web apps
-    * Maintained by [Vercel](https://vercel.com) and the open source community
-* `react` -- Frontend design framework
-    * Maintained by [Meta](https://reactjs.org). 
-    * Largest frontend web UI library.
-    * (Alternative considered: Angular -- however, was recently deprecated by Google)
-* `pg` -- basic PostgreSQL driver
-    * Maintained [on npm](https://www.npmjs.com/package/pg)
-* `typescript` -- Types for JavaScript
-    * Maintained by [Microsoft](https://www.typescriptlang.org/) and the open source community.
+
+- `next` -- Framework for production-driven web apps
+  - Maintained by [Vercel](https://vercel.com) and the open source community
+- `react` -- Frontend design framework
+  - Maintained by [Meta](https://reactjs.org).
+  - Largest frontend web UI library.
+  - (Alternative considered: Angular -- however, was recently deprecated by Google)
+- `pg` -- basic PostgreSQL driver
+  - Maintained [on npm](https://www.npmjs.com/package/pg)
+- `typescript` -- Types for JavaScript
+  - Maintained by [Microsoft](https://www.typescriptlang.org/) and the open source community.
 
 ## Updates
+
 > TODO: add documentation
 
 ## Local Installation (No Server)
 
 1. **Install Docker**
 
-    This project uses Docker. Instructions for installing Docker [here](https://docs.docker.com/get-docker/). Note that if you do not install Docker with Docker Desktop (which is recommended) you will have to install Docker Compose separately Instructions for that [here](https://docs.docker.com/compose/install/#scenario-two-install-the-compose-plugin).
+   This project uses Docker. Instructions for installing Docker [here](https://docs.docker.com/get-docker/). Note that if you do not install Docker with Docker Desktop (which is recommended) you will have to install Docker Compose separately Instructions for that [here](https://docs.docker.com/compose/install/#scenario-two-install-the-compose-plugin).
 
 2. **Install PostgreSQL**
-    
-    You can find instructions for installing PostgreSQL on your machine [here](https://www.postgresql.org/download/).
 
-    Or you can create a PostgreSQL server with Docker:
-    
-    ```bash
-    docker run -d --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgrespw postgres
-    ```
-    
-    > The username and database name will both be `postgres` and the password will be `postgrespw`. You can connect via the hostname `host.docker.internal` over port `5432`.
+   You can find instructions for installing PostgreSQL on your machine [here](https://www.postgresql.org/download/).
+
+   Or you can create a PostgreSQL server with Docker:
+
+   ```bash
+   docker run -d --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgrespw postgres
+   ```
+
+   > The username and database name will both be `postgres` and the password will be `postgrespw`. You can connect via the hostname `host.docker.internal` over port `5432`.
 
 3. **Clone and configure the project**
 
-    - Clone the repo and go into its directory:
+   - Clone the repo and go into its directory:
 
-        ```bash
-        git clone https://github.com/EbookFoundation/oapen-suggestion-service.git
-        cd oapen-suggestion-service
-        ```
-    - Copy the `.env.template` file to `.env`:
-        ```bash
-        cp .env.template .env
-        ```
+     ```bash
+     git clone https://github.com/EbookFoundation/oapen-suggestion-service.git
+     cd oapen-suggestion-service
+     ```
 
-    - Using a text editor like `vim` or `nano` configure all of the options in `.env`:
-        ```properties
-        API_PORT=<Port to serve API on>
-        POSTGRES_HOST=<Hostname of postgres server>
-        POSTGRES_PORT=<Port postgres is running on>
-        POSTGRES_DB_NAME=<Name of the postgres database>
-        POSTGRES_USERNAME=<Username of the postgres user>
-        POSTGRES_PASSWORD=<Password of the postgres user>
-        POSTGRES_SSLMODE=<'allow' for a local installation>
-        ```
-    - Open the `docker-compose.yml` file and find the line:
-        ```dockerfile
-        - RUN_CLEAN=1
-        ```
-        This is set to `1` by default, which causes the database to be ***COMPLETELY*** deleted and the types recreated each time the server restarts. It is important to have this set to `1` only on the _first run of the application_, or after making changes that affect the structure of the database. As soon as you run the application with the following command, you should change the line to:
-        ```dockerfile
-        - RUN_CLEAN=0
-        ```
-        To prevent this behavior.
+   - Copy the `.env.template` file to `.env`:
+
+     ```bash
+     cp .env.template .env
+     ```
+
+   - Using a text editor like `vim` or `nano` configure all of the options in `.env`:
+     ```properties
+     API_PORT=<Port to serve API on>
+     POSTGRES_HOST=<Hostname of postgres server>
+     POSTGRES_PORT=<Port postgres is running on>
+     POSTGRES_DB_NAME=<Name of the postgres database>
+     POSTGRES_USERNAME=<Username of the postgres user>
+     POSTGRES_PASSWORD=<Password of the postgres user>
+     POSTGRES_SSLMODE=<'allow' for a local installation>
+     ```
+    
 4. See [Running](#running)

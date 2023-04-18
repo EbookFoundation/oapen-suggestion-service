@@ -68,7 +68,7 @@ class OapenDB:
         cursor.close()
         return args
 
-    def table_exists(self, table):
+    def table_exists(self, table_name):
         cursor = self.connection.cursor()
         query = """
                 SELECT EXISTS (
@@ -77,10 +77,29 @@ class OapenDB:
                 """
 
         try:
-            cursor.execute(query, (table,))
+            cursor.execute(query, (table_name,))
             res = cursor.fetchone()[0]
 
-            return res is not None
+            return bool(res)
+        except (Exception, psycopg2.Error) as error:
+            logger.error(error)
+            return False
+        finally:
+            cursor.close()
+
+    def type_exists(self, type_name):
+        cursor = self.connection.cursor()
+        query = """
+            SELECT EXISTS (
+                SELECT 1 FROM pg_type WHERE typname = %s
+            )
+            """
+
+        try:
+            cursor.execute(query, (type_name,))
+            res = cursor.fetchone()[0]
+
+            return bool(res)
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
             return False
