@@ -19,8 +19,9 @@ if (
 ) throw new DatabaseConnectionError(
   "Some Postgres environment variables weren't found. Please configure them in the .env file."
 );
-let sslmode = process.env.POSTGRES_SSLMODE === "require";
-const connection_string = `postgresql://${process.env.POSTGRES_USERNAME}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB_NAME}?ssl=${sslmode}`;
+let connection_string = `postgresql://${process.env.POSTGRES_USERNAME}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB_NAME}`;
+if (process.env.POSTGRES_SSLMODE === "require")
+  connection_string += "?ssl=true";
 const db = pgp(connection_string);
 
 module.exports = db;

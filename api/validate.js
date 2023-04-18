@@ -7,6 +7,9 @@ class UserError extends Error {
   }
 }
 
+const MAX_ITEM_LIMIT = 100;
+const DEFAULT_ITEM_LIMIT = 25;
+
 // RegEx to match formatting of handle
 const handleRegExpression = new RegExp("([0-9]+.[0-9]+.[0-9]+/[0-9]+)");
 
@@ -24,4 +27,6 @@ let checkHandle = async (handle) => {
 
 module.exports = {
   checkHandle,
+  MAX_ITEM_LIMIT,
+  DEFAULT_ITEM_LIMIT
 };
