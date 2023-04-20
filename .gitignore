@@ -3,3 +3,5 @@ oapen-engine/lib/
 .python-version
 private/
 .env
+
+api/certificates/
