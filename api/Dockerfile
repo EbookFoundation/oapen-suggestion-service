@@ -13,9 +13,10 @@ RUN npm install
 
 COPY . .
 
-COPY certificates/* /usr/local/share/ca-certificates/
+# Copy our certificate into the container and update certificate store
+COPY ./certificates/ca-certificate.crt /usr/local/share/ca-certificates/ca-certificate.crt
 
-RUN update-ca-certificates
+RUN chmod 644 /usr/local/share/ca-certificates/ca-certificate.crt && update-ca-certificates
 
 EXPOSE 3001
 
