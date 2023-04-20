@@ -1,5 +1,6 @@
 const options = {};
 const pgp = require("pg-promise")(options);
+const fs = require("fs");
 
 class DatabaseConnectionError extends Error {
   constructor(message) {
@@ -16,7 +17,10 @@ try {
     database: process.env.POSTGRES_DB_NAME,
     user: process.env.POSTGRES_USERNAME,
     password: process.env.POSTGRES_PASSWORD,
-    ssl: process.env.POSTGRES_SSLMODE === "require"
+    ssl: {
+	    rejectUnauthorized: process.env.POSTGRES_SSLMODE === "require",
+	    ca: fs.readFileSync(process.env.CA_CERT).toString(),
+    }
   };
   db = pgp(cn);
 } catch {

@@ -140,7 +140,9 @@ The OAPEN Suggestion Service uses natural-language processing to suggest books b
 
 ### SSL Certificate
 
-> TODO: add documentation
+   > Add information on how to retrieve certificate from DigitalOcean managed DB.
+
+Create a directory in `api` called `certificates`. Once you have acquired a certificate for your managed database, copy it into `/api/certificates`. **Make sure that this file is named `ca-certificate.crt`, or ensure that the name of your certificate matches the `CA_CERT` variable in your `.env`.** 
 
 ## Running
 
