@@ -23,7 +23,7 @@ try {
     }
   };
   db = pgp(cn);
-} catch (e) {
+} catch {
   throw new DatabaseConnectionError(
     "Postgres connection could not be created, please check your .env file."
   );
