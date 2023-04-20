@@ -142,7 +142,7 @@ The OAPEN Suggestion Service uses natural-language processing to suggest books b
 
    > Add information on how to retrieve certificate from DigitalOcean managed DB.
 
-Once you have acquired a certificate for your managed database, copy it into `/api/certificates`. When the image is built and spun up, Docker will add this certificate to a single file that lists all certificates available within the API container. Referencing this file in the client connection configuration will allow us to access the database.
+Create a directory in `api` called `certificates`. Once you have acquired a certificate for your managed database, copy it into `/api/certificates`. *Make sure that this file is named `ca-certificate.crt`, or ensure that the name of your certificate matches the `CA_CERT` variable in your `.env`.* 
 
 ## Running
 
