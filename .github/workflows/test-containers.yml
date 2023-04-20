@@ -13,6 +13,8 @@ jobs:
       run: |
         cp .env.template .env
         sed -i 's/POSTGRES_SSLMODE=require/POSTGRES_SSLMODE=allow/' .env
+    - name: Create dummy certificate
+      run: touch api/certificates/dummy-cert.crt
     - name: Create PostgreSQL container
       run: docker run -d --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgrespw postgres
     - name: Start containers
