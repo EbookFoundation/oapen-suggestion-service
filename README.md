@@ -140,7 +140,9 @@ The OAPEN Suggestion Service uses natural-language processing to suggest books b
 
 ### SSL Certificate
 
-> TODO: add documentation
+   > Add information on how to retrieve certificate from DigitalOcean managed DB.
+
+Once you have acquired a certificate for your managed database, copy it into `/api/certificates`. When the image is built and spun up, Docker will add this certificate to a single file that lists all certificates available within the API container. Referencing this file in the client connection configuration will allow us to access the database.
 
 ## Running
 
