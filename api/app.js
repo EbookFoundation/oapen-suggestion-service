@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 
 const apiRoutes = require("./routes.js");
@@ -22,5 +23,5 @@ const port = process.env.API_PORT || 3001;
 
 app.listen(port, () => {
   console.log("Suggestion Service API is up on port " + port);
-  console.log("Running at http://localhost:" + port + "/");
+  console.log("Running at http://localhost:" + port + "/api");
 });

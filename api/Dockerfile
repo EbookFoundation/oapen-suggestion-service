@@ -17,6 +17,6 @@ COPY ./certificates/* /usr/local/share/ca-certificates/
 
 RUN chmod 644 /usr/local/share/ca-certificates/*.crt && update-ca-certificates
 
-EXPOSE 3001
+EXPOSE ${API_PORT}
 
 CMD [ "npm", "start" ]

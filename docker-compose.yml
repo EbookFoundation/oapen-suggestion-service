@@ -26,6 +26,17 @@ services:
     restart: always
     ports:
         - "0.0.0.0:${EMBED_SCRIPT_PORT}:3002"
+  nginx-ssl-proxy:
+    image: danieldent/nginx-ssl-proxy
+    restart: always
+    environment:
+      UPSTREAM: localhost:${API_PORT}
+      SERVERNAME: oss.ebookfoundation.org
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/etc/letsencrypt"
 volumes:
   db:
     driver: local
