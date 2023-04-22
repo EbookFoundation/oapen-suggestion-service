@@ -29,7 +29,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx-conf:/etc/nginx/conf.d
-      - web-root:/var/www/html
+      - web-root:/var/www/letsencrypt
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
     depends_on:
@@ -38,12 +38,12 @@ services:
     image: certbot/certbot
     container_name: certbot
     volumes:
-      - web-root:/var/www/html
+      - web-root:/var/www/letsencrypt
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
     depends_on:
       - nginx-proxy
-    command: certonly --webroot --webroot-path=/var/www/html --email eric@hellman.net --agree-tos --no-eff-email --staging -d oss.ebookfoundation.org
+    command: certonly --webroot --webroot-path=/var/www/letsencrypt --email eric@hellman.net --agree-tos --no-eff-email --staging -d oss.ebookfoundation.org
   web:
     build: ./web/
     restart: always
