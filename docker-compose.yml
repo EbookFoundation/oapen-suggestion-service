@@ -17,6 +17,8 @@ services:
       - .env
     ports:
         - "0.0.0.0:${API_PORT}:${API_PORT}"
+    networks:
+      - nginx-passthrough
   nginx:
     image: nginx:mainline-alpine
     restart: always
@@ -27,6 +29,8 @@ services:
       - ./nginx-conf:/etc/nginx/conf.d
       - /etc/oss/certbot/conf:/etc/letsencrypt
       - /etc/oss/certbot/www:/var/www/certbot
+    networks:
+      - nginx-passthrough
   certbot:
     image: certbot/certbot
     depends_on:
@@ -45,3 +49,6 @@ services:
     restart: always
     ports:
         - "0.0.0.0:${EMBED_SCRIPT_PORT}:3002"
+networks:
+  nginx-passthrough:
+    driver: bridge
