@@ -10,6 +10,7 @@ services:
       - REFRESH_PERIOD=86400        # daily
       - HARVEST_PERIOD=604800       # weekly
   api:
+    container_name: api
     build: ./api/
     restart: always
     env_file:
@@ -28,9 +29,12 @@ services:
       - /etc/oss/certbot/www:/var/www/certbot
   certbot:
     image: certbot/certbot
+    depends_on:
+      - nginx
     volumes:
       - /etc/oss/certbot/conf:/etc/letsencrypt
       - /etc/oss/certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email "ssl@peterrauscher.anonaddy.com" -d oss.ebookfoundation.org --agree-tos
   web:
     build: ./web/
     restart: always
