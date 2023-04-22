@@ -10,40 +10,27 @@ services:
       - REFRESH_PERIOD=86400        # daily
       - HARVEST_PERIOD=604800       # weekly
   api:
-    container_name: api
     build: ./api/
     restart: always
-    networks:
-      - nginx-network
     env_file:
       - .env
     ports:
         - "0.0.0.0:${API_PORT}:${API_PORT}"
-  nginx-proxy:
-    container_name: nginx-proxy
+  nginx:
     image: nginx:mainline-alpine
     restart: always
-    networks:
-      - nginx-network
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx-conf:/etc/nginx/conf.d
-      - web-root:/var/www/letsencrypt
-      - certbot-etc:/etc/letsencrypt
-      - certbot-var:/var/lib/letsencrypt
-    depends_on:
-      - api
+      - /etc/oss/certbot/conf:/etc/letsencrypt
+      - /etc/oss/certbot/www:/var/www/certbot
   certbot:
     image: certbot/certbot
-    container_name: certbot
     volumes:
-      - web-root:/var/www/letsencrypt
-      - certbot-etc:/etc/letsencrypt
-      - certbot-var:/var/lib/letsencrypt
-    depends_on:
-      - nginx-proxy
-    command: certonly --webroot --webroot-path=/var/www/letsencrypt --email eric@hellman.net --agree-tos --no-eff-email --staging -d oss.ebookfoundation.org
+      - /etc/oss/certbot/conf:/etc/letsencrypt
+      - /etc/oss/certbot/www:/var/www/certbot
   web:
     build: ./web/
     restart: always
@@ -54,13 +41,3 @@ services:
     restart: always
     ports:
         - "0.0.0.0:${EMBED_SCRIPT_PORT}:3002"
-volumes:
-  db:
-    driver: local
-  certbot-etc:
-  certbot-var:
-  web-root:
-    driver: local
-networks:
-  nginx-network:
-    driver: bridge
