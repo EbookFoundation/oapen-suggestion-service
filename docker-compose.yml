@@ -34,7 +34,7 @@ services:
     networks:
       - nginx-passthrough
   certbot:
-    image: certbot/certbot:211f3e61182e094fd388129dd22ba72028b286935337ee06cb0169c727a5e2e8
+    image: certbot/certbot
     depends_on:
       - nginx
     volumes:
