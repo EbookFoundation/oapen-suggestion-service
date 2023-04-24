@@ -10,7 +10,12 @@ RUN npm install
 # RUN npm ci --only=production
 
 # Bundle app source
+
 COPY . .
+
+COPY ./certificates/* /usr/local/share/ca-certificates/
+
+RUN chmod 644 /usr/local/share/ca-certificates/*.crt && update-ca-certificates
 
 EXPOSE 3001
 

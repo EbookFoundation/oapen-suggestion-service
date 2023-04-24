@@ -1,20 +1,33 @@
-# OAPEN Suggestion Engine
+# OAPEN Suggestion Service
 
 ## Description
-The OAPEN Suggestion Engine will suggest e-books based on other books with similar content. It achieves this using a trigram semantic inferecing algorithm. The proof-of-concept and paper that this service is built on is the work of Ronald Snijder of the OAPEN Foundation, you can read his original paper [here](https://liberquarterly.eu/article/view/10938).
+
+The OAPEN Suggestion Service uses natural-language processing to suggest books based on their content similarities. To protect user privacy, we utilize text analysis rather than usage data to provide recommendations. This service is built on the proof-of-concept and paper by Ronald Snijder from the OAPEN Foundation, and you can [read the paper here](https://liberquarterly.eu/article/view/10938).
 
 ## Table of Contents
 
-- [Setup](#setup)
-- [Configuration](#configuration)
-- [Endpoints](#dependencies)
+- [Installation (Server)](#installation-server)
+  * [DigitalOcean Droplet](#digitalocean-droplet)
+  * [DigitalOcean Managed Database](#digitalocean-managed-database)
+  * [Setup Users & Install Requirements](#setup-users-install-requirements)
+  * [Clone & Configure the Project](#clone-configure-the-project)
+  * [SSL Certificate](#ssl-certificate)
+- [Running](#running)
+- [Logging](#logging)
+- [Endpoints](#endpoints)
+  * [/api](#get-api)
+  * [/api/ngrams](#get-apingrams)
+  * [/api/{handle}](#get-apihandle)
+  * [/api/{handle}/ngrams](#get-apihandlengrams)
 - [Service Components](#service-components)
-- [License](/LICENSE.md)
-- [Deploying](/DEPLOYING.md)
+  * [Suggestion Engine](#suggestion-engine)
+  * [API](#api)
+  * [Embed Script](#embed-script)
+  * [Web Demo](#web-demo)
+- [Updates](#updates)
+- [Local Installation (No Server)](#local-installation-no-server)
 
-## Installation
-
-### 0. Configure Server
+## Installation (Server)
 
 #### Digital Ocean:
 
@@ -47,81 +60,242 @@ Then add the user to it:
 
 Restart the machine for the changes to take effect or you can run `
 
-### 1. Install Docker
+### DigitalOcean Droplet
 
-This project uses Docker. To run the project, you will need to have Docker installed. You can find instructions for installing Docker [here](https://docs.docker.com/get-docker/). Note that on Linux, if you do not install Docker with Docker Desktop, you will have to install Docker Compose separately, instructions for which can be found [here](https://docs.docker.com/compose/install/#scenario-two-install-the-compose-plugin).
 
-### 2. Install PostgreSQL
+1. Log in to your DigitalOcean account.
+2. Create a new Droplet.
+3. Under "Choose an image" select "Marketplace" and search for "Docker". Select "Docker 20.10.21 on Ubuntu 22.04".
+4. Choose any size, but the cheapest option will work fine.
+5. If you do not have an ssh key, generate one with:
+   ```bash
+   ssh-keygen -t rsa -b 4096
+   ```
+   And copy the public key to your clipboard. If you have a key on your computer already, you can use that.
+6. Under "Choose Authentication Method" choose "SSH Key" and click "New SSH Key", and in the popup window paste the public key you copied to your clipboard. Make sure it is selected.
+7. Give the Droplet a name and click "Create".
+8. Open the firewall ports
+   - https://cloud.digitalocean.com/networking/firewalls
 
-The project uses PostgreSQL as a database. You can find instructions for installing PostgreSQL [here](https://www.postgresql.org/download/).
-Make sure it is running, and a database is created. Take note of the credentials and name of the database you create, you will need them for the next step.
+### DigitalOcean Managed Database
 
-> If you would like to run the project for local testing, you can create a PostgreSQL server with Docker using this command:
+1. From the DigitalOcean dashboard, click "Databases" > "Create Database".
+2. Ideally, select the same region & datacenter as the Droplet you just created, so they can be part of the same VPC network.
+3. Choose "PostgreSQL v15".
+4. Select any sizing plan, but the cheapest one will suffice.
+5. Give the database a name, and click "Create Database Cluster".
+6. Once the database is done creating (this can take a few minutes), find the "Connection details" section on the new database's page, you will need them later.
+
+### Setup Users & Install Requirements
+
+1. Log in to the droplet over SSH:
+   ```bash
+   ssh root@<your-droplet-ip>
+   ```
+2. Create a new user `oapen` and set a password, adding them to the `sudo` and `docker` groups, then login as the new user:
+
+   ```bash
+   useradd -m -G sudo,docker oapen
+   passwd oapen
+   su -l -s /bin/bash oapen
+   ```
+
+3. Install the `docker compose` command:
+
+   ```bash
+   sudo apt-get update
+   sudo apt-get install docker-compose-plugin
+   ```
+
+4. Change the SSH configuration file to disallow root login:
+
+   ```bash
+   sudo sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+   ```
+
+5. Allow SSH login with non-root user with the same SSH keys you uploaded to DigitalOcean:
+
+   ```bash
+   mkdir -p ~/.ssh
+   sudo cp /root/.ssh/authorized_keys ~/.ssh/
+   sudo chown -R oapen:oapen ~/.ssh
+   sudo chmod 700 ~/.ssh
+   sudo chmod 600 ~/.ssh/authorized_keys
+   sudo systemctl restart ssh
+   ```
+
+6. Create a swapfile to avoid issues with high memory usage:
+
+   ```bash
+   sudo fallocate -l 1G /swapfile
+   sudo chmod 600 /swapfile
+   sudo mkswap /swapfile
+   sudo swapon /swapfile
+   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+   ```
+
+   > Feel free to replace `1G` in the first command with `4G`. Although the service should never use this much memory, extra swap never hurts if you have the disk space to spare. More on swap [here](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04).
+
+7. Restart the droplet to persist all of the changes. From now on, login to the droplet with:
+
+   ```bash
+   ssh oapen@<your-droplet-ip>
+   ```
+
+### Clone & Configure the Project
+
+1. Clone the repository and cd into the directory it creates:
+   ```bash
+   git clone https://github.com/EbookFoundation/oapen-suggestion-service.git
+   cd oapen-suggestion-service
+   ```
+   > You can clone this anywhere but in the home directory is easiest.
+2. Copy the `.env.template` file to `.env`:
+
+   ```bash
+   cp .env.template .env
+   ```
+
+3. Using a text editor like `vim` or `nano` configure all of the options in `.env`:
+
+   ```properties
+   API_PORT=<Port to serve API on>
+   POSTGRES_HOST=<Hostname of postgres server>
+   POSTGRES_PORT=<Port postgres is running on>
+   POSTGRES_DB_NAME=<Name of the postgres database>
+   POSTGRES_USERNAME=<Username of the postgres user>
+   POSTGRES_PASSWORD=<Password of the postgres user>
+   POSTGRES_SSLMODE=<'require' when using a managed database>
+   ```
+
+   > Postgres credentials can be found in the "Connection details" section of the managed database
+
+### SSL Certificate
+
+   > Add information on how to retrieve certificate from DigitalOcean managed DB.
+
+Create a directory in `api` called `certificates`. Once you have acquired a certificate for your managed database, copy it into `/api/certificates`. **Make sure that this file is named `ca-certificate.crt`, or ensure that the name of your certificate matches the `CA_CERT` variable in your `.env`.** 
+
+## Running
+
+You can start the services by running the following command in the directory where you cloned the repo:
+
 ```bash
-docker run -d --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgrespw postgres
+docker compose up -d --build
 ```
-> Note that the username and database name will both be `postgres` and the password will be `postgrespw`. You can connect via the hostname `host.docker.internal` over port `5432`. As such, it is not recommended to use this in a production environment.
 
-### 3. Clone the repository
+The API will be running on `https://<your-ip>:<API_PORT>`.
 
-Clone the repository:
+> _NOTE_: The `-d` flag runs the services in the background, so you can safely exit the session and the services will continue to run. The `--build` flag ensures any changes to the code are reflected in the containers.
+
+You can stop the services with:
 
 ```bash
-git clone https://github.com/EbookFoundation/oapen-suggestion-service.git
+docker compose down
 ```
 
-And go into the project directory:
+## Logging
 
-```bash
-cd oapen-suggestion-service
-```
+Log files are automatically generated by Docker for each container. The log files can be found in `/var/lib/docker/containers/<container-id>/*-json.log`.
 
-### 4. Configure the environment
+To find a container's id, run `docker ps -a`.
 
-And create a file `.env` with the following, replacing `<>` with the described values:
+To view log files, run `tail -f /var/lib/docker/containers/<container-id>/*-json.log`.
 
-```properties
-API_PORT=<Port to serve API on>
-WEB_DEMO_PORT=<Port to serve web demo on>
-EMBED_SCRIPT_PORT=<Port to serve embed script on>
-POSTGRES_HOST=<Hostname of postgres server, will be "localhost" on local installation>
-POSTGRES_PORT=<Port postgres is running on, default of 5432 in most cases>
-POSTGRES_DB_NAME=<Name of the postgres database, "postgres" works fine here>
-POSTGRES_USERNAME=<Username of the postgres user>
-POSTGRES_PASSWORD=<Password of the postgres user>
-POSTGRES_SSLMODE=require # for Digital ocean managed db
-```
+After some time, log files may take up too much disk space. To clear all logs on the host machine, run `truncate -s 0 /var/lib/docker/containers/*/*-json.log`
 
-> The service **will not run** if this is improperly configured.
-
-### 5. Run the service
-
-Now you can simply start the service with:
-
-```bash
-docker compose up
-```
-
-and connect to the API at `http://localhost:<API_PORT>`.
-
-To view logs:
-```
-docker logs oapen-suggestion-service-oapen-engine-1
-```
-## Configuration
-
-> *More configuration options should go here*
+To clear logs for a specific container, run `truncate -s 0 /var/lib/docker/containers/<container-id>/*-json.log`
 
 ## Endpoints
 
 The API provides access to the following endpoints:
 
-- `http://localhost:3001/api/{handle}`
-  - e.g. http://localhost:3001/api/20.400.12657/47581
-- `http://localhost:3001/api/{handle}/?threshold={integer}`
-  - e.g. http://localhost:3001/api/20.400.12657/47581/?threshold=5
-- `http://localhost:3001/api/{handle}/ngrams`
-  - e.g. http://localhost:3001/api/20.400.12657/47581/ngrams
+### GET /api
+
+Returns an array of suggestions for each book as an array.
+
+The array of books is ordered by the date they were added (most recent first).
+
+#### Query Parameters
+
+- `limit` (optional): limits the number of results returned. Default is 25, maximum is 100.
+- `offset` (optional): offset the list of results. Default is 0.
+- `threshold` (optional): sets the minimum similarity score to receive suggestions for. Default is 0, returning all suggestions.
+
+#### Examples
+
+Any combination of the query parameters in any order are valid.
+
+- `/api?threshold=3`
+   
+   Returns suggestions with a similarity score of 3 or more for the 25 most recently added books.
+- `/api?threshold=5&limit=100`
+   
+   Returns suggestions with a similarity score of 3 or more for the 100 most recently added books.
+- `/api?limit=50&offset=1000`
+   
+   Returns 50 books and all of their suggestions, skipping the 1000 most recent.
+
+### GET /api/ngrams
+
+Returns an array of ngrams and their occurences for each book as an array.
+
+The array of books is ordered by the date they were added (most recent first).
+
+#### Query Parameters
+
+- `limit` (optional): limits the number of results returned. Default is 25, maximum is 100.
+- `offset` (optional): offset the list of results. Default is 0.
+
+#### Examples
+
+Any combination of the query parameters in any order are valid.
+
+- `/api?limit=100`
+   
+   Returns ngrams for the 100 most recent books.
+- `/api?offset=1000`
+   
+   Returns ngrams for 25 books, skipping the 1000 most recent.
+
+
+### GET /api/{handle}
+
+Returns suggestions for the book with the specified handle.
+
+#### Path Parameters
+
+`{handle}` (required): the handle of the book to retrieve.
+
+#### Query Parameters
+`threshold` (optional): sets the minimum similarity score to receive suggestions for. Default is 0, returning all suggestions.
+
+#### Examples
+
+> **NOTE**: You won't need to worry about the forward slash in handles causing problems, this is handled server-side.
+
+- `/api/20.400.12657/47581`
+
+Returns suggestions for [the book](https://library.oapen.org/handle/20.500.12657/37041) with the handle `20.400.12657/47581`.
+
+- `/api/20.400.12657/47581?threshold=3`
+
+Returns suggestions with a similarity score of 3 or more for [the book](https://library.oapen.org/handle/20.500.12657/37041) with the handle `20.400.12657/47581`.
+
+
+### GET /api/{handle}/ngrams
+
+Returns the ngrams and their occurences for the book with the specified handle.
+
+#### Path Parameters
+
+`{handle}` (required): the handle of the book to retrieve.
+
+#### Example
+
+`/api/20.400.12657/47581/ngrams`
+
+Returns ngrams and their occurences for [the book](https://library.oapen.org/handle/20.500.12657/37041) with the handle `20.400.12657/47581`.
 
 ## Service Components
 
@@ -161,19 +335,69 @@ You can find the code for the web demo in `web/`.
 Configuration info for the web demo is in [`web/README.md`](web/README.md).
 
 **Base dependencies**:
-* NodeJS 14.x+
-* NPM package manager
+
+- NodeJS 14.x+
+- NPM package manager
 
 **Automatically-installed dependencies**:
-* `next` -- Framework for production-driven web apps
-    * Maintained by [Vercel](https://vercel.com) and the open source community
-* `react` -- Frontend design framework
-    * Maintained by [Meta](https://reactjs.org). 
-    * Largest frontend web UI library.
-    * (Alternative considered: Angular -- however, was recently deprecated by Google)
-* `pg` -- basic PostgreSQL driver
-    * Maintained [on npm](https://www.npmjs.com/package/pg)
-* `typescript` -- Types for JavaScript
-    * Maintained by [Microsoft](https://www.typescriptlang.org/) and the open source community.
 
-### Updates
+- `next` -- Framework for production-driven web apps
+  - Maintained by [Vercel](https://vercel.com) and the open source community
+- `react` -- Frontend design framework
+  - Maintained by [Meta](https://reactjs.org).
+  - Largest frontend web UI library.
+  - (Alternative considered: Angular -- however, was recently deprecated by Google)
+- `pg` -- basic PostgreSQL driver
+  - Maintained [on npm](https://www.npmjs.com/package/pg)
+- `typescript` -- Types for JavaScript
+  - Maintained by [Microsoft](https://www.typescriptlang.org/) and the open source community.
+
+## Updates
+
+> TODO: add documentation
+
+## Local Installation (No Server)
+
+1. **Install Docker**
+
+   This project uses Docker. Instructions for installing Docker [here](https://docs.docker.com/get-docker/). Note that if you do not install Docker with Docker Desktop (which is recommended) you will have to install Docker Compose separately Instructions for that [here](https://docs.docker.com/compose/install/#scenario-two-install-the-compose-plugin).
+
+2. **Install PostgreSQL**
+
+   You can find instructions for installing PostgreSQL on your machine [here](https://www.postgresql.org/download/).
+
+   Or you can create a PostgreSQL server with Docker:
+
+   ```bash
+   docker run -d --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgrespw postgres
+   ```
+
+   > The username and database name will both be `postgres` and the password will be `postgrespw`. You can connect via the hostname `host.docker.internal` over port `5432`.
+
+3. **Clone and configure the project**
+
+   - Clone the repo and go into its directory:
+
+     ```bash
+     git clone https://github.com/EbookFoundation/oapen-suggestion-service.git
+     cd oapen-suggestion-service
+     ```
+
+   - Copy the `.env.template` file to `.env`:
+
+     ```bash
+     cp .env.template .env
+     ```
+
+   - Using a text editor like `vim` or `nano` configure all of the options in `.env`:
+     ```properties
+     API_PORT=<Port to serve API on>
+     POSTGRES_HOST=<Hostname of postgres server>
+     POSTGRES_PORT=<Port postgres is running on>
+     POSTGRES_DB_NAME=<Name of the postgres database>
+     POSTGRES_USERNAME=<Username of the postgres user>
+     POSTGRES_PASSWORD=<Password of the postgres user>
+     POSTGRES_SSLMODE=<'allow' for a local installation>
+     ```
+
+4. See [Running](#running)

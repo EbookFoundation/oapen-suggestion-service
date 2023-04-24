@@ -1,5 +1,6 @@
 const options = {};
 const pgp = require("pg-promise")(options);
+const fs = require("fs");
 
 class DatabaseConnectionError extends Error {
   constructor(message) {
@@ -7,21 +8,25 @@ class DatabaseConnectionError extends Error {
   }
 }
 
-if (
-  !(
-    process.env.POSTGRES_USERNAME &&
-    process.env.POSTGRES_PASSWORD &&
-    process.env.POSTGRES_HOST &&
-    process.env.POSTGRES_PORT &&
-    process.env.POSTGRES_DB_NAME &&
-    process.env.POSTGRES_SSLMODE
-  )
-)
-  throw new DatabaseConnectionError(
-    "Some Postgres environment variables weren't found. Please configure them in the .env file."
-  );
+let db;
 
-const connection_string = `postgresql://${process.env.POSTGRES_USERNAME}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB_NAME}?sslmode=${process.env.POSTGRES_SSLMODE}`;
-const db = pgp(connection_string);
+try {
+  const cn = {
+    host: process.env.POSTGRES_HOST,
+    port: process.env.POSTGRES_PORT,
+    database: process.env.POSTGRES_DB_NAME,
+    user: process.env.POSTGRES_USERNAME,
+    password: process.env.POSTGRES_PASSWORD,
+    ssl: {
+	    rejectUnauthorized: process.env.POSTGRES_SSLMODE === "require",
+	    ca: fs.readFileSync(process.env.CA_CERT).toString(),
+    }
+  };
+  db = pgp(cn);
+} catch {
+  throw new DatabaseConnectionError(
+    "Postgres connection could not be created, please check your .env file."
+  );
+}
 
 module.exports = db;
