@@ -7,23 +7,23 @@ The OAPEN Suggestion Service uses natural-language processing to suggest books b
 ## Table of Contents
 
 - [Installation (Server)](#installation-server)
-  * [DigitalOcean Droplet](#digitalocean-droplet)
-  * [DigitalOcean Managed Database](#digitalocean-managed-database)
-  * [Setup Users & Install Requirements](#setup-users-install-requirements)
-  * [Clone & Configure the Project](#clone-configure-the-project)
-  * [SSL Certificate](#ssl-certificate)
+  - [DigitalOcean Droplet](#digitalocean-droplet)
+  - [DigitalOcean Managed Database](#digitalocean-managed-database)
+  - [Setup Users & Install Requirements](#setup-users-install-requirements)
+  - [Clone & Configure the Project](#clone-configure-the-project)
+  - [SSL Certificate](#ssl-certificate)
 - [Running](#running)
 - [Logging](#logging)
 - [Endpoints](#endpoints)
-  * [/api](#get-api)
-  * [/api/ngrams](#get-apingrams)
-  * [/api/{handle}](#get-apihandle)
-  * [/api/{handle}/ngrams](#get-apihandlengrams)
+  - [/api](#get-api)
+  - [/api/ngrams](#get-apingrams)
+  - [/api/{handle}](#get-apihandle)
+  - [/api/{handle}/ngrams](#get-apihandlengrams)
 - [Service Components](#service-components)
-  * [Suggestion Engine](#suggestion-engine)
-  * [API](#api)
-  * [Embed Script](#embed-script)
-  * [Web Demo](#web-demo)
+  - [Suggestion Engine](#suggestion-engine)
+  - [API](#api)
+  - [Embed Script](#embed-script)
+  - [Web Demo](#web-demo)
 - [Updates](#updates)
 - [Local Installation (No Server)](#local-installation-no-server)
 
@@ -134,15 +134,66 @@ The OAPEN Suggestion Service uses natural-language processing to suggest books b
    POSTGRES_USERNAME=<Username of the postgres user>
    POSTGRES_PASSWORD=<Password of the postgres user>
    POSTGRES_SSLMODE=<'require' when using a managed database>
+   CA_CERT=<Path to the PostgreSQL ca-certificate.crt file>
+   DOMAIN=<domain the API should run on>
+   SSL_EMAIL=<email to send Certbot notifications to>
    ```
 
    > Postgres credentials can be found in the "Connection details" section of the managed database
 
 ### SSL Certificate
 
-   > Add information on how to retrieve certificate from DigitalOcean managed DB.
+#### SSL for Database
 
-Create a directory in `api` called `certificates`. Once you have acquired a certificate for your managed database, copy it into `/api/certificates`. **Make sure that this file is named `ca-certificate.crt`, or ensure that the name of your certificate matches the `CA_CERT` variable in your `.env`.** 
+> Add information on how to retrieve certificate from DigitalOcean managed DB.
+
+Create a directory in `api` called `certificates`. Once you have acquired a certificate for your managed database, copy it into `/api/certificates`. **Make sure that this file is named `ca-certificate.crt`, or ensure that the name of your certificate matches the `CA_CERT` variable in your `.env`.**
+
+#### SSL for API
+
+To setup SSL for the API endpoint, you need to first ensure you have the proper ports open, both in DigitalOcean's built-in firewall, and on the droplet itself using `ufw`. DigitalOcean's firewall is sufficient, so if you like you can just `sudo ufw disable`.
+
+If you'd like to keep both `ufw` and the DigitalOcean firewall running, enable the rules in `ufw`:
+
+```bash
+sudo ufw allow http
+sudo ufw allow https
+```
+
+Next, enable ports `80` and `443` in the DigitalOcean dashboard for the droplet. `443` is for HTTPS traffic and `80` is for HTTP traffic, which is needed for certbot to re-issue certificates when they expire. Don't worry, nginx will redirect all non-certbot traffic to HTTPS automatically.
+
+For certbot to issue an SSL certificate, your `DOMAIN` specified in `.env` must already have the proper DNS records pointing to the droplet's IPv4 address.
+
+Then, just make sure the scripts are executeable:
+
+```bash
+chmod +x setup-ssh.sh ready-ssh.sh
+```
+
+And run them in this order.
+
+```bash
+./setup-ssh.sh
+./ready-ssh.sh
+```
+
+> Wait for `setup-ssh.sh` to run to completion before running `ready-ssh.sh`.
+
+The API should now be accessible by HTTPS only at `https://<domain>/api`!
+
+However, to ensure that certificates are renewed before they expire, add a `cron` job that renews the certificate automatically. First, open the cron editor:
+
+```bash
+crontab -e
+```
+
+And add a line, replacing `/home/oapen/oapen-suggestion-service` with wherever you cloned the repository to locally:
+
+```
+0 5 1 */2 *    /usr/bin/docker compose up -f   /home/oapen/oapen-suggestion-service/docker-compose.yml certbot
+```
+
+Save your changes and exit. Now your certificates will renew automatically every 60 days!
 
 ## Running
 
@@ -195,14 +246,11 @@ The array of books is ordered by the date they were added (most recent first).
 Any combination of the query parameters in any order are valid.
 
 - `/api?threshold=3`
-   
-   Returns suggestions with a similarity score of 3 or more for the 25 most recently added books.
+  Returns suggestions with a similarity score of 3 or more for the 25 most recently added books.
 - `/api?threshold=5&limit=100`
-   
-   Returns suggestions with a similarity score of 3 or more for the 100 most recently added books.
+  Returns suggestions with a similarity score of 3 or more for the 100 most recently added books.
 - `/api?limit=50&offset=1000`
-   
-   Returns 50 books and all of their suggestions, skipping the 1000 most recent.
+  Returns 50 books and all of their suggestions, skipping the 1000 most recent.
 
 ### GET /api/ngrams
 
@@ -220,12 +268,9 @@ The array of books is ordered by the date they were added (most recent first).
 Any combination of the query parameters in any order are valid.
 
 - `/api?limit=100`
-   
-   Returns ngrams for the 100 most recent books.
+  Returns ngrams for the 100 most recent books.
 - `/api?offset=1000`
-   
-   Returns ngrams for 25 books, skipping the 1000 most recent.
-
+  Returns ngrams for 25 books, skipping the 1000 most recent.
 
 ### GET /api/{handle}
 
@@ -236,6 +281,7 @@ Returns suggestions for the book with the specified handle.
 `{handle}` (required): the handle of the book to retrieve.
 
 #### Query Parameters
+
 `threshold` (optional): sets the minimum similarity score to receive suggestions for. Default is 0, returning all suggestions.
 
 #### Examples
@@ -249,7 +295,6 @@ Returns suggestions for [the book](https://library.oapen.org/handle/20.500.12657
 - `/api/20.400.12657/47581?threshold=3`
 
 Returns suggestions with a similarity score of 3 or more for [the book](https://library.oapen.org/handle/20.500.12657/37041) with the handle `20.400.12657/47581`.
-
 
 ### GET /api/{handle}/ngrams
 
