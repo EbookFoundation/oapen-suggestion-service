@@ -7,7 +7,7 @@ async function querySuggestions(handle, threshold = 0) {
   await validate.checkHandle(handle);
 
   const query = new PQ({
-    text: `SELECT suggestion AS handle, score
+    text: `SELECT *
     FROM oapen_suggestions.suggestions
     WHERE handle = $1
     AND score >= $2`,
