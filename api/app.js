@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 
 const apiRoutes = require("./routes.js");
@@ -18,9 +19,9 @@ app.use("*", (req, res) => {
   return res.status(404).json({ error: "Resource not found" });
 });
 
-const port = process.env.API_PORT || 3001;
+const port = process.env.API_PORT || 8000;
 
 app.listen(port, () => {
   console.log("Suggestion Service API is up on port " + port);
-  console.log("Running at http://localhost:" + port + "/");
+  console.log("Running at http://localhost:" + port + "/api");
 });

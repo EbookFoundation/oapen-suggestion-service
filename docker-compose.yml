@@ -10,12 +10,37 @@ services:
       - REFRESH_PERIOD=86400        # daily
       - HARVEST_PERIOD=604800       # weekly
   api:
+    container_name: api
     build: ./api/
     restart: always
     env_file:
       - .env
     ports:
-        - "0.0.0.0:${API_PORT}:${API_PORT}"
+      - 0.0.0.0:${API_PORT}:${API_PORT}
+    networks:
+      - nginx-passthrough
+  nginx:
+    image: nginx:mainline-alpine
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./nginx:/etc/nginx/templates
+      - /etc/certbot/conf:/etc/letsencrypt
+      - /etc/certbot/www:/var/www/certbot
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - nginx-passthrough
+  certbot:
+    image: certbot/certbot
+    depends_on:
+      - nginx
+    volumes:
+      - /etc/certbot/conf:/etc/letsencrypt
+      - /etc/certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${SSL_EMAIL} -d ${DOMAIN} --agree-tos
   web:
     build: ./web/
     restart: always
@@ -26,6 +51,6 @@ services:
     restart: always
     ports:
         - "0.0.0.0:${EMBED_SCRIPT_PORT}:3002"
-volumes:
-  db:
-    driver: local
+networks:
+  nginx-passthrough:
+    driver: bridge
