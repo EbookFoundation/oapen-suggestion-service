@@ -1,7 +1,7 @@
 ITEMS_PER_IMPORT_THREAD = 25
 
 # Max thread count for data ingest
-IO_MAX_WORKERS = 5
+IO_MAX_WORKERS = 1
 
 # Delay for submitting new API call thread
 HARVEST_THREAD_SPAWN_DELAY = 5
