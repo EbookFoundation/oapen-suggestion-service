@@ -1,13 +1,15 @@
 import random
 import time
 from datetime import datetime
-from typing import List
+from typing import List, Iterable
 
 import requests
 from logger.base_logger import logger
 from model.oapen_types import OapenItem
+from data.oapen_oai import get_oapen_handles
 
 SERVER_PATH = "https://library.oapen.org"
+USER_AGENT = "oss_bot v0.0.1 <https://github.com/EbookFoundation/oapen_suggestion_service>"
 GET_COLLECTIONS = "/rest/collections/"
 GET_ITEM_BITSTREAMS = "/rest/items/{id}/bitstreams"
 GET_COLLECTION_ITEMS = "/rest/collections/{id}/items"
@@ -15,6 +17,8 @@ GET_WEEKLY_ITEMS = "/rest/search?query=dc.date.accessioned_dt:[NOW-7DAY/DAY+TO+N
 GET_UPDATED_ITEMS = (
     "/rest/search?query=lastModified%3E{date}&expand=metadata,bitsteams"  # YYYY-MM-DD
 )
+GET_STREAM_QUERY = '/rest/search?query=handle:{handle}&expand=bitstreams'
+
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
@@ -29,6 +33,14 @@ def transform_item_data(item) -> OapenItem:
     return OapenItem(item["handle"], item["name"], thumbnail, text)
 
 
+def oapen_item(handle) -> OapenItem:
+    items =  get(
+        endpoint=GET_STREAM_QUERY.format(handle=handle),
+        params={"expand": "bitstreams"},
+    )
+    return transform_item_data(items)
+
+
 def transform_multiple_items_data(items) -> List[OapenItem]:
     return [transform_item_data(item) for item in items]
 
@@ -39,7 +51,7 @@ def get(endpoint, params=None):
         url=SERVER_PATH + endpoint,
         params=params,
         timeout=(None, 120),
-        headers={"User-Agent": random.choice(USER_AGENTS)},
+        headers={"User-Agent": USER_AGENT},
     )
 
     ret = None
@@ -59,10 +71,6 @@ def get_all_collections():
     return res
 
 
-# i.e. /rest/collections/2154c0ca-7814-4cc8-a869-3de4215c4121/items?limit=25&offset=0&expand=bitstreams,metadata
-# This is a redundancy of get_collection_items_by_id meant to be used with endpoints that
-# are constructed in tasks/clean.py and cached in the database. This is not a high priority
-# issue, but it certainly can be cleaned up in the future.
 def get_collection_items_by_endpoint(endpoint) -> List[OapenItem]:
     res = get(endpoint=endpoint)
 
@@ -71,23 +79,18 @@ def get_collection_items_by_endpoint(endpoint) -> List[OapenItem]:
     return res
 
 
-def get_collection_items_by_id(id, limit=None, offset=None) -> List[OapenItem]:
-    res = get(
-        endpoint=GET_COLLECTION_ITEMS.format(id=id),
-        params={"expand": "bitstreams,metadata", "limit": limit, "offset": offset},
-    )
-
-    if res is not None and len(res) > 0:
-        return transform_multiple_items_data(res)
-    return res
-
-
 # Gets all items added in the last week
-def get_weekly_items(limit=None) -> List[OapenItem]:
-    res = get(endpoint=GET_WEEKLY_ITEMS, params={"limit": limit})
-    if res is not None and len(res) > 0:
-        return transform_multiple_items_data(res)
-    return res
+def get_weekly_items(limit=None) -> Iterable[OapenItem]:
+    num = 0
+    for handle, item_type in get_oapen_handles(from_date='week'):
+        if limit and num > limit:
+            return
+ 
+        endpoint = GET_STREAM_QUERY.format(handle=handle)
+        res = get(endpoint=endpoint)
+        if res is not None and len(res) > 0:
+            num += 1
+            yield transform_item_data(res[0])
 
 
 def get_updated_items(date: datetime, limit=None, offset=None) -> List[OapenItem]:

@@ -14,6 +14,7 @@ schedule = "*"
 charset_normalizer = "*"
 idna = "*"
 certifi = "*"
+pyoai = "*"
 
 [dev-packages]
 pytest = "*"
