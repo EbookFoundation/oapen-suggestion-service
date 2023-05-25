@@ -1,7 +1,7 @@
 import os
 import sys
 
-import config
+from tasks import config
 import data.oapen as OapenAPI
 from data.connection import get_connection
 from data.oapen_db import OapenDB
