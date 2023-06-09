@@ -28,7 +28,8 @@ class OapenDB:
             ).decode("utf-8")
             for x in ngrams
         )
-        cursor.close()
+        if not cursor.closed:
+            cursor.close()
         return args
 
     def mogrify_suggestions(self, suggestions: List[SuggestionRow]) -> str:
@@ -47,7 +48,8 @@ class OapenDB:
             ).decode("utf-8")
             for x in suggestions
         )
-        cursor.close()
+        if not cursor.closed:
+            cursor.close()
         return args
 
     def mogrify_urls(self, urls: List[str]) -> str:
@@ -65,7 +67,8 @@ class OapenDB:
             for x in urls
         )
 
-        cursor.close()
+        if not cursor.closed:
+            cursor.close()
         return args
 
     def table_exists(self, table_name):
@@ -85,7 +88,8 @@ class OapenDB:
             logger.error(error)
             return False
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
 
     def type_exists(self, type_name):
         cursor = self.connection.cursor()
@@ -104,7 +108,8 @@ class OapenDB:
             logger.error(error)
             return False
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
 
     def add_single_suggestion(self, suggestion: SuggestionRow) -> None:
         cursor = self.connection.cursor()
@@ -120,7 +125,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
 
     def add_many_suggestions(self, suggestions: List[SuggestionRow]) -> None:
         cursor = self.connection.cursor()
@@ -135,7 +141,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
 
     def add_single_ngrams(self, ngram: NgramRow) -> None:
         cursor = self.connection.cursor()
@@ -152,7 +159,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
 
     def add_many_ngrams(self, ngrams: List[NgramRow]) -> None:
         try:
@@ -169,7 +177,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
 
     # get_empty = True -> Include rows with no ngrams in result
     def get_all_ngrams(self, get_empty=True) -> List[NgramRow]:
@@ -190,7 +199,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
             return ret
 
     def get_all_suggestions(self) -> List[SuggestionRow]:
@@ -208,7 +218,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
             return ret
 
     def get_suggestions_for_item(self, handle) -> List[SuggestionRow]:
@@ -227,7 +238,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
             return ret
 
     def get_suggestions_for_item(self, handle) -> List[SuggestionRow]:
@@ -246,7 +258,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
             return ret
 
     def count_table(self, table_name) -> int or None:
@@ -260,7 +273,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
             return ret
 
     def count_ngrams(self) -> int:
@@ -287,7 +301,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
 
     def get_incomplete_urls(self) -> List[UrlRow]:
         cursor = self.connection.cursor()
@@ -306,7 +321,8 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
             return ret
 
     def update_url(self, url, completed) -> None:
@@ -322,4 +338,5 @@ class OapenDB:
         except (Exception, psycopg2.Error) as error:
             logger.error(error)
         finally:
-            cursor.close()
+            if not cursor.closed:
+                cursor.close()
