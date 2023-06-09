@@ -38,4 +38,4 @@ People with access to the repository can create a pull request to edit the stopw
 ```
 oapen-engine/src/model/stopwords_*.txt
 ```
-Changes in stopwords will not reflected until the next harvest, which occurs weekly by default.
+Changes in stopwords will not reflected until the next harvest, which is every time the service is started.
