@@ -1,10 +1,11 @@
 import os
 import sys
 
-import config
+from tasks import config
 import data.oapen as OapenAPI
 from data.connection import get_connection
 from data.oapen_db import OapenDB
+from data.oapen_oai import get_oapen_handles
 from logger.base_logger import logger
 
 
@@ -83,46 +84,15 @@ def drop_schema(connection) -> None:
 
 
 def get_endpoints():
-    collections = OapenAPI.get_all_collections()
-
-    if collections is None:
-        logger.error("Could not fetch collections from OAPEN server. Is it down?")
-        sys.exit(1)
-
-    endpoints = []
-
-    COLLECTION_IMPORT_LIMIT = int(os.environ["COLLECTION_IMPORT_LIMIT"])
-
-    SKIPPED_COLLECTIONS = [
-        "1f7c8abd-677e-4275-8b4e-3d8da49f7b36",
-        "93223e33-3c7c-47bd-9356-a7878b2814a0",
-    ]
-
-    for collection in collections:
-        if collection["uuid"] in SKIPPED_COLLECTIONS:
-            continue
-
-        num_items = (
-            collection["numberItems"]
-            if COLLECTION_IMPORT_LIMIT == 0
-            else min(COLLECTION_IMPORT_LIMIT, collection["numberItems"])
-        )
-
-        for offset in range(0, num_items, config.ITEMS_PER_IMPORT_THREAD):
-            x = "/rest/collections/{id}/items?limit={limit}&offset={offset}&expand=bitstreams,metadata".format(
-                id=collection["uuid"],
-                limit=config.ITEMS_PER_IMPORT_THREAD,
-                offset=offset,
-            )
-            endpoints.append(x)
-
-    return endpoints
+    for handle, item_type in get_oapen_handles():
+        yield OapenAPI.GET_STREAM_QUERY.format(handle=handle)
 
 
 def seed_endpoints(connection):
     db = OapenDB(connection)
     endpoints = get_endpoints()
     db.add_urls(endpoints)
+
 
 def mark_for_cleaning(connection):
     cursor = connection.cursor()
@@ -150,7 +120,7 @@ def run():
     drop_schema(connection)
     create_schema(connection)
     mark_no_clean(connection)
-    seed_endpoints(connection)
+    #seed_endpoints(connection)
 
     connection.close()
 

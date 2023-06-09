@@ -56,7 +56,7 @@ def main():
     harvest()
 
     schedule.every().day.at("20:00").do(refresh)
-    schedule.every().sunday.at("22:00").do(harvest)
+    #schedule.every().sunday.at("22:00").do(harvest)
 
     while True:
         schedule.run_pending()

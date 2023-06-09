@@ -1,13 +1,21 @@
 import data.oapen as OapenAPI
+from tasks.clean import get_endpoints
 
 
-def test_get_collection_limit():
-    collection = OapenAPI.get_collection_items_by_id(
-        "ea93f8f0-430f-4a03-b7e2-5b06053585b0", limit=10
-    )
-    assert len(collection) <= 10
+def test_get_endpoints():
+    num = 0
+    for endpoint in get_endpoints():
+        print(endpoint)
+        num += 1
+        if num > 10: 
+            break
+        assert endpoint 
 
 
-def test_get_collection_404():
-    collection = OapenAPI.get_collection_items_by_id("hahaha", limit=10)
-    assert collection is None
+def test_weekly():
+    for item in OapenAPI.get_weekly_items(limit=5):
+        print(len(item.text))
+        assert item.name
+
+#test_get_endpoints()
+#test_weekly()

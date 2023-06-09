@@ -13,11 +13,12 @@ def main():
     print("Testing connection to OAPEN.")
     try:
         run_test(
-            "Attempting to get collection limit by id (ea93f8f0-430f-4a03-b7e2-5b06053585b0):",
-            test_oapen.test_get_collection_limit,
+            "Attempting to get 10 endpoints by oai",
+            test_oapen.test_get_endpoints,
         )
         run_test(
-            "Attempting to get null collection:", test_oapen.test_get_collection_404
+            "Attempting to get weekly items by oai",
+            test_oapen.test_weekly,
         )
     except Exception as e:
         print("\nFailed:")
